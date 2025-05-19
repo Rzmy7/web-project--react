@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import "../index.css";
 import Facilities from "../components/Facilities";
 import SearchBar from "../components/Searchbar";
+import ShopPage from "../pages/ufshop"
 
 const HeroSection = styled.div`
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)),
@@ -76,8 +77,8 @@ function UOMFacHome() {
           searchQuery={searchQuery}
         />
       </div>
-    </div>
-  );
+      {/* <ShopPage shopName='Wala Canteen' status='Open' openingTime='7.00AM'  closingTime='6.00PM' location='Near here' /> */}
+      </div>);
 }
 
 export default UOMFacHome;

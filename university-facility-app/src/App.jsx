@@ -5,7 +5,7 @@ import About from "./pages/About";
 import Navbar from "./components/Navbar";
 import Review from "./pages/Review";
 import UOMFacilities from "./pages/ufshop";
-import UOMFacHome from "./pages/ufHome";
+import UOMFacHome from "./pages/ufhome";
 import styled from "styled-components";
 import Footer from "./components/Footer";
 

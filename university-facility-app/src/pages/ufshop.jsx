@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { useNavigate } from 'react-router-dom';
 
 const Shop = styled.div`
   margin: 2rem 0;
@@ -54,7 +55,7 @@ const ShopNameMain = styled.span`
 `;
 
 const ShopStatus = styled.span`
-  background-color: #27ae60;
+  background-color: ${({ isOpen }) => (isOpen ? '#27ae60' : '#e74c3c')};
   color: #f8f9fa;
   padding: 0.3rem 0.6rem;
   font-size: 1rem;
@@ -81,30 +82,33 @@ const ShopInfoItem = styled.div`
   }
 `;
 
-const ShopPage = ({shopName,openingTime , closingTime , location}) => {
-    if(openingTime>12){
-        
-    }
+function ShopPage ({shopName,status,openingTime , closingTime , location}) {
+
+  const navigate = useNavigate();
+  const handleBack = () => {
+    navigate(-1); // Navigate back to the previous page
+  };
+
   return (
     <Shop>
-      <ShopHeader className="shop-header">
-        <BackButton id="backBtn" className="back-btn">
+      <ShopHeader>
+        <BackButton onClick={handleBack}>
           Back to Home
         </BackButton>
-        <ShopTitle className="shopTitle">
-          <ShopNameMain id="shopNameMain" className="shopNameMain">
+        <ShopTitle>
+          <ShopNameMain >
             {shopName}
           </ShopNameMain>
-          <ShopStatus className="shopStatus status-open">open</ShopStatus>
+          <ShopStatus isOpen={status === 'Open'} >{status}</ShopStatus>
         </ShopTitle>
-        <ShopInfo className="shop-info">
-          <ShopInfoItem className="shop-info-item">
+        <ShopInfo >
+          <ShopInfoItem >
             <span>Hours:</span>
-            <span>7:00 AM - 8:00 PM</span>
+            <span>{openingTime} - {closingTime}</span>
           </ShopInfoItem>
-          <ShopInfoItem className="shop-info-item location">
+          <ShopInfoItem className="location">
             <span>Location:</span>
-            <span>Near Main Gate</span>
+            <span>{location}</span>
           </ShopInfoItem>
         </ShopInfo>
       </ShopHeader>
