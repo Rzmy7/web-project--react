@@ -1,8 +1,6 @@
-
-
-import React from 'react';
-import styled from 'styled-components';
-import FacilityCard from './FacilityCard';
+import React from "react";
+import styled from "styled-components";
+import FacilityCard from "./FacilityCard";
 
 const FacilitiesContainer = styled.div`
   width: 100%;
@@ -19,75 +17,77 @@ const FacilitiesGrid = styled.div`
 function Facilities({ facilityType, status, searchQuery }) {
   const facilities = [
     {
-      name: 'Godayata',
-      type: 'Canteen',type2:'',
-      type3:'',
-      status: 'Open',
+      name: "Godayata",
+      type: "Canteen",
+      type2: "",
+      type3: "",
+      status: "Open",
       picture:
-        'https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg',
-      location: 'Near Main Gate',
-      openTime: '7.00',
-      closeTime: '7.00',
+        "https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg",
+      location: "Near Main Gate",
+      openTime: "7.00",
+      closeTime: "7.00",
     },
     {
-      name: 'Civil',
-      type: 'Canteen',
-      type3:'',
-      type2:'Juice Bar',
-      status: 'Open',
+      name: "Civil",
+      type: "Canteen",
+      type3: "",
+      type2: "Juice Bar",
+      status: "Open",
       picture:
-        'https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg',
-      location: 'Near Main Gate',
-      openTime: '7.00',
-      closeTime: '7.00',
+        "https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg",
+      location: "Near Main Gate",
+      openTime: "7.00",
+      closeTime: "7.00",
     },
     {
-      name: 'L',
-      type: 'Canteen',
-      type2:'',
-      type3:'',
-      status: 'Open',
+      name: "L",
+      type: "Canteen",
+      type2: "",
+      type3: "",
+      status: "Open",
       picture:
-        'https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg',
-      location: 'Near Main Gate',
-      openTime: '7.00',
-      closeTime: '7.00',
+        "https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg",
+      location: "Near Main Gate",
+      openTime: "7.00",
+      closeTime: "7.00",
     },
     {
-      name: 'GodaUda',
-      type: 'Canteen',
-      type2: 'Juice Bar',
-      type3:'',
-      status: 'Open',
+      name: "GodaUda",
+      type: "Canteen",
+      type2: "Juice Bar",
+      type3: "",
+      status: "Open",
       picture:
-        'https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg',
-      location: 'Near Main Gate',
-      openTime: '7.00',
-      closeTime: '7.00',
+        "https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg",
+      location: "Near Main Gate",
+      openTime: "7.00",
+      closeTime: "7.00",
     },
     {
-      name: 'Wala',
-      type: 'Canteen',
-      type2:'',
-      type3:'',
-      status: 'Closed',
+      name: "Wala",
+      type: "Canteen",
+      type2: "",
+      type3: "",
+      status: "Closed",
       picture:
-        'https://lh3.googleusercontent.com/gps-cs-s/AC9h4no87lWMi4Rg15JFx3TWzlZbJqiNwntWCzUMQi7ZJftoAwi4W7nJ8b87Ma0bBPYHrqRXFe0lf9jcMsjjXWPiLZEoTdRT1orNVpKJwOZNmBlE6YtJgLl5awnqR6aiD5pYT8WAfzxU=s1360-w1360-h1020-rw',
-      location: 'Near Main Gate',
-      openTime: '7.00',
-      closeTime: '7.00',
+        "https://lh3.googleusercontent.com/gps-cs-s/AC9h4no87lWMi4Rg15JFx3TWzlZbJqiNwntWCzUMQi7ZJftoAwi4W7nJ8b87Ma0bBPYHrqRXFe0lf9jcMsjjXWPiLZEoTdRT1orNVpKJwOZNmBlE6YtJgLl5awnqR6aiD5pYT8WAfzxU=s1360-w1360-h1020-rw",
+      location: "Near Main Gate",
+      openTime: "7.00",
+      closeTime: "7.00",
     },
   ];
 
   const filteredFacilities = facilities.filter((facility) => {
     const matchesType =
-      facilityType === 'all' ||
-      (facility.type.toLowerCase().includes(facilityType.toLowerCase())||facility.type2.toLowerCase().includes(facilityType.toLowerCase()));
+      facilityType === "all" ||
+      facility.type.toLowerCase().includes(facilityType.toLowerCase()) ||
+      facility.type2.toLowerCase().includes(facilityType.toLowerCase());
     const matchesStatus =
-      status === 'all' ||
+      status === "all" ||
       facility.status.toLowerCase() === status.toLowerCase();
     const matchesQuery =
-      searchQuery === '' ||
+      searchQuery === "" ||
       facility.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       facility.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
       facility.location.toLowerCase().includes(searchQuery.toLowerCase());
