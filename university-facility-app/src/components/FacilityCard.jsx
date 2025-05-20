@@ -229,7 +229,7 @@ const FacilityBtn = styled.button`
   }
 `;
 
-function FacilityCard({ name, type,type2, type3,status, picture, location, openTime, closeTime }) {
+function FacilityCard({ name, type,type2, type3,status, picture, location, opentime, closetime }) {
   const AndNeeded = (e) => {
   if (e) {
     return '&';
@@ -247,7 +247,7 @@ function FacilityCard({ name, type,type2, type3,status, picture, location, openT
         <FacilityType>{type} {AndNeeded(type2)} {type2} {AndNeeded(type3)} {type3}</FacilityType>
         <FacilityName>{name}</FacilityName>
         <FacilityDetails>
-          <FacilityDetailsText>Hours: {openTime} AM - {closeTime} PM</FacilityDetailsText>
+          <FacilityDetailsText>Hours: {opentime} - {closetime}</FacilityDetailsText>
           <FacilityDetailsText>Location: {location}</FacilityDetailsText>
         </FacilityDetails>
         <FacilityActions>
