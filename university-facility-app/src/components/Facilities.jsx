@@ -134,7 +134,7 @@ function Facilities({ facilityType, status, searchQuery }) {
 
   useEffect(() => {
     // Initial fetch
-    fetch("http://127.0.0.1:5000/api/data")
+    fetch("http://127.0.0.1:8001/api/data")
       .then((res) => res.json())
       .then((data) => {
         setFacilities(data);
@@ -146,7 +146,7 @@ function Facilities({ facilityType, status, searchQuery }) {
       });
 
     // Set up Socket.IO
-    const socket = io("http://127.0.0.1:5000"); // Your Flask-SocketIO server address
+    const socket = io("http://127.0.0.1:8001"); // Your Flask-SocketIO server address
 
     socket.on("connect", () => {
       console.log("Connected to Socket.IO server");
