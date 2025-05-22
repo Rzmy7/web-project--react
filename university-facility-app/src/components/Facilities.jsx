@@ -111,11 +111,10 @@
 
 
 
-
-
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import FacilityCard from "./FacilityCard";
+import { io } from "socket.io-client";
 
 const FacilitiesContainer = styled.div`
   width: 100%;
@@ -134,7 +133,8 @@ function Facilities({ facilityType, status, searchQuery }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/data") // Replace with actual Flask API URL
+    // Initial fetch
+    fetch("http://127.0.0.1:5000/api/data")
       .then((res) => res.json())
       .then((data) => {
         setFacilities(data);
@@ -144,6 +144,24 @@ function Facilities({ facilityType, status, searchQuery }) {
         console.error("Error fetching facilities:", err);
         setLoading(false);
       });
+
+    // Set up Socket.IO
+    const socket = io("http://127.0.0.1:5000"); // Your Flask-SocketIO server address
+
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+    });
+
+    // Listen for real-time updates
+    socket.on("update_data", (updatedData) => {
+      console.log("Received real-time update:", updatedData);
+      setFacilities(updatedData);
+    });
+
+    // Clean up on unmount
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const filteredFacilities = facilities.filter((facility) => {
