@@ -1,12 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
+import '../index.css'
 
 // Styled components for the footer
 const FooterStyled = styled.footer`
  position:relative;
   bottom: 0;
-  background-color: ${props => props.primaryColor || '#1a3c34'};
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
   padding: 2rem 1rem;
   display: flex;
   justify-content: space-evenly;
@@ -19,11 +20,17 @@ const FooterContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+
+  @media (max-width: 768px){
+    justify-content: center;
+    justify-self: center;
+  }
 `;
 
 const FooterSection = styled.div`
   flex: 1;
   min-width: 200px;
+  justify-content: left;
   margin-bottom: 1.5rem;
 `;
 
@@ -31,7 +38,7 @@ const SectionTitle = styled.h4`
   font-size: 1.2rem;
   font-weight: 670;
   margin-bottom: 1rem;
-  color: ${props => props.accentColor || '#f4a261'};
+  color: var(--accent-color);
 `;
 
 const List = styled.ul`
@@ -43,10 +50,10 @@ const ListItem = styled.li`
 `;
 
 const Link = styled.a`
-  color: white;
+  color: var(--secondary-color);
   transition: color 0.3s ease;
   &:hover {
-    color: ${props => props.accentColor || '#f4a261'};
+    color: var(--accent-color);
   }
 `;
 
@@ -59,44 +66,44 @@ const FooterBottom = styled.div`
 `;
 
 // Footer component
-const Footer = ({ primaryColor, accentColor }) => {
+const Footer = () => {
   return (
-    <FooterStyled primaryColor={primaryColor}>
+    <FooterStyled >
       <FooterContainer>
         <FooterSection>
-          <SectionTitle accentColor={accentColor}>About</SectionTitle>
+          <SectionTitle >About</SectionTitle>
           <List>
-            <ListItem><Link href="#" accentColor={accentColor}>About UoM Facilities</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>Our Team</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>How It Works</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>Contact Us</Link></ListItem>
+            <ListItem><Link href="#" >About UoM Facilities</Link></ListItem>
+            <ListItem><Link href="#" >Our Team</Link></ListItem>
+            <ListItem><Link href="#" >How It Works</Link></ListItem>
+            <ListItem><Link href="#" >Contact Us</Link></ListItem>
           </List>
         </FooterSection>
         <FooterSection>
-          <SectionTitle accentColor={accentColor}>Facilities</SectionTitle>
+          <SectionTitle >Facilities</SectionTitle>
           <List>
-            <ListItem><Link href="#" accentColor={accentColor}>All Canteens</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>All Juice Bars</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>All Book Shops</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>Campus Map</Link></ListItem>
+            <ListItem><Link href="#" >All Canteens</Link></ListItem>
+            <ListItem><Link href="#" >All Juice Bars</Link></ListItem>
+            <ListItem><Link href="#" >All Book Shops</Link></ListItem>
+            <ListItem><Link href="#" >Campus Map</Link></ListItem>
           </List>
         </FooterSection>
         <FooterSection>
-          <SectionTitle accentColor={accentColor}>For Facility Owners</SectionTitle>
+          <SectionTitle >For Facility Owners</SectionTitle>
           <List>
-            <ListItem><Link href="#" accentColor={accentColor}>Update Your Info</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>Manage Pre-orders</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>Facility Dashboard</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>Support</Link></ListItem>
+            <ListItem><Link href="#" >Update Your Info</Link></ListItem>
+            <ListItem><Link href="#" >Manage Pre-orders</Link></ListItem>
+            <ListItem><Link href="#" >Facility Dashboard</Link></ListItem>
+            <ListItem><Link href="#" >Support</Link></ListItem>
           </List>
         </FooterSection>
         <FooterSection>
-          <SectionTitle accentColor={accentColor}>For Students</SectionTitle>
+          <SectionTitle >For Students</SectionTitle>
           <List>
-            <ListItem><Link href="#" accentColor={accentColor}>Create Account</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>Pre-order System</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>Your Reviews</Link></ListItem>
-            <ListItem><Link href="#" accentColor={accentColor}>Help</Link></ListItem>
+            <ListItem><Link href="#" >Create Account</Link></ListItem>
+            <ListItem><Link href="#" >Pre-order System</Link></ListItem>
+            <ListItem><Link href="#" >Your Reviews</Link></ListItem>
+            <ListItem><Link href="#" >Help</Link></ListItem>
           </List>
         </FooterSection>
         <FooterBottom>
@@ -108,3 +115,7 @@ const Footer = ({ primaryColor, accentColor }) => {
 };
 
 export default Footer;
+
+
+
+

@@ -109,8 +109,6 @@
 // export default Facilities;
 
 
-
-
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import FacilityCard from "./FacilityCard";
@@ -144,7 +142,9 @@ function Facilities({ facilityType, status, searchQuery }) {
         console.error("Error fetching facilities:", err);
         setLoading(false);
       });
+  }, []);
 
+  useEffect(() => {
     // Set up Socket.IO
     const socket = io("http://127.0.0.1:8001"); // Your Flask-SocketIO server address
 
@@ -153,8 +153,15 @@ function Facilities({ facilityType, status, searchQuery }) {
     });
 
     // Listen for real-time updates
-    socket.on("update_data", (updatedData) => {
-      console.log("Received real-time update:", updatedData);
+    socket.on("new_entry", (data) => {
+      console.log("New entry received:", data);
+      // Update state with new data
+      setFacilities((prevFacilities) => [...prevFacilities, data]);
+    });
+
+    // Listen for full data updates (if you want to replace the entire list)
+    socket.on("shop_data", (updatedData) => {
+      console.log("Received full data update:", updatedData);
       setFacilities(updatedData);
     });
 
@@ -191,7 +198,7 @@ function Facilities({ facilityType, status, searchQuery }) {
     <FacilitiesContainer>
       <FacilitiesGrid>
         {filteredFacilities.map((f, index) => (
-          <FacilityCard key={f.id || index} {...f} />
+          <FacilityCard key={f.shopid || index} {...f} />
         ))}
       </FacilitiesGrid>
     </FacilitiesContainer>

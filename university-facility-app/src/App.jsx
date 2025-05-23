@@ -8,7 +8,7 @@ import UOMFacilities from "./pages/ufshop";
 import UOMFacHome from "./pages/ufhome";
 import styled from "styled-components";
 import Footer from "./components/Footer";
-
+import './index.css'; 
 
 const MainContent = styled.div`
   max-width: "1500px";
@@ -17,13 +17,13 @@ const MainContent = styled.div`
   background-color: #f8f9fa;
 
   @media (max-width: 768px) {
-    padding: 0 1rem ;
+    padding: 0 1rem;
   }
 `;
 
 function App() {
   return (
-    <div className="min-h-screen  bg-white-100">
+    <div >
       <Navbar />
       <MainContent>
         <Routes>
@@ -31,11 +31,22 @@ function App() {
           <Route path="/facilities" element={<Facilities />} />
           <Route path="/about" element={<About />} />
           <Route path="/review" element={<Review />} />
-          <Route path="/UoMFacilities" element={<UOMFacilities />} />
+          <Route
+            path="/UoMFacilities"
+            element={
+              <UOMFacilities
+                shopName="Coffee Haven"
+                status="Open"
+                openingTime="8:00 AM"
+                closingTime="6:00 PM"
+                location="123 Main St, City"
+              />
+            }
+          />
           <Route path="/UOMFacHome" element={<UOMFacHome />} />
         </Routes>
       </MainContent>
-      <Footer primaryColor="#1a3064" accentColor="#e67e22" />
+      <Footer/>
     </div>
   );
 }

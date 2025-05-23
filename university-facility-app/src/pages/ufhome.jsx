@@ -3,14 +3,15 @@ import React, { useState } from 'react';
 import "../index.css";
 import Facilities from "../components/Facilities";
 import SearchBar from "../components/Searchbar";
-import ShopPage from "../pages/ufshop"
+import ShopPage from "../pages/ufshop";
+
 
 const HeroSection = styled.div`
-  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), 
     url("https://codl.lk/wp-content/uploads/2023/12/Screenshot-2023-12-28-104003-1-1536x483.png");
   background-size: cover;
   background-position: center;
-  color: white;
+  color: var(--secondary-color);
   text-align: center;
   padding: 3.5rem 1rem;
   border-radius: 8px;
@@ -24,23 +25,30 @@ const HeroHeading = styled.h2`
   font-size: 2.5rem;
   margin-bottom: 1rem;
   font-weight: bold;
+  color: var(--secondary-color);
 `;
 
 const HeroInfo = styled.p`
   font-size: 1.1rem;
   max-width: 700px;
   margin: 0 auto 1.5rem;
+  color: var(--secondary-color);
 `;
 
 const FindFacBtn = styled.a`
   display: inline-block;
-  background-color: #e67e22;
+  background-color: var(--accent-color);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   font-weight: 500;
-  transition: background-color 0.3s ease;
+  transition: var(--transition);
+  text-decoration: none;
+  &:hover {
+    background-color: var(--hover-accent-color);
+  }
 `;
+
 
 function UOMFacHome() {
     const [facilityType, setFacilityType] = useState('all');
