@@ -11,11 +11,11 @@ html, body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1rem;
   min-width: 370px;
+  overflow-x: hidden;
 }
 
 a{
   text-decoration: none;
-  justify-self: left;
 }
 
 button{

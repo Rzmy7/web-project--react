@@ -1,13 +1,12 @@
 import styled from "styled-components";
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import "../index.css";
 import Facilities from "../components/Facilities";
 import SearchBar from "../components/Searchbar";
 import ShopPage from "../pages/ufshop";
 
-
 const HeroSection = styled.div`
-  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), 
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)),
     url("https://codl.lk/wp-content/uploads/2023/12/Screenshot-2023-12-28-104003-1-1536x483.png");
   background-size: cover;
   background-position: center;
@@ -17,7 +16,7 @@ const HeroSection = styled.div`
   border-radius: 8px;
   margin-top: 2rem;
   margin-bottom: 2rem;
-  width: 100%; 
+  width: 100%;
   min-width: 80vw;
 `;
 
@@ -49,11 +48,10 @@ const FindFacBtn = styled.a`
   }
 `;
 
-
 function UOMFacHome() {
-    const [facilityType, setFacilityType] = useState('all');
-  const [status, setStatus] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [facilityType, setFacilityType] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   return (
     <div style={{ width: "100%", margin: "0 auto" }}>
       <HeroSection>
@@ -86,13 +84,11 @@ function UOMFacHome() {
         />
       </div>
       {/* <ShopPage shopName='Wala Canteen' status='Open' openingTime='7.00AM'  closingTime='6.00PM' location='Near here' /> */}
-      </div>);
+    </div>
+  );
 }
 
 export default UOMFacHome;
-
-
-
 
 // import React, { useState } from 'react';
 // import styled from 'styled-components';

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import '../index.css';
+import React, { useState } from "react";
+import styled from "styled-components";
+import "../index.css";
+import MenuTabContent from "./ShopMenu";
 
 const TabContainer = styled.div`
   background-color: #f9f9f9;
@@ -26,7 +27,9 @@ const TabButton = styled.button`
     color: var(--text-color);
   }
 
-  ${(props) => (props.active ? `
+  ${(props) =>
+    props.active
+      ? `
     color: var(--primary-color);
     font-weight: 500;
     &:after {
@@ -42,16 +45,80 @@ const TabButton = styled.button`
     &:hover{
         color:var(--primary-color);
     }
-  ` : null)}
+  `
+      : null}
 `;
 
 const TabContent = styled.div`
   padding: 20px 0px;
 `;
 
+const MenuItemTab = styled.div`
+  display: grid;
+  flex:1;
+  justify-content: space-between;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1.5rem;
+  min-width: 10rem;
+`;
+
 const TabNavigationComponent = () => {
-  const [activeTab, setActiveTab] = useState('Menu');
-  const tabs = ['Menu', 'Reviews', 'Pre-order'];
+  const [activeTab, setActiveTab] = useState("Menu");
+  const tabs = ["Menu", "Reviews", "Pre-order"];
+
+  // const foodItems = [
+  //   {
+  //     id: "FD001",
+  //     name: "Kabilithi One",
+  //     price: "chikibili 1",
+  //     status: "available",
+  //   },
+  //   {
+  //     id: "FD002",
+  //     name: "Prawn Curry",
+  //     price: "chikibili 3.50",
+  //     status: "unavailable", // Example of an unavailable item
+  //   },
+  //   {
+  //     id: "FD003",
+  //     name: "Chicken Noodles",
+  //     price: "chikibili 2.75",
+  //     status: "available",
+  //   },
+  //   {
+  //     id: "FD004",
+  //     name: "Veggie Burger",
+  //     price: "chikibili 2.00",
+  //     status: "available",
+  //   },
+  //   {
+  //     id: "FD005",
+  //     name: "Fruit Salad",
+  //     price: "chikibili 1.25",
+  //     status: "unavailable",
+  //   },
+  // ];
+const menuData = [
+  {
+    id: 'cat-1',
+    name: 'Main Dishes',
+    items: [
+      { id: 'FD001', name: 'Kabilithi One', price: 'chikibili 1', status: 'available' },
+      { id: 'FD002', name: 'Prawn Curry', price: 'chikibili 3.50', status: 'unavailable' },
+      { id: 'FD003', name: 'Chicken Noodles', price: 'chikibili 2.75', status: 'available' },
+      { id: 'FD004', name: 'Veggie Burger', price: 'chikibili 2.00', status: 'available' },
+    ],
+  },
+  {
+    id: 'cat-2',
+    name: 'Drinks',
+    items: [
+      { id: 'DR001', name: 'itemNamebima', price: 'chikibili 1.50', status: 'available' },
+      { id: 'DR002', name: 'Orange Juice', price: 'chikibili 0.75', status: 'available' },
+      { id: 'DR003', name: 'Coca-Cola', price: 'chikibili 1.00', status: 'unavailable' },
+    ],
+  }]
+
 
   return (
     <TabContainer>
@@ -67,9 +134,12 @@ const TabNavigationComponent = () => {
         ))}
       </TabNavigation>
       <TabContent>
-        {activeTab === 'Menu' && <div>This is the menu content</div>}
-        {activeTab === 'Reviews' && <div>This is the reviews content</div>}
-        {activeTab === 'Pre-order' && <div>This is the pre-order content</div>}
+        {activeTab === "Menu" && (
+          <MenuTabContent categories={menuData} // Pass the entire menu data
+          isSelected={true}/>
+        )}
+        {activeTab === "Reviews" && <div>This is the reviews content</div>}
+        {activeTab === "Pre-order" && <div>This is the pre-order content</div>}
       </TabContent>
     </TabContainer>
   );
