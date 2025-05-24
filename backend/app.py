@@ -16,7 +16,7 @@
 # DB_CONFIG = {
 #     'dbname': 'react test',
 #     'user': 'karigemba',
-#     'password': 'karigemba',  # Replace with actual password
+#     'password': '*****',  # Replace with actual password
 #     'host': 'database-1.c3myi0ygeelx.ap-southeast-2.rds.amazonaws.com',
 #     'port': '5432'
 # }
