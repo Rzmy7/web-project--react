@@ -6,9 +6,10 @@ import { Link } from "react-router-dom";
 
 // Define styled components
 const Header = styled.header`
-  background-color: #1a3064;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
   padding: 1rem;
+  width: 100%;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -31,7 +32,7 @@ const Logo = styled.div`
   }
 
   span {
-    color: #e67e22;
+    color: var(--accent-color);
   }
 `;
 
@@ -51,12 +52,12 @@ const Nav = styled.nav`
   }
 
   a {
-    color: white;
+    color: var(--secondary-color);
     font-weight: 500;
     transition: color 0.3s ease;
 
     &:hover {
-      color: #e67e22;
+      color: var(--accent-color);
     }
   }
 
@@ -106,8 +107,8 @@ const AuthButtons = styled.div`
 
 const LoginBtn = styled.button`
   background-color: transparent;
-  border: 1px solid white !important;
-  color: white;
+  border: 1px solid var(--secondary-color) !important;
+  color: var(--secondary-color);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-weight: 500;
@@ -125,8 +126,8 @@ const LoginBtn = styled.button`
 `;
 
 const SignupBtn = styled.button`
-  background-color: #e67e22;
-  color: white;
+  background-color: var(--accent-color);
+  color: var(--secondary-color);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-weight: 500;
@@ -134,7 +135,7 @@ const SignupBtn = styled.button`
   transition: all 0.3s ease;
 
   &:hover {
-    background-color: #d35400;
+    background-color: var(--hover-accent-color);
   }
 
   @media (max-width: 768px) {
@@ -147,7 +148,7 @@ const MobileMenuBtn = styled.button`
   display: none;
   background: none;
   border: none;
-  color: white;
+  color: var(--secondary-color);
   font-size: 1.5rem;
   cursor: pointer;
   position: relative;
@@ -164,7 +165,7 @@ const MobileMenuBtn = styled.button`
     display: block;
     width: 24px;
     height: 3px;
-    background: white;
+    background: var(--secondary-color);
     position: absolute;
     transition: all 0.3s ease;
     border-radius: 2px;

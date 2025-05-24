@@ -109,13 +109,10 @@
 // export default Facilities;
 
 
-
-
-
-
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import FacilityCard from "./FacilityCard";
+import { io } from "socket.io-client";
 
 const FacilitiesContainer = styled.div`
   width: 100%;
@@ -134,7 +131,8 @@ function Facilities({ facilityType, status, searchQuery }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/data") // Replace with actual Flask API URL
+    // Initial fetch
+    fetch("http://127.0.0.1:8001/api/data")
       .then((res) => res.json())
       .then((data) => {
         setFacilities(data);
@@ -144,6 +142,33 @@ function Facilities({ facilityType, status, searchQuery }) {
         console.error("Error fetching facilities:", err);
         setLoading(false);
       });
+  }, []);
+
+  useEffect(() => {
+    // Set up Socket.IO
+    const socket = io("http://127.0.0.1:8001"); // Your Flask-SocketIO server address
+
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+    });
+
+    // Listen for real-time updates
+    socket.on("new_entry", (data) => {
+      console.log("New entry received:", data);
+      // Update state with new data
+      setFacilities((prevFacilities) => [...prevFacilities, data]);
+    });
+
+    // Listen for full data updates (if you want to replace the entire list)
+    socket.on("shop_data", (updatedData) => {
+      console.log("Received full data update:", updatedData);
+      setFacilities(updatedData);
+    });
+
+    // Clean up on unmount
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const filteredFacilities = facilities.filter((facility) => {
@@ -173,7 +198,7 @@ function Facilities({ facilityType, status, searchQuery }) {
     <FacilitiesContainer>
       <FacilitiesGrid>
         {filteredFacilities.map((f, index) => (
-          <FacilityCard key={f.id || index} {...f} />
+          <FacilityCard key={f.shopid || index} {...f} />
         ))}
       </FacilitiesGrid>
     </FacilitiesContainer>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Insert Shop</title>
+</head>
+<body>
+  <h2>Add Facility</h2>
+  <form method="POST">
+    <input name="shopid" placeholder="id" required><br>
+    <input name="name" placeholder="Name" required><br>
+    <input name="type" placeholder="Type"><br>
+    <input name="type2" placeholder="Type2"><br>
+    <input name="type3" placeholder="Type3"><br>
+    <input name="status" placeholder="Status"><br>
+    <input name="picture" placeholder="Picture URL"><br>
+    <input name="location" placeholder="Location"><br>
+    <input name="opentime"  required><br>
+    <input name="closetime"  required><br>
+    <button type="submit">Submit</button>
+  </form>
+
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:5000");
+
+    socket.on("new_entry", (data) => {
+      alert("New entry added: " + data.name);
+    });
+
+    socket.on("shop_data", (data) => {
+      console.log("Real-time shop data received:", data);
+    });
+  </script>
+</body>
+</html>
