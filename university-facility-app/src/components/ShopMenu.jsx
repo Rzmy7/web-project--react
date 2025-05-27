@@ -1,7 +1,7 @@
-// MenuTabContent.jsx
-import React from 'react';
-import styled from 'styled-components';
-import ItemCard from './ItemCard'; // Make sure the path is correct for your project
+import React from "react";
+import styled from "styled-components";
+import ItemCard from "./ItemCard";
+import "../index.css";
 
 // Define CSS variables (ensure these match or are consistent with ItemCard.jsx)
 
@@ -26,18 +26,18 @@ const MenuCategoryName = styled.div`
 `;
 
 const MenuItemsGrid = styled.div`
-    margin-top: 1.5rem;
+  margin-top: 1.5rem;
   display: grid;
-  flex:1;
+  flex: 1;
   justify-content: space-between;
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   gap: 1.5rem;
   min-width: 10rem;
 `;
 
-const MenuTabContent = ({ categories, onAddToOrder, isSelected }) => {
+const MenuTabContent = ({ categories, onAddToOrder, isSelected ,preOrderNumHandle}) => {
   return (
-    <TabPane className={isSelected ? 'selected' : ''}>
+    <TabPane className={isSelected ? "selected" : ""}>
       {categories.map((category) => (
         <MenuCategoryContainer key={category.id}>
           <MenuCategoryName>{category.name}</MenuCategoryName>
@@ -49,6 +49,7 @@ const MenuTabContent = ({ categories, onAddToOrder, isSelected }) => {
                 name={item.name}
                 price={item.price}
                 status={item.status}
+                preOrderNumHandle={preOrderNumHandle}
                 onAddToOrder={() => onAddToOrder(item.id)}
               />
             ))}

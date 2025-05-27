@@ -14,10 +14,11 @@ const HeroSection = styled.div`
   text-align: center;
   padding: 3.5rem 1rem;
   border-radius: 8px;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+  margin: 2rem auto;
   width: 100%;
-  min-width: 80vw;
+  min-width: 300px;
+  position: relative;
+  border: 1px solid black;
 `;
 
 const HeroHeading = styled.h2`
@@ -53,21 +54,26 @@ function UOMFacHome() {
   const [status, setStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   return (
-    <div style={{ width: "100%", margin: "0 auto" }}>
-      <HeroSection>
-        <HeroHeading>Your University Facilities at a Glance</HeroHeading>
-        <HeroInfo>
-          Real-time information about canteens, juice bars, and book shops at
-          the University of Moratuwa. Check what's open, see menus, and
-          pre-order items.
-        </HeroInfo>
-        <FindFacBtn href="#facilityGrid">Find a Facility</FindFacBtn>
-      </HeroSection>
-      {/* <SearchBar/> */}
-      {/* <div id="facilityGrid">
-        {" "}
-        <Facilities />{" "}
-      </div> */}
+    <div style={{ width: "100%", margin: "0 auto", flexDirection: "column" }}>
+      <div
+        style={{
+          width: "100%",
+          height: "fit-content",
+          display: "flex",
+          justifySelf: "center",
+        }}
+      >
+        <HeroSection>
+          <HeroHeading>Your University Facilities at a Glance</HeroHeading>
+          <HeroInfo>
+            Real-time information about canteens, juice bars, and book shops at
+            the University of Moratuwa. Check what's open, see menus, and
+            pre-order items.
+          </HeroInfo>
+          <FindFacBtn href="#facilityGrid">Find a Facility</FindFacBtn>
+        </HeroSection>
+      </div>
+
       <SearchBar
         facilityType={facilityType}
         setFacilityType={setFacilityType}

@@ -4,7 +4,6 @@ import '../index.css';
 
 
 
-
 const MenuItem = styled.div`
   background-color: var(--secondary-color);
   border: 1px solid var(--light-gray);
@@ -69,7 +68,7 @@ const AddOrderButton = styled.button`
   cursor: pointer; /* Add cursor pointer for buttons */
 `;
 
-const ItemCard = ({ id, name, price, status, onAddToOrder }) => {
+const ItemCard = ({ id, name, price, status ,preOrderNumHandle}) => {
   const isAvailable = status === 'available';
   const finishedClass = !isAvailable ? 'finished' : '';
 
@@ -82,7 +81,7 @@ const ItemCard = ({ id, name, price, status, onAddToOrder }) => {
       </ItemStatus>
       <AddOrderButton
         className="add-order-btn"
-        onClick={onAddToOrder}
+        onClick={preOrderNumHandle}
         disabled={!isAvailable} // Disable button if not available
       >
         Add to Order
