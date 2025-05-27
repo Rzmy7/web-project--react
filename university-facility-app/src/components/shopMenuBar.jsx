@@ -18,7 +18,7 @@ const TabNavigation = styled.div`
 const TabButton = styled.button`
   background: none;
   border: none;
-  padding: 0pc8px 12px;
+  padding: 0 8px 12px 0;
   height: 3rem;
   /* min-width: 6rem; */
   /* border: 1px solid black; */
@@ -66,7 +66,6 @@ const MenuItemTab = styled.div`
 
 const PreOrderBadge = styled.span`
   color: var(--secondary-color);
-  min-width: 0.2rem;
   padding: 0.1rem;
   width: max-content;
   min-width: 0.9rem;

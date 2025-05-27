@@ -54,7 +54,7 @@ function UOMFacHome() {
   const [status, setStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   return (
-    <div style={{ width: "100%", margin: "0 auto", flexDirection: "column" }}>
+    <div style={{ width: "100%", margin: "0 auto", display: "flex", flexDirection: "column" }}>
       <div
         style={{
           width: "100%",
