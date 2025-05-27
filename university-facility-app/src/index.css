@@ -1,17 +1,24 @@
 /* In your CSS file (e.g., index.css) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 html, body {
-  width: 100%;
+  width: 100dvw;
   height: 100%;
   margin: 0;
   padding: 0;
-  margin-bottom: 0;
   background-color: var(--secondary-color);
-  min-height: 100dvh;
+  /* min-height: 100dvh; */
   box-sizing: border-box;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1rem;
-  min-width: 370px;
-  overflow-x: hidden;
+  min-width: 360px;
+  overflow-x:auto;
+  border: 10px solid black important;
+  
 }
 
 a{

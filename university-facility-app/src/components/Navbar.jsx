@@ -18,9 +18,11 @@ const Header = styled.header`
 
 const HeaderContainer = styled.div`
   display: flex;
+  /* border: 1px solid black; */
   justify-content: space-between;
   align-items: center;
   max-width: 1500px;
+  /* width: 700px; */
   margin: 0 auto;
   flex-wrap: wrap;
 `;

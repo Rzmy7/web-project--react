@@ -8,22 +8,27 @@ import UOMFacilities from "./pages/ufshop";
 import UOMFacHome from "./pages/ufhome";
 import styled from "styled-components";
 import Footer from "./components/Footer";
-import './index.css'; 
+import "./index.css";
 
 const MainContent = styled.div`
-  max-width: "1500px";
+  max-width: 1500px;
   justify-self: "center";
   padding: 0 5rem;
-  background-color: #f8f9fa;
+  background-color: var(--secondary-color);
+  display: flex;
+  width: 100%;
+  justify-self: center;
 
   @media (max-width: 768px) {
     padding: 0 1rem;
+    display: flex;
+  justify-self: center;
   }
 `;
 
 function App() {
   return (
-    <div >
+    <div>
       <Navbar />
       <MainContent>
         <Routes>
@@ -46,7 +51,7 @@ function App() {
           <Route path="/UOMFacHome" element={<UOMFacHome />} />
         </Routes>
       </MainContent>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
