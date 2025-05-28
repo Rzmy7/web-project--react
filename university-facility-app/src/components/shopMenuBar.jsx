@@ -2,6 +2,7 @@ import React, { useState ,useEffect} from "react";
 import styled from "styled-components";
 import "../index.css";
 import MenuTabContent from "./ShopMenu";
+import PreOrderTab from "./PreOrderTab";
 
 const TabContainer = styled.div`
   background-color: #f9f9f9;
@@ -144,28 +145,25 @@ const TabNavigationComponent = () => {
     },
   ];
 
-  const handlePreOrder = (action) => {
-  if (action === "add") {
-    setPreOrderItemCount(prev => prev + 1);
-  } else if (action === "remove") {
-    setPreOrderItemCount(prev => Math.max(0, prev - 1));
-  }
-};
 
-const [preOrderedItemIds, setPreOrderedItemIds] = useState([]);
 
-  const handlePreOrderChange = (action, itemId) => {
+const [preOrderedItems, setPreOrderedItems] = useState([]);
+
+
+  const handlePreOrderChange = (action, item) => {
   if (action === "add") {
     setPreOrderItemCount(prevCount => prevCount + 1);
-    setPreOrderedItemIds(prev => [...prev, itemId]);
+    setPreOrderedItems(prev => [...prev, item]);
   } else if (action === "remove") {
     setPreOrderItemCount(prevCount => Math.max(0, prevCount - 1));
-    setPreOrderedItemIds(prev => prev.filter(id => id !== itemId));
+    setPreOrderedItems(prev => prev.filter(i => i.id !== item.id));
   }
 };
+
 useEffect(() => {
-  console.log("Updated pre-ordered item IDs:", preOrderedItemIds);
-}, [preOrderedItemIds]);
+  console.log("Current Pre-Ordered Items:", preOrderedItems);
+}, [preOrderedItems]);
+
 
 
 
@@ -190,17 +188,14 @@ useEffect(() => {
         {activeTab === "Menu" && (
           <MenuTabContent
             categories={menuData}
-            preOrderedItemIds={preOrderedItemIds}
+            preOrderedItems={preOrderedItems}
             preOrderNumHandle={handlePreOrderChange}
             isSelected={true}
           />
         )}
         {activeTab === "Reviews" && <div>This is the reviews content</div>}
         {activeTab === "Pre-Order" && (
-          <div>
-            This is the pre-order content
-            <button onClick={handlePreOrder}>Add to Pre-order</button>
-          </div>
+          <PreOrderTab/>
         )}
       </TabContent>
     </TabContainer>

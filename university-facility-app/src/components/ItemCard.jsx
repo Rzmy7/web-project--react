@@ -115,6 +115,7 @@ const MenuItem = styled.div`
   min-width: 10rem;
   max-width: 16rem;
   position: relative;
+  
 
   &.finished {
     background-color: var(--light-gray);
@@ -127,6 +128,17 @@ const MenuItem = styled.div`
     .add-order-btn {
       opacity: 0.7;
     }
+  }
+
+  &.ordered{
+    .item-name,.item-price,.add-order-btn{
+      opacity: 0.6;
+      z-index: 0;
+    }
+  }
+
+  @media (max-width: 768px){
+    width: 100%;
   }
 `;
 
@@ -173,6 +185,7 @@ const DeleteButton = styled.button`
   font-size: 1.3rem;
   cursor: pointer;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+  z-index: 100;
 `;
 
 // const ItemCard = ({
@@ -225,14 +238,14 @@ const ItemCard = ({
   preOrderChangeHandle,
 }) => {
   const isAvailable = status === "available";
-  const finishedClass = !isAvailable || isPreOrdered ? "finished" : "";
+  const finishedClass = isAvailable ? isPreOrdered ?"ordered":"": "finished";
 
   const clickedPreOrderBtn = () => {
-    preOrderChangeHandle("add", id);
+    preOrderChangeHandle("add",{id,name,price});
   };
 
   const clickedDeleteBtn = () => {
-    preOrderChangeHandle("remove", id);
+    preOrderChangeHandle("remove", {id,name,price});
   };
 
   return (
