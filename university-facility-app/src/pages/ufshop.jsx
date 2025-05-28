@@ -103,7 +103,7 @@ function ShopPage ({shopName,status,openingTime , closingTime , location}) {
   };
 
   return (
-    <Shop>
+    <div style={{width:"100%",display:"flex",flexDirection:"column",justifyContent:"center"}}><Shop>
       <ShopHeader>
         <BackButton onClick={handleBack}>
           Back to Home
@@ -126,7 +126,8 @@ function ShopPage ({shopName,status,openingTime , closingTime , location}) {
         </ShopInfo>
       </ShopHeader>
       <TabNavigationComponent/>
-    </Shop>
+    </Shop></div>
+    
   );
 };
 

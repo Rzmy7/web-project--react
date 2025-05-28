@@ -4,6 +4,11 @@ from flask_socketio import SocketIO, emit
 import psycopg2
 import psycopg2.extras
 from datetime import date, time, datetime
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -12,11 +17,11 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Database configuration
 DB_CONFIG = {
-    'dbname': 'react test',
-    'user': 'karigemba',
-    'password': '*****' , # Replace with actual password
-    'host': 'database-1.c3myi0ygeelx.ap-southeast-2.rds.amazonaws.com',
-    'port': '5432'
+    'dbname': os.getenv('DB_NAME'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'host': os.getenv('DB_HOST'),
+    'port': os.getenv('DB_PORT')
 }
 
 def get_db_connection():
