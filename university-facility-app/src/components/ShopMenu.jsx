@@ -39,7 +39,7 @@ const MenuTabContent = ({
   categories,
   onAddToOrder,
   isSelected,
-  preOrderNumHandle,
+  preOrderNumHandle,preOrderedItemIds,
 }) => {
   return (
     <TabPane className={isSelected ? "selected" : ""}>
@@ -64,7 +64,8 @@ const MenuTabContent = ({
                   name={item.name}
                   price={item.price}
                   status={item.status}
-                  preOrderNumHandle={preOrderNumHandle}
+                  preOrderChangeHandle={preOrderNumHandle}
+                  isPreOrdered={preOrderedItemIds.includes(item.id)}
                   onAddToOrder={() => onAddToOrder(item.id)}
                 />
               ))}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import styled from "styled-components";
 import "../index.css";
 import MenuTabContent from "./ShopMenu";
@@ -152,6 +152,23 @@ const TabNavigationComponent = () => {
   }
 };
 
+const [preOrderedItemIds, setPreOrderedItemIds] = useState([]);
+
+  const handlePreOrderChange = (action, itemId) => {
+  if (action === "add") {
+    setPreOrderItemCount(prevCount => prevCount + 1);
+    setPreOrderedItemIds(prev => [...prev, itemId]);
+  } else if (action === "remove") {
+    setPreOrderItemCount(prevCount => Math.max(0, prevCount - 1));
+    setPreOrderedItemIds(prev => prev.filter(id => id !== itemId));
+  }
+};
+useEffect(() => {
+  console.log("Updated pre-ordered item IDs:", preOrderedItemIds);
+}, [preOrderedItemIds]);
+
+
+
   return (
     <TabContainer>
       <TabNavigation>
@@ -173,7 +190,8 @@ const TabNavigationComponent = () => {
         {activeTab === "Menu" && (
           <MenuTabContent
             categories={menuData}
-            preOrderNumHandle={handlePreOrder}
+            preOrderedItemIds={preOrderedItemIds}
+            preOrderNumHandle={handlePreOrderChange}
             isSelected={true}
           />
         )}
