@@ -81,7 +81,7 @@ const PreOrderBadge = styled.span`
   justify-content: center;
   align-items: center;
 `;
- 
+
 const TabNavigationComponent = () => {
   const [activeTab, setActiveTab] = useState("Menu");
   const [preOrderItemCount, setPreOrderItemCount] = useState(0); // State to track pre-order items
@@ -89,24 +89,59 @@ const TabNavigationComponent = () => {
 
   const menuData = [
     {
-      id: 'cat-1',
-      name: 'Main Dishes',
+      id: "cat-1",
+      name: "Main Dishes",
       items: [
-        { id: 'FD001', name: 'Kabilithi One', price: 'chikibili 1', status: 'available' },
-        { id: 'FD002', name: 'Prawn Curry', price: 'chikibili 3.50', status: 'unavailable' },
-        { id: 'FD003', name: 'Chicken Noodles', price: 'chikibili 2.75', status: 'available' },
-        { id: 'FD004', name: 'Veggie Burger', price: 'chikibili 2.00', status: 'available' },
+        {
+          id: "FD001",
+          name: "Kabilithi One",
+          price: "chikibili 1",
+          status: "available",
+        },
+        {
+          id: "FD002",
+          name: "Prawn Curry",
+          price: "chikibili 3.50",
+          status: "unavailable",
+        },
+        {
+          id: "FD003",
+          name: "Chicken Noodles",
+          price: "chikibili 2.75",
+          status: "available",
+        },
+        {
+          id: "FD004",
+          name: "Veggie Burger",
+          price: "chikibili 2.00",
+          status: "available",
+        },
       ],
     },
     {
-      id: 'cat-2',
-      name: 'Drinks',
+      id: "cat-2",
+      name: "Drinks",
       items: [
-        { id: 'DR001', name: 'itemNamebima', price: 'chikibili 1.50', status: 'available' },
-        { id: 'DR002', name: 'Orange Juice', price: 'chikibili 0.75', status: 'available' },
-        { id: 'DR003', name: 'Coca-Cola', price: 'chikibili 1.00', status: 'unavailable' },
+        {
+          id: "DR001",
+          name: "itemNamebima",
+          price: "chikibili 1.50",
+          status: "available",
+        },
+        {
+          id: "DR002",
+          name: "Orange Juice",
+          price: "chikibili 0.75",
+          status: "available",
+        },
+        {
+          id: "DR003",
+          name: "Coca-Cola",
+          price: "chikibili 1.00",
+          status: "unavailable",
+        },
       ],
-    }
+    },
   ];
 
   const handlePreOrder = () => {
@@ -125,7 +160,7 @@ const TabNavigationComponent = () => {
             >
               {tab}
             </TabButton>
-            {tab === "Pre-Order" && (
+            {tab === "Pre-Order" && preOrderItemCount > 0 && (
               <PreOrderBadge>{preOrderItemCount}</PreOrderBadge>
             )}
           </div>
@@ -133,7 +168,11 @@ const TabNavigationComponent = () => {
       </TabNavigation>
       <TabContent>
         {activeTab === "Menu" && (
-          <MenuTabContent categories={menuData} preOrderNumHandle={handlePreOrder} isSelected={true} />
+          <MenuTabContent
+            categories={menuData}
+            preOrderNumHandle={handlePreOrder}
+            isSelected={true}
+          />
         )}
         {activeTab === "Reviews" && <div>This is the reviews content</div>}
         {activeTab === "Pre-Order" && (
