@@ -144,10 +144,13 @@ const TabNavigationComponent = () => {
     },
   ];
 
-  const handlePreOrder = () => {
-    // Example function to update pre-order count
-    setPreOrderItemCount(preOrderItemCount + 1);
-  };
+  const handlePreOrder = (action) => {
+  if (action === "add") {
+    setPreOrderItemCount(prev => prev + 1);
+  } else if (action === "remove") {
+    setPreOrderItemCount(prev => Math.max(0, prev - 1));
+  }
+};
 
   return (
     <TabContainer>
