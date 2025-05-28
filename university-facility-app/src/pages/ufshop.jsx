@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import TabNavigationComponent from "../components/shopMenuBar";
 
 const Shop = styled.div`
@@ -10,8 +10,8 @@ const Shop = styled.div`
   border-radius: 0.4rem;
   padding: 1rem 1.7rem;
 
-  @media (max-width : 768px) {
-    padding:0.6rem 1.1rem;
+  @media (max-width: 768px) {
+    padding: 0.6rem 1.1rem;
   }
 `;
 
@@ -60,7 +60,8 @@ const ShopNameMain = styled.span`
 `;
 
 const ShopStatus = styled.span`
-  background-color: ${({ isOpen }) => (isOpen ? 'var(--success)' : 'var(--danger)')};
+  background-color: ${({ isOpen }) =>
+    isOpen ? "var(--success)" : "var(--danger)"};
   color: var(--secondary-color);
   padding: 0.3rem 0.6rem;
   font-size: 1rem;
@@ -76,7 +77,7 @@ const ShopInfo = styled.div`
   margin-top: 0.9rem;
   color: var(--dark-gray);
 
-  @media (max-width:768px){
+  @media (max-width: 768px) {
     flex-direction: column;
   }
 `;
@@ -89,45 +90,51 @@ const ShopInfoItem = styled.div`
   &.location {
     margin-left: 4rem;
 
-    @media (max-width:768px){
-    margin:0.5rem 0;
-  }
+    @media (max-width: 768px) {
+      margin: 0.5rem 0;
+    }
   }
 `;
 
-function ShopPage ({shopName,status,openingTime , closingTime , location}) {
-
+function ShopPage({ shopName, status, openingTime, closingTime, location }) {
   const navigate = useNavigate();
   const handleBack = () => {
     navigate(-1); // Navigate back to the previous page
   };
 
   return (
-    <Shop>
-      <ShopHeader>
-        <BackButton onClick={handleBack}>
-          Back to Home
-        </BackButton>
-        <ShopTitle>
-          <ShopNameMain >
-            {shopName}
-          </ShopNameMain>
-          <ShopStatus isOpen={status === 'Open'} >{status}</ShopStatus>
-        </ShopTitle>
-        <ShopInfo >
-          <ShopInfoItem >
-            <span>Hours:</span>
-            <span>{openingTime} - {closingTime}</span>
-          </ShopInfoItem>
-          <ShopInfoItem className="location">
-            <span>Location:</span>
-            <span>{location}</span>
-          </ShopInfoItem>
-        </ShopInfo>
-      </ShopHeader>
-      <TabNavigationComponent/>
-    </Shop>
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
+    >
+      <Shop>
+        <ShopHeader>
+          <BackButton onClick={handleBack}>Back to Home</BackButton>
+          <ShopTitle>
+            <ShopNameMain>{shopName}</ShopNameMain>
+            <ShopStatus isOpen={status === "Open"}>{status}</ShopStatus>
+          </ShopTitle>
+          <ShopInfo>
+            <ShopInfoItem>
+              <span>Hours:</span>
+              <span>
+                {openingTime} - {closingTime}
+              </span>
+            </ShopInfoItem>
+            <ShopInfoItem className="location">
+              <span>Location:</span>
+              <span>{location}</span>
+            </ShopInfoItem>
+          </ShopInfo>
+        </ShopHeader>
+        <TabNavigationComponent />
+      </Shop>
+    </div>
   );
-};
+}
 
 export default ShopPage;

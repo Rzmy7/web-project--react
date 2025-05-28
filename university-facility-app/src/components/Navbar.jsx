@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 const Header = styled.header`
   background-color: var(--primary-color);
   color: var(--secondary-color);
-  padding: 1rem;
+  padding: 2rem;
   width: 100%;
   position: sticky;
   top: 0;
