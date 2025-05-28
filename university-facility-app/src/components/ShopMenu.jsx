@@ -35,24 +35,39 @@ const MenuItemsGrid = styled.div`
   min-width: 10rem;
 `;
 
-const MenuTabContent = ({ categories, onAddToOrder, isSelected ,preOrderNumHandle}) => {
+const MenuTabContent = ({
+  categories,
+  onAddToOrder,
+  isSelected,
+  preOrderNumHandle,
+}) => {
   return (
     <TabPane className={isSelected ? "selected" : ""}>
       {categories.map((category) => (
         <MenuCategoryContainer key={category.id}>
           <MenuCategoryName>{category.name}</MenuCategoryName>
           <MenuItemsGrid>
-            {category.items.map((item) => (
-              <ItemCard
-                key={item.id}
-                id={item.id}
-                name={item.name}
-                price={item.price}
-                status={item.status}
-                preOrderNumHandle={preOrderNumHandle}
-                onAddToOrder={() => onAddToOrder(item.id)}
-              />
-            ))}
+            {category.items
+              .slice() // clone the array to avoid mutating original data
+              .sort((a, b) => {
+                // Sort so that available items come before unavailable ones
+                return a.status === "available" && b.status !== "available"
+                  ? -1
+                  : a.status !== "available" && b.status === "available"
+                  ? 1
+                  : 0;
+              })
+              .map((item) => (
+                <ItemCard
+                  key={item.id}
+                  id={item.id}
+                  name={item.name}
+                  price={item.price}
+                  status={item.status}
+                  preOrderNumHandle={preOrderNumHandle}
+                  onAddToOrder={() => onAddToOrder(item.id)}
+                />
+              ))}
           </MenuItemsGrid>
         </MenuCategoryContainer>
       ))}

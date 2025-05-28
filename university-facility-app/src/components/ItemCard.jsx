@@ -1,8 +1,6 @@
-import React from 'react';
-import styled from 'styled-components';
-import '../index.css';
-
-
+import React from "react";
+import styled from "styled-components";
+import "../index.css";
 
 const MenuItem = styled.div`
   background-color: var(--secondary-color);
@@ -15,7 +13,7 @@ const MenuItem = styled.div`
   padding: 1rem;
   row-gap: 1.5rem;
   font-weight: 550;
-  min-width:10rem;
+  min-width: 10rem;
   max-width: 16rem;
   border: 1px solid var(--light-gray);
 
@@ -68,16 +66,16 @@ const AddOrderButton = styled.button`
   cursor: pointer; /* Add cursor pointer for buttons */
 `;
 
-const ItemCard = ({ id, name, price, status ,preOrderNumHandle}) => {
-  const isAvailable = status === 'available';
-  const finishedClass = !isAvailable ? 'finished' : '';
+const ItemCard = ({ id, name, price, status, preOrderNumHandle }) => {
+  const isAvailable = status === "available";
+  const finishedClass = !isAvailable ? "finished" : "";
 
   return (
     <MenuItem id={id} className={finishedClass}>
-      <ItemName >{name}</ItemName>
+      <ItemName>{name}</ItemName>
       <ItemPrice>{price}</ItemPrice>
       <ItemStatus className={`${status}`}>
-        {status === 'available' ? 'Availabile' : 'Unavailable'}
+        {status === "available" ? "Availabile" : "Unavailable"}
       </ItemStatus>
       <AddOrderButton
         className="add-order-btn"
