@@ -1,208 +1,3 @@
-// import React, { useState } from 'react';
-// import styled from 'styled-components';
-// import '../index.css';
-
-// const TabPane = styled.div`
-//   display: flex !important;
-//   flex-direction: column;
-// `;
-
-// const PreOrderTitle = styled.span`
-//   color: var(--primary-color);
-//   font-weight: 700;
-//   margin: 2rem 0;
-// `;
-
-// const OrderedItemList = styled.div`
-//   display: flex;
-//   flex-direction: column;
-//   row-gap: 2rem;
-//   overflow-y: auto;
-//   padding-bottom: 1.2rem;
-//   border-bottom: 1px solid var(--light-gray);
-// `;
-
-// const OrderedItem = styled.div``;
-
-// const OrderedItemName = styled.div`
-//   font-weight: 500;
-// `;
-
-// const OrderedItemDetails = styled.div`
-//   display: flex;
-//   justify-content: space-between;
-// `;
-
-// const OrderedItemPrice = styled.span`
-//   color: var(--primary-color);
-// `;
-
-// const OrderedItemQuantity = styled.div`
-//   display: flex;
-//   justify-content: space-between;
-//   column-gap: 0.2rem;
-// `;
-
-// const OrderQuantityChanger = styled.span`
-//   background-color: var(--light-gray);
-//   padding: 0.2rem 0.7rem;
-//   border-radius: 0.3rem;
-//   cursor: pointer;
-//   border: 1px solid transparent;
-
-//   &:hover {
-//     background-color: var(--secondary-color);
-//     border: 1px solid var(--text-color);
-//   }
-//   &:active {
-//     background-color: var(--text-color);
-//     color: var(--secondary-color);
-//     border: 1px solid var(--text-color);
-//   }
-// `;
-
-// const OrderQuantity = styled.input`
-//   padding: 0.2rem 0;
-//   width: 3rem;
-//   text-align: center;
-
-//   &::-webkit-outer-spin-button,
-//   &::-webkit-inner-spin-button {
-//     -webkit-appearance: none;
-//     margin: 0;
-//   }
-// `;
-
-// const AdditionalNotes = styled.div`
-//   margin-top: 2rem;
-// `;
-
-// const AdditionalNotesTitle = styled.p``;
-
-// const AdditionalNotesForm = styled.form`
-//   display: flex;
-//   flex-direction: column;
-//   margin-top: 0.3rem;
-// `;
-
-// const AdditionalNotesTextarea = styled.textarea`
-//   padding: 0.5rem;
-//   border: 1px solid var(--light-gray);
-//   width: 100%;
-//   height: 9rem;
-//   border-radius: 0.3rem;
-//   box-shadow: 0px 0px 0px 1px var(--light-gray);
-//   resize: none;
-// `;
-
-// const PreOrderSubmitBtn = styled.button`
-//   margin-top: 2rem;
-//   border: 1px solid transparent;
-//   background-color: var(--success);
-//   color: var(--secondary-color);
-//   font-weight: 500;
-//   padding: 0.7rem 1.3rem;
-//   width: fit-content;
-//   border-radius: 0.3rem;
-//   align-self: end;
-// `;
-
-// const PreOrderTab = () => {
-//   const [orderedItems, setOrderedItems] = useState([]);
-//   const [numOfOrderedItem, setNumOfOrderedItem] = useState(0);
-//   const [additionalNotes, setAdditionalNotes] = useState('');
-
-//   const addPreOrderToList = (itemId, itemName, itemPrice) => {
-//     const existingItem = orderedItems.find((item) => item.id === itemId);
-//     if (existingItem) {
-//       setOrderedItems((prevItems) =>
-//         prevItems.map((item) =>
-//           item.id === itemId
-//             ? { ...item, quantity: item.quantity + 1 }
-//             : item
-//         )
-//       );
-//     } else {
-//       const newItem = {
-//         id: itemId,
-//         name: itemName,
-//         price: itemPrice,
-//         quantity: 1,
-//       };
-//       setOrderedItems((prevItems) => [...prevItems, newItem]);
-//       setNumOfOrderedItem((prevCount) => prevCount + 1);
-//     }
-//   };
-
-//   const handleQuantityChange = (id, change) => {
-//     setOrderedItems((prevItems) =>
-//       prevItems.map((item) =>
-//         item.id === id
-//           ? { ...item, quantity: Math.max(0, item.quantity + change) }
-//           : item
-//       )
-//     );
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     console.log('Ordered Items:', orderedItems);
-//     console.log('Additional Notes:', additionalNotes);
-//   };
-
-//   return (
-//     <TabPane id="preOrderTab">
-//       <PreOrderTitle>Your Pre-order</PreOrderTitle>
-//       <OrderedItemList id="orderItemList">
-//         {orderedItems.length === 0 && <p>No items added yet.</p>}
-//         {orderedItems.map((item) => (
-//           <OrderedItem key={item.id} id={item.id}>
-//             <OrderedItemName>{item.name}</OrderedItemName>
-//             <OrderedItemDetails>
-//               <OrderedItemPrice>{item.price}</OrderedItemPrice>
-//               <OrderedItemQuantity>
-//                 <OrderQuantityChanger
-//                   className="minus"
-//                   onClick={() => handleQuantityChange(item.id, -1)}
-//                 >
-//                   -
-//                 </OrderQuantityChanger>
-//                 <OrderQuantity
-//                   type="number"
-//                   value={item.quantity}
-//                   readOnly
-//                   aria-label={`Quantity of ${item.name}`}
-//                 />
-//                 <OrderQuantityChanger
-//                   className="plus"
-//                   onClick={() => handleQuantityChange(item.id, 1)}
-//                 >
-//                   +
-//                 </OrderQuantityChanger>
-//               </OrderedItemQuantity>
-//             </OrderedItemDetails>
-//           </OrderedItem>
-//         ))}
-//       </OrderedItemList>
-//       <AdditionalNotes>
-//         <AdditionalNotesTitle>Additional Notes</AdditionalNotesTitle>
-//         <AdditionalNotesForm onSubmit={handleSubmit}>
-//           <AdditionalNotesTextarea
-//             id="additionalNotes"
-//             placeholder="e.g., No onions, please"
-//             value={additionalNotes}
-//             onChange={(e) => setAdditionalNotes(e.target.value)}
-//           />
-//           <PreOrderSubmitBtn type="submit" id="preOrderSubmitBtn">
-//             Submit Pre-order
-//           </PreOrderSubmitBtn>
-//         </AdditionalNotesForm>
-//       </AdditionalNotes>
-//     </TabPane>
-//   );
-// };
-
-// export default PreOrderTab;
 
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
@@ -210,15 +5,16 @@ import styled from "styled-components";
 const TabPane = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 2rem;
+  /* padding: 2rem; */
   font-family: sans-serif;
+  width: 100%;
 `;
 
 const PreOrderTitle = styled.span`
-  color: #2c3e50;
+  color: var(--primary-color);
   font-weight: 700;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
 `;
 
 const OrderedItemList = styled.div`
@@ -295,7 +91,9 @@ const AdditionalNotes = styled.div`
 
 const AdditionalNotesTextarea = styled.textarea`
   padding: 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--light-gray);
+  border-radius: 0.3rem;
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
   width: 100%;
   height: 100px;
   resize: none;

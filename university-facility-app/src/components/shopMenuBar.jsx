@@ -195,7 +195,7 @@ useEffect(() => {
         )}
         {activeTab === "Reviews" && <div>This is the reviews content</div>}
         {activeTab === "Pre-Order" && (
-          <PreOrderTab/>
+          <PreOrderTab style={{marginTop:"0px"}}/>
         )}
       </TabContent>
     </TabContainer>

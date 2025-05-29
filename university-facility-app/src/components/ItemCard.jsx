@@ -185,7 +185,7 @@ const DeleteButton = styled.button`
   font-size: 1.3rem;
   cursor: pointer;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-  z-index: 100;
+  z-index: 1;
 `;
 
 // const ItemCard = ({
