@@ -151,6 +151,7 @@ const [preOrderedItems, setPreOrderedItems] = useState([]);
 
 
   const handlePreOrderChange = (action, item) => {
+    console.log(action , item);
   if (action === "add") {
     setPreOrderItemCount(prevCount => prevCount + 1);
     setPreOrderedItems(prev => [...prev, item]);
@@ -195,7 +196,7 @@ useEffect(() => {
         )}
         {activeTab === "Reviews" && <div>This is the reviews content</div>}
         {activeTab === "Pre-Order" && (
-          <PreOrderTab PreOrderItems={preOrderedItems}/>
+          <PreOrderTab PreOrderItems={preOrderedItems} setPreOrderedItems={handlePreOrderChange}/>
         )}
       </TabContent>
     </TabContainer>

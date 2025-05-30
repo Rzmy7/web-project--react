@@ -96,6 +96,7 @@ const AdditionalNotes = styled.div`
 `;
 
 const AdditionalNotesTextarea = styled.textarea`
+margin-top: 1rem;
   padding: 0.5rem;
   border: 1px solid var(--light-gray);
   border-radius: 0.3rem;
@@ -132,7 +133,7 @@ const formatCurrency = (value) => {
 };
 
 
-const PreOrderTab = ({ PreOrderItems = [] }) => {
+const PreOrderTab = ({ PreOrderItems = [] ,setPreOrderedItems}) => {
   const initializedItems = PreOrderItems.map(item => ({
     ...item,
     quantity: item.quantity || 1,
@@ -168,8 +169,9 @@ const PreOrderTab = ({ PreOrderItems = [] }) => {
     );
   };
 
-  const handleRemoveItem = id => {
-    setOrderedItems(prev => prev.filter(item => item.id !== id));
+  const handleRemoveItem = (item) => {
+    setOrderedItems(prev => prev.filter(i => i.id !== item.id));
+    setPreOrderedItems("remove",item);
   };
 
   const handleSubmit = e => {
@@ -194,7 +196,7 @@ const PreOrderTab = ({ PreOrderItems = [] }) => {
         {orderedItems.length === 0 && <p>No items added yet.</p>}
         {orderedItems.map(item => (
           <OrderedItem key={item.id}>
-            <RemoveButton onClick={() => handleRemoveItem(item.id)}>✕</RemoveButton>
+            <RemoveButton onClick={() => handleRemoveItem(item)}>✕</RemoveButton>
             <OrderedItemName>{item.name}</OrderedItemName>
             <OrderedItemDetails>
               <OrderedItemPrice>
