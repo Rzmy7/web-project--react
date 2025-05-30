@@ -26,3 +26,5 @@ dist-ssr
 
 #passwords and senstial data
 .env
+
+/node_modules

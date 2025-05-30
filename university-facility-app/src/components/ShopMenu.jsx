@@ -33,13 +33,19 @@ const MenuItemsGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   gap: 1.5rem;
   min-width: 10rem;
+
+  @media (max-width:768px) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
 `;
 
 const MenuTabContent = ({
   categories,
   onAddToOrder,
   isSelected,
-  preOrderNumHandle,
+  preOrderNumHandle,preOrderedItems,
 }) => {
   return (
     <TabPane className={isSelected ? "selected" : ""}>
@@ -64,7 +70,8 @@ const MenuTabContent = ({
                   name={item.name}
                   price={item.price}
                   status={item.status}
-                  preOrderNumHandle={preOrderNumHandle}
+                  preOrderChangeHandle={preOrderNumHandle}
+                  isPreOrdered={preOrderedItems.some(i => i.id === item.id)}
                   onAddToOrder={() => onAddToOrder(item.id)}
                 />
               ))}
