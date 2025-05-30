@@ -42,7 +42,7 @@ const MenuItemsGrid = styled.div`
 `;
 
 const MenuTabContent = ({
-  categories,
+  categories=[],
   onAddToOrder,
   isSelected,
   preOrderNumHandle,preOrderedItems,

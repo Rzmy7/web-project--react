@@ -67,9 +67,9 @@ const Nav = styled.nav`
     width: 100%;
     margin-top: 1rem;
     max-height: ${props => (props.isOpen ? '500px' : '0')};
-    opacity: ${props => (props.isOpen ? '1' : '0')};
-    visibility: ${props => (props.isOpen ? 'visible' : 'hidden')};
-    transform: ${props => (props.isOpen ? 'translateY(0)' : 'translateY(-20px)')};
+    opacity: ${props => (props.$isOpen ? '1' : '0')};
+    visibility: ${props => (props.$isOpen ? 'visible' : 'hidden')};
+    transform: ${props => (props.$isOpen ? 'translateY(0)' : 'translateY(-20px)')};
     transition: max-height 0.4s ease, opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
     overflow: hidden;
     ul {
@@ -80,10 +80,10 @@ const Nav = styled.nav`
         a {
           font-size: 1.1rem;
         }
-        opacity: ${props => (props.isOpen ? '1' : '0')};
-        transform: ${props => (props.isOpen ? 'translateY(0)' : 'translateY(-30px)')};
+        opacity: ${props => (props.$isOpen ? '1' : '0')};
+        transform: ${props => (props.$isOpen ? 'translateY(0)' : 'translateY(-30px)')};
         transition: opacity 0.3s ease, transform 0.3s ease;
-        transition-delay: ${props => (props.isOpen ? 'calc(0.1s * var(--index))' : '0s')};
+        transition-delay: ${props => (props.$isOpen ? 'calc(0.1s * var(--index))' : '0s')};
       }
     }
   }
@@ -98,10 +98,10 @@ const AuthButtons = styled.div`
     margin-top: 1rem;
     gap: 0.5rem;
     justify-content: space-between;
-    max-height: ${props => (props.isOpen ? '500px' : '0')};
-    opacity: ${props => (props.isOpen ? '1' : '0')};
-    visibility: ${props => (props.isOpen ? 'visible' : 'hidden')};
-    transform: ${props => (props.isOpen ? 'translateY(0)' : 'translateY(-20px)')};
+    max-height: ${props => (props.$isOpen ? '500px' : '0')};
+    opacity: ${props => (props.$isOpen ? '1' : '0')};
+    visibility: ${props => (props.$isOpen ? 'visible' : 'hidden')};
+    transform: ${props => (props.$isOpen ? 'translateY(0)' : 'translateY(-20px)')};
     transition: max-height 0.4s ease 0.1s, opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s, visibility 0.4s ease 0.1s;
     overflow: hidden;
   }
@@ -173,15 +173,15 @@ const MobileMenuBtn = styled.button`
     border-radius: 2px;
 
     &:nth-child(1) {
-      transform: ${props => (props.isOpen ? 'rotate(45deg) translate(5px, 5px)' : 'translateY(-8px)')};
+      transform: ${props => (props.$isOpen ? 'rotate(45deg) translate(5px, 5px)' : 'translateY(-8px)')};
     }
 
     &:nth-child(2) {
-      opacity: ${props => (props.isOpen ? '0' : '1')};
+      opacity: ${props => (props.$isOpen ? '0' : '1')};
     }
 
     &:nth-child(3) {
-      transform: ${props => (props.isOpen ? 'rotate(-45deg) translate(7px, -7px)' : 'translateY(8px)')};
+      transform: ${props => (props.$isOpen ? 'rotate(-45deg) translate(7px, -7px)' : 'translateY(8px)')};
     }
   }
 `;
@@ -202,22 +202,22 @@ function HeaderComponent() {
             UoM<span>Facilities</span>
           </h1>
         </Logo>
-        <MobileMenuBtn id="mobileMenuBtn" isOpen={isMenuOpen} onClick={toggleMenu}>
+        <MobileMenuBtn id="mobileMenuBtn" $isOpen={isMenuOpen} onClick={toggleMenu}>
           <span></span>
           <span></span>
           <span></span>
         </MobileMenuBtn>
-        <Nav id="mainNav" isOpen={isMenuOpen}>
+        <Nav id="mainNav" $isOpen={isMenuOpen}>
           <ul>
-            {["Home", "Facilities", "About", "Review", "UoMFacilities", "UoMFacHome"].map((item, index) => (
-              <li key={item} style={{ '--index': index }}>
+            {["Home", "Facilities", "About", "Review", "UoMFacilities", "UoMFacHome"].map((item) => (
+              <li key={item} >
                 <Link to={`/${item === "Home" ? "" : item}`}>{item}</Link>
               </li>
             ))}
           </ul>
         </Nav>
-        <AuthButtons id="authButtons" isOpen={isMenuOpen}>
-          <LoginBtn id="loginBtn">Login</LoginBtn>
+        <AuthButtons id="authButtons" $isOpen={isMenuOpen}>
+        <LoginBtn id="loginBtn">Login</LoginBtn>
           <SignupBtn id="signupBtn">Sign Up</SignupBtn>
         </AuthButtons>
       </HeaderContainer>

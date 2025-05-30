@@ -99,6 +99,7 @@
 
 import styled from "styled-components";
 import "../index.css";
+import formatCurrency from "../utils/CurrencyFormat"
 
 // Styles
 const MenuItem = styled.div`
@@ -188,46 +189,6 @@ const DeleteButton = styled.button`
   z-index: 1;
 `;
 
-// const ItemCard = ({
-//   id,
-//   name,
-//   price,
-//   status,
-//   isPreOrdered,
-//   preOrderChangeHandle
-// }) => {
-//   const isAvailable = status === "available";
-//   const finishedClass = !isAvailable || isPreOrdered ? "finished" : "";
-
-//   const clickedPreOrderBtn = () => {
-//     preOrderChangeHandle("add", id);
-//   };
-
-//   const clickedDeleteBtn = () => {
-//     preOrderChangeHandle("remove", id);
-//   };
-
-//   return (
-//     <MenuItem id={id} className={finishedClass}>
-//       {isPreOrdered && (
-//         <DeleteButton onClick={clickedDeleteBtn} title="Remove from order">
-//           ❌
-//         </DeleteButton>
-//       )}
-//       <ItemName>{name}</ItemName>
-//       <ItemPrice>{price}</ItemPrice>
-//       <ItemStatus className={status}>
-//         {isAvailable ? "Available" : "Unavailable"}
-//       </ItemStatus>
-//       <AddOrderButton
-//         onClick={clickedPreOrderBtn}
-//         disabled={!isAvailable || isPreOrdered}
-//       >
-//         {isPreOrdered ? "Added" : "Add to Order"}
-//       </AddOrderButton>
-//     </MenuItem>
-//   );
-// };
 
 const ItemCard = ({
   id,
@@ -256,7 +217,7 @@ const ItemCard = ({
         </DeleteButton>
       )}
       <ItemName className="item-name">{name}</ItemName>
-      <ItemPrice className="item-price">{price}</ItemPrice>
+      <ItemPrice className="item-price">{formatCurrency(parseFloat(price))}</ItemPrice>
       <ItemStatus className={status}>
         {status === "available" ? "Available" : "Unavailable"}
       </ItemStatus>
@@ -271,44 +232,5 @@ const ItemCard = ({
   );
 };
 
-// // Component
-// const ItemCard = ({ id, name, price, status, preOrderNumHandle }) => {
-//   const [isAdded, setIsAdded] = useState(false);
-//   const isAvailable = status === "available";
-//   const finishedClass = !isAvailable || isAdded ? "finished" : "";
-
-//   const clickedPreOrderBtn = () => {
-//     preOrderNumHandle("add"); // signal parent something was added
-//     setIsAdded(true);
-//   };
-
-//   const clickedDeleteBtn = () => {
-//     preOrderNumHandle("remove"); // signal parent something was removed
-//     setIsAdded(false);
-//   };
-
-//   return (
-//     <MenuItem id={id} className={finishedClass}>
-//       {/* Delete icon button only shows after item is added */}
-//       {isAdded && (
-//         <DeleteButton onClick={clickedDeleteBtn} title="Remove from order">
-//           X
-//         </DeleteButton>
-//       )}
-//       <ItemName className="item-name">{name}</ItemName>
-//       <ItemPrice className="item-price">{price}</ItemPrice>
-//       <ItemStatus className={`${status}`}>
-//         {isAvailable ? "Available" : "Unavailable"}
-//       </ItemStatus>
-//       <AddOrderButton
-//         className="add-order-btn"
-//         onClick={clickedPreOrderBtn}
-//         disabled={!isAvailable || isAdded}
-//       >
-//         {isAdded ? "Added" : "Add to Order"}
-//       </AddOrderButton>
-//     </MenuItem>
-//   );
-// };
 
 export default ItemCard;

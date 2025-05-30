@@ -5,6 +5,7 @@ import About from "./pages/About";
 import Navbar from "./components/Navbar";
 import Review from "./pages/Review";
 import UOMFacilities from "./pages/ufshop";
+import ShopPage from "./pages/ufshop";
 import UOMFacHome from "./pages/ufhome";
 import styled from "styled-components";
 import Footer from "./components/Footer";
@@ -22,7 +23,7 @@ const MainContent = styled.div`
   @media (max-width: 768px) {
     padding: 0 1rem;
     display: flex;
-  justify-self: center;
+    justify-self: center;
   }
 `;
 
@@ -38,14 +39,11 @@ function App() {
           <Route path="/review" element={<Review />} />
           <Route
             path="/UoMFacilities"
+            element={<UOMFacilities />}/>
+          <Route
+            path="/shopItems/:shopName"
             element={
-              <UOMFacilities
-                shopName="Coffee Haven"
-                status="Open"
-                openingTime="8:00 AM"
-                closingTime="6:00 PM"
-                location="123 Main St, City"
-              />
+              <ShopPage/>
             }
           />
           <Route path="/UOMFacHome" element={<UOMFacHome />} />
