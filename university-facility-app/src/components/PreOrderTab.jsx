@@ -108,7 +108,7 @@ margin-top: 1rem;
 
 const PreOrderSubmitBtn = styled.button`
   margin-top: 1rem;
-  background-color: #27ae60;
+  background-color: var(--success);
   color: white;
   padding: 0.7rem 1.5rem;
   border: none;
@@ -120,7 +120,7 @@ const TotalDisplay = styled.div`
   margin-top: 1.5rem;
   font-weight: 600;
   text-align: right;
-  color: #34495e;
+  color: var(--primary-color);
 `;
 
 // Currency formatter for LKR

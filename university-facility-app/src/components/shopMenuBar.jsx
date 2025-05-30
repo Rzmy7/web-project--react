@@ -31,7 +31,7 @@ const TabButton = styled.button`
   }
 
   ${(props) =>
-    props.active
+    props.$active
       ? `
     color: var(--primary-color);
     font-weight: 500;
@@ -83,67 +83,67 @@ const PreOrderBadge = styled.span`
   align-items: center;
 `;
 
-const TabNavigationComponent = () => {
+const TabNavigationComponent = ({menuData}) => {
   const [activeTab, setActiveTab] = useState("Menu");
   const [preOrderItemCount, setPreOrderItemCount] = useState(0); // State to track pre-order items
   const tabs = ["Menu", "Reviews", "Pre-Order"];
 
-  const menuData = [
-    {
-      id: "cat-1",
-      name: "Main Dishes",
-      items: [
-        {
-          id: "FD001",
-          name: "Kabilithi One",
-          price: "2300",
-          status: "available",
-        },
-        {
-          id: "FD002",
-          name: "Prawn Curry",
-          price: "900",
-          status: "unavailable",
-        },
-        {
-          id: "FD003",
-          name: "Chicken Noodles",
-          price: "280",
-          status: "available",
-        },
-        {
-          id: "FD004",
-          name: "Veggie Burger",
-          price: "200",
-          status: "available",
-        },
-      ],
-    },
-    {
-      id: "cat-2",
-      name: "Drinks",
-      items: [
-        {
-          id: "DR001",
-          name: "itemNamebima",
-          price: "150",
-          status: "available",
-        },
-        {
-          id: "DR002",
-          name: "Orange Juice",
-          price: "700",
-          status: "available",
-        },
-        {
-          id: "DR003",
-          name: "Coca-Cola",
-          price: "305",
-          status: "unavailable",
-        },
-      ],
-    },
-  ];
+  // const menuData = [
+  //   {
+  //     id: "cat-1",
+  //     name: "Main Dishes",
+  //     items: [
+  //       {
+  //         id: "FD001",
+  //         name: "Kabilithi One",
+  //         price: "2300",
+  //         status: "available",
+  //       },
+  //       {
+  //         id: "FD002",
+  //         name: "Prawn Curry",
+  //         price: "900",
+  //         status: "unavailable",
+  //       },
+  //       {
+  //         id: "FD003",
+  //         name: "Chicken Noodles",
+  //         price: "280",
+  //         status: "available",
+  //       },
+  //       {
+  //         id: "FD004",
+  //         name: "Veggie Burger",
+  //         price: "200",
+  //         status: "available",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     id: "cat-2",
+  //     name: "Drinks",
+  //     items: [
+  //       {
+  //         id: "DR001",
+  //         name: "itemNamebima",
+  //         price: "150",
+  //         status: "available",
+  //       },
+  //       {
+  //         id: "DR002",
+  //         name: "Orange Juice",
+  //         price: "700",
+  //         status: "available",
+  //       },
+  //       {
+  //         id: "DR003",
+  //         name: "Coca-Cola",
+  //         price: "305",
+  //         status: "unavailable",
+  //       },
+  //     ],
+  //   },
+  // ];
 
 
 
@@ -174,7 +174,7 @@ useEffect(() => {
         {tabs.map((tab) => (
           <div key={tab} style={{ position: "relative" }}>
             <TabButton
-              active={activeTab === tab}
+              $active={activeTab === tab}
               onClick={() => setActiveTab(tab)}
             >
               {tab}

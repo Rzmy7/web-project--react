@@ -48,6 +48,58 @@ def get_data():
     except Exception as e:
         print(f"Error fetching data: {e}")
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/shopItems/<shop_name>', methods=['GET'])
+def get_shop_menu(shop_name):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        query = """
+        SELECT 
+            s.name AS "shopName",
+            s.status AS "status",
+            s.opentime AS "openingTime",
+            s.closetime AS "closingTime",
+            s.location AS "location",
+            COALESCE(json_agg(json_build_object(
+                'id', c.id,
+                'name', c.name,
+                'items', COALESCE(cat_items.items, '[]')
+            )) FILTER (WHERE c.id IS NOT NULL), '[]') AS menuData
+        FROM shop s
+        LEFT JOIN (
+            SELECT 
+                i.category_id::INTEGER AS category_id,
+                si.shop_id,
+                JSON_AGG(json_build_object(
+                    'id', i.item_id,
+                    'name', i.name,
+                    'price', si.price,
+                    'status', si.availability
+                )) AS items
+            FROM shopItem si
+            JOIN items i ON si.item_id = i.item_id
+            GROUP BY i.category_id, si.shop_id
+        ) AS cat_items ON cat_items.shop_id = s.shopid
+        LEFT JOIN categories c ON c.id = cat_items.category_id
+        WHERE s.name = %s
+        GROUP BY s.name, s.status, s.opentime, s.closetime, s.location;
+        """
+
+        cur.execute(query, (shop_name,))
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if not result:
+            return jsonify({'error': 'Shop not found'}), 404
+
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error fetching shop items: {e}")
+        return jsonify({'error': str(e)}), 500
+
 
 # --------- Route to Insert Shop Data via Form ---------
 @app.route('/', methods=['GET', 'POST'])
