@@ -30,7 +30,7 @@ const OrderedItem = styled.div`
 `;
 
 const OrderedItemName = styled.div`
-  font-weight: 600;
+  font-weight: 400;
 `;
 
 const OrderedItemDetails = styled.div`
@@ -40,7 +40,8 @@ const OrderedItemDetails = styled.div`
 `;
 
 const OrderedItemPrice = styled.span`
-  color: #2ecc71;
+  margin-top: 0.3rem;
+  color: var(--primary-color);
 `;
 
 const OrderedItemQuantity = styled.div`
@@ -50,36 +51,41 @@ const OrderedItemQuantity = styled.div`
 `;
 
 const OrderQuantityChanger = styled.button`
-  background-color: #ecf0f1;
-  border: 1px solid #bdc3c7;
+  background-color: transparent;
+  border: 1px solid var(--medium-gray);
   padding: 0.2rem 0.6rem;
   border-radius: 4px;
   cursor: pointer;
+  height: 1.7rem;
 
   &:hover {
-    background-color: #dcdde1;
+    background-color: var(--medium-gray);
   }
 `;
 
 const OrderQuantity = styled.input`
-  width: 3rem;
+  width: 2.5rem;
   text-align: center;
+  height: 1.7rem;
+  background-color: transparent;
+  border: 1px solid var(--medium-gray);
 `;
 
 const RemoveButton = styled.button`
   position: absolute;
-  top: 1rem;
+  top: 1.2rem;
   right: 9rem;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
+  background-color: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
   border-radius: 3px;
   font-size: 0.9rem;
   padding: 0.2rem 0.5rem;
   cursor: pointer;
 
   &:hover {
-    background-color: #c0392b;
+    background-color: var(--danger);
+    color: var(--secondary-color);
   }
 
   
@@ -125,8 +131,14 @@ const formatCurrency = (value) => {
   }).format(value);
 };
 
-const PreOrderTab = () => {
-  const [orderedItems, setOrderedItems] = useState([]);
+
+const PreOrderTab = ({ PreOrderItems = [] }) => {
+  const initializedItems = PreOrderItems.map(item => ({
+    ...item,
+    quantity: item.quantity || 1,
+  }));
+
+  const [orderedItems, setOrderedItems] = useState(initializedItems);
   const [additionalNotes, setAdditionalNotes] = useState("");
 
   // Load from localStorage on mount
@@ -147,8 +159,8 @@ const PreOrderTab = () => {
   }, [additionalNotes]);
 
   const handleQuantityChange = (id, delta) => {
-    setOrderedItems((prevItems) =>
-      prevItems.map((item) =>
+    setOrderedItems(prevItems =>
+      prevItems.map(item =>
         item.id === id
           ? { ...item, quantity: Math.max(1, item.quantity + delta) }
           : item
@@ -156,11 +168,11 @@ const PreOrderTab = () => {
     );
   };
 
-  const handleRemoveItem = (id) => {
-    setOrderedItems((prev) => prev.filter((item) => item.id !== id));
+  const handleRemoveItem = id => {
+    setOrderedItems(prev => prev.filter(item => item.id !== id));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
     console.log("🛒 Ordered Items:", orderedItems);
     console.log("📝 Additional Notes:", additionalNotes);
@@ -174,42 +186,32 @@ const PreOrderTab = () => {
     }, 0);
   };
 
-  // SAMPLE DATA to pre-fill for demo
-  useEffect(() => {
-    if (orderedItems.length === 0) {
-      setOrderedItems([
-        { id: "FD001", name: "Kabilithi One", price: "450.00", quantity: 2 },
-        { id: "DR002", name: "Orange Juice", price: "200.00", quantity: 1 },
-      ]);
-    }
-  }, [orderedItems.length]);
-
   return (
     <TabPane>
       <PreOrderTitle>Your Pre-order</PreOrderTitle>
 
       <OrderedItemList>
         {orderedItems.length === 0 && <p>No items added yet.</p>}
-        {orderedItems.map((item) => (
+        {orderedItems.map(item => (
           <OrderedItem key={item.id}>
-            <RemoveButton onClick={() => handleRemoveItem(item.id)}>
-              ✕
-            </RemoveButton>
+            <RemoveButton onClick={() => handleRemoveItem(item.id)}>✕</RemoveButton>
             <OrderedItemName>{item.name}</OrderedItemName>
             <OrderedItemDetails>
               <OrderedItemPrice>
                 {formatCurrency(parseFloat(item.price))}
               </OrderedItemPrice>
               <OrderedItemQuantity>
-                <OrderQuantityChanger
-                  onClick={() => handleQuantityChange(item.id, -1)}
-                >
+                <OrderQuantityChanger onClick={() => handleQuantityChange(item.id, -1)}>
                   -
                 </OrderQuantityChanger>
-                <OrderQuantity type="number" value={item.quantity} readOnly />
-                <OrderQuantityChanger
-                  onClick={() => handleQuantityChange(item.id, 1)}
-                >
+
+                <OrderQuantity
+                  type="number"
+                  value={item.quantity}
+                  readOnly
+                />
+
+                <OrderQuantityChanger onClick={() => handleQuantityChange(item.id, 1)}>
                   +
                 </OrderQuantityChanger>
               </OrderedItemQuantity>
@@ -235,5 +237,8 @@ const PreOrderTab = () => {
     </TabPane>
   );
 };
+
+
+
 
 export default PreOrderTab;

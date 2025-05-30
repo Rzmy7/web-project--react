@@ -1,114 +1,3 @@
-// import React from "react";
-// import styled from "styled-components";
-// import FacilityCard from "./FacilityCard";
-
-// const FacilitiesContainer = styled.div`
-//   width: 100%;
-// `;
-
-// const FacilitiesGrid = styled.div`
-//   display: grid;
-//   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-//   gap: 1.5rem;
-//   margin-bottom: 2rem;
-//   width: 100%;
-// `;
-
-// function Facilities({ facilityType, status, searchQuery }) {
-//   const facilities = [
-//     {
-//       name: "Godayata",
-//       type: "Canteen",
-//       type2: "",
-//       type3: "",
-//       status: "Open",
-//       picture:
-//         "https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg",
-//       location: "Near Main Gate",
-//       openTime: "7.00",
-//       closeTime: "7.00",
-//     },
-//     {
-//       name: "Civil",
-//       type: "Canteen",
-//       type3: "",
-//       type2: "Juice Bar",
-//       status: "Open",
-//       picture:
-//         "https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg",
-//       location: "Near Main Gate",
-//       openTime: "7.00",
-//       closeTime: "7.00",
-//     },
-//     {
-//       name: "L",
-//       type: "Canteen",
-//       type2: "",
-//       type3: "",
-//       status: "Open",
-//       picture:
-//         "https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg",
-//       location: "Near Main Gate",
-//       openTime: "7.00",
-//       closeTime: "7.00",
-//     },
-//     {
-//       name: "GodaUda",
-//       type: "Canteen",
-//       type2: "Juice Bar",
-//       type3: "",
-//       status: "Open",
-//       picture:
-//         "https://kairosinternationalschool.com/wp-content/uploads/2023/06/WhatsApp-Image-2023-06-12-at-2.31.20-PM-1.jpeg",
-//       location: "Near Main Gate",
-//       openTime: "7.00",
-//       closeTime: "7.00",
-//     },
-//     {
-//       name: "Wala",
-//       type: "Canteen",
-//       type2: "",
-//       type3: "",
-//       status: "Closed",
-//       picture:
-//         "https://lh3.googleusercontent.com/gps-cs-s/AC9h4no87lWMi4Rg15JFx3TWzlZbJqiNwntWCzUMQi7ZJftoAwi4W7nJ8b87Ma0bBPYHrqRXFe0lf9jcMsjjXWPiLZEoTdRT1orNVpKJwOZNmBlE6YtJgLl5awnqR6aiD5pYT8WAfzxU=s1360-w1360-h1020-rw",
-//       location: "Near Main Gate",
-//       openTime: "7.00",
-//       closeTime: "7.00",
-//     },
-//   ];
-
-//   const filteredFacilities = facilities.filter((facility) => {
-//     const matchesType =
-//       facilityType === "all" ||
-//       facility.type.toLowerCase().includes(facilityType.toLowerCase()) ||
-//       facility.type2.toLowerCase().includes(facilityType.toLowerCase());
-//     const matchesStatus =
-//       status === "all" ||
-//       facility.status.toLowerCase() === status.toLowerCase();
-//     const matchesQuery =
-//       searchQuery === "" ||
-//       facility.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//       facility.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//       facility.location.toLowerCase().includes(searchQuery.toLowerCase());
-
-//     return matchesType && matchesStatus && matchesQuery;
-//   });
-
-//   return (
-//     <FacilitiesContainer>
-//       <FacilitiesGrid>
-//         {filteredFacilities.map((f) => (
-//           <FacilityCard key={f.name} {...f} />
-//         ))}
-//       </FacilitiesGrid>
-//     </FacilitiesContainer>
-//   );
-// }
-
-// export default Facilities;
-
-
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import FacilityCard from "./FacilityCard";
@@ -165,6 +54,75 @@ function Facilities({ facilityType, status, searchQuery }) {
       setFacilities(updatedData);
     });
 
+
+  // useEffect(() => {
+  //   const cachedData = sessionStorage.getItem("facilities");
+
+  //   if (cachedData) {
+  //     try {
+  //       const parsed = JSON.parse(cachedData);
+  //       setFacilities(parsed);
+  //       setLoading(false); // Use cached data, don't fetch
+  //       console.log("Loaded facilities from cache");
+  //       return;
+  //     } catch (e) {
+  //       console.error("Error parsing cache:", e);
+  //     }
+  //   }
+
+  //   // If no cache, fetch from server
+  //   fetch("http://127.0.0.1:8001/api/data")
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setFacilities(data);
+  //       sessionStorage.setItem("facilities", JSON.stringify(data));
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error fetching facilities:", err);
+  //     })
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  // }, []);
+
+  // // Real-time updates with Socket.IO
+  // useEffect(() => {
+  //   const socket = io("http://127.0.0.1:8001");
+
+  //   socket.on("connect", () => {
+  //     console.log("Connected to Socket.IO server");
+  //   });
+
+  //   socket.on("new_entry", (data) => {
+  //     setFacilities((prev) => {
+  //       const updated = [...prev, data];
+  //       sessionStorage.setItem("facilities", JSON.stringify(updated));
+  //       return updated;
+  //     });
+  //   });
+
+  //   socket.on("shop_data", (updatedData) => {
+  //     setFacilities(updatedData);
+  //     sessionStorage.setItem("facilities", JSON.stringify(updatedData));
+  //   });
+
+  //   socket.on("entry_deleted", (deletedId) => {
+  //     setFacilities((prev) => {
+  //       const updated = prev.filter((item) => item.id !== deletedId);
+  //       sessionStorage.setItem("facilities", JSON.stringify(updated));
+  //       return updated;
+  //     });
+  //   });
+
+  //   socket.on("entry_updated", (updatedItem) => {
+  //     setFacilities((prev) => {
+  //       const updated = prev.map((item) =>
+  //         item.id === updatedItem.id ? updatedItem : item
+  //       );
+  //       sessionStorage.setItem("facilities", JSON.stringify(updated));
+  //       return updated;
+  //     });
+  //   });
     // Clean up on unmount
     return () => {
       socket.disconnect();
@@ -174,18 +132,25 @@ function Facilities({ facilityType, status, searchQuery }) {
   const filteredFacilities = facilities.filter((facility) => {
     const matchesType =
       facilityType === "all" ||
-      (facility.type && facility.type.toLowerCase().includes(facilityType.toLowerCase())) ||
-      (facility.type2 && facility.type2.toLowerCase().includes(facilityType.toLowerCase())) ||
-      (facility.type3 && facility.type3.toLowerCase().includes(facilityType.toLowerCase()));
+      (facility.type &&
+        facility.type.toLowerCase().includes(facilityType.toLowerCase())) ||
+      (facility.type2 &&
+        facility.type2.toLowerCase().includes(facilityType.toLowerCase())) ||
+      (facility.type3 &&
+        facility.type3.toLowerCase().includes(facilityType.toLowerCase()));
 
     const matchesStatus =
-      status === "all" || facility.status?.toLowerCase() === status.toLowerCase();
+      status === "all" ||
+      facility.status?.toLowerCase() === status.toLowerCase();
 
     const matchesQuery =
       searchQuery === "" ||
-      (facility.name && facility.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (facility.type && facility.type.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (facility.location && facility.location.toLowerCase().includes(searchQuery.toLowerCase()));
+      (facility.name &&
+        facility.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (facility.type &&
+        facility.type.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (facility.location &&
+        facility.location.toLowerCase().includes(searchQuery.toLowerCase()));
 
     return matchesType && matchesStatus && matchesQuery;
   });

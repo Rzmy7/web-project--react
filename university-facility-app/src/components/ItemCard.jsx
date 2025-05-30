@@ -99,6 +99,7 @@
 
 import styled from "styled-components";
 import "../index.css";
+import formatCurrency from "../utils/CurrencyFormat"
 
 // Styles
 const MenuItem = styled.div`
@@ -256,7 +257,7 @@ const ItemCard = ({
         </DeleteButton>
       )}
       <ItemName className="item-name">{name}</ItemName>
-      <ItemPrice className="item-price">{price}</ItemPrice>
+      <ItemPrice className="item-price">{formatCurrency(parseFloat(price))}</ItemPrice>
       <ItemStatus className={status}>
         {status === "available" ? "Available" : "Unavailable"}
       </ItemStatus>

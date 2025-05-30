@@ -96,25 +96,25 @@ const TabNavigationComponent = () => {
         {
           id: "FD001",
           name: "Kabilithi One",
-          price: "chikibili 1",
+          price: "2300",
           status: "available",
         },
         {
           id: "FD002",
           name: "Prawn Curry",
-          price: "chikibili 3.50",
+          price: "900",
           status: "unavailable",
         },
         {
           id: "FD003",
           name: "Chicken Noodles",
-          price: "chikibili 2.75",
+          price: "280",
           status: "available",
         },
         {
           id: "FD004",
           name: "Veggie Burger",
-          price: "chikibili 2.00",
+          price: "200",
           status: "available",
         },
       ],
@@ -126,19 +126,19 @@ const TabNavigationComponent = () => {
         {
           id: "DR001",
           name: "itemNamebima",
-          price: "chikibili 1.50",
+          price: "150",
           status: "available",
         },
         {
           id: "DR002",
           name: "Orange Juice",
-          price: "chikibili 0.75",
+          price: "700",
           status: "available",
         },
         {
           id: "DR003",
           name: "Coca-Cola",
-          price: "chikibili 1.00",
+          price: "305",
           status: "unavailable",
         },
       ],
@@ -195,7 +195,7 @@ useEffect(() => {
         )}
         {activeTab === "Reviews" && <div>This is the reviews content</div>}
         {activeTab === "Pre-Order" && (
-          <PreOrderTab style={{marginTop:"0px"}}/>
+          <PreOrderTab PreOrderItems={preOrderedItems}/>
         )}
       </TabContent>
     </TabContainer>
