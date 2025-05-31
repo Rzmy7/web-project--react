@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import FacilityCard from "./FacilityCard";
 import { io } from "socket.io-client";
+import LoadingScreen from "../utils/Loading";
 
 const FacilitiesContainer = styled.div`
   width: 100%;
@@ -85,7 +86,7 @@ function Facilities({ facilityType, status, searchQuery }) {
   });
 
   if (loading) {
-    return <p>Loading facilities...</p>;
+    return <LoadingScreen/>;
   }
 
   return (
@@ -100,3 +101,6 @@ function Facilities({ facilityType, status, searchQuery }) {
 }
 
 export default Facilities;
+
+
+
