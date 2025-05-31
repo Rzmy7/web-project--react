@@ -16,7 +16,6 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    justifyItems:"center",
     alignItems: "center",
     backgroundColor: "var(--secondary-color)",
   },
