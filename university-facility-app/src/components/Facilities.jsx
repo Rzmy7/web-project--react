@@ -3,7 +3,6 @@ import styled from "styled-components";
 import FacilityCard from "./FacilityCard";
 import { io } from "socket.io-client";
 import LoadingScreen from "../utils/Loading";
-import FacilityDetails from "../pages/ViewShop";
 
 const FacilitiesContainer = styled.div`
   width: 100%;
@@ -97,7 +96,6 @@ function Facilities({ facilityType, status, searchQuery }) {
           <FacilityCard key={f.shopid || index} {...f} />
         ))}
       </FacilitiesGrid>
-      <FacilityDetails/>
     </FacilitiesContainer>
   );
 }

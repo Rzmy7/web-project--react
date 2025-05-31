@@ -10,6 +10,7 @@ import UOMFacHome from "./pages/ufhome";
 import styled from "styled-components";
 import Footer from "./components/Footer";
 import "./index.css";
+import FacilityDetails from "./pages/ViewShop";
 
 const MainContent = styled.div`
   max-width: 1500px;
@@ -37,16 +38,10 @@ function App() {
           <Route path="/facilities" element={<Facilities />} />
           <Route path="/about" element={<About />} />
           <Route path="/review" element={<Review />} />
-          <Route
-            path="/UoMFacilities"
-            element={<UOMFacilities />}/>
-          <Route
-            path="/shopItems/:shopName"
-            element={
-              <ShopPage/>
-            }
-          />
+          <Route path="/UoMFacilities" element={<UOMFacilities />} />
+          <Route path="/shopItems/:shopName" element={<ShopPage />} />
           <Route path="/UOMFacHome" element={<UOMFacHome />} />
+          <Route path="/FacilityDetails" element={<FacilityDetails />} />
         </Routes>
       </MainContent>
       <Footer />

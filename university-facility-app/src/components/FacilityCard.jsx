@@ -1,7 +1,6 @@
-
-import React from 'react';
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import React from "react";
+import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 const FacilityCardContainer = styled.div`
   background-color: white;
@@ -9,7 +8,7 @@ const FacilityCardContainer = styled.div`
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
 
   &:hover {
     transform: translateY(-2px);
@@ -42,7 +41,7 @@ const FacilityStatus = styled.span`
   font-size: 0.8rem;
   font-weight: 600;
   color: #f8f9fa;
-  background-color: ${({ isOpen }) => (isOpen ? '#27ae60' : '#e74c3c')};
+  background-color: ${({ isOpen }) => (isOpen ? "#27ae60" : "#e74c3c")};
 `;
 
 const FacilityContent = styled.div`
@@ -101,32 +100,52 @@ const FacilityBtn = styled.button`
   }
 `;
 
-function FacilityCard({ name, type,type2, type3,status, picture, location, opentime, closetime }) {
+function FacilityCard({
+  name,
+  type,
+  type2,
+  type3,
+  status,
+  picture,
+  location,
+  opentime,
+  closetime,
+}) {
   const AndNeeded = (e) => {
-  if (e) {
-    return '&';
-  } else {
-    return '';
-  }
-};
+    if (e) {
+      return "&";
+    } else {
+      return "";
+    }
+  };
   return (
     <FacilityCardContainer data-type={type} data-status={status} id={name}>
       <FacilityImage>
         <FacilityImgTag src={picture} alt={name} />
-        <FacilityStatus isOpen={status === 'Open'}>{status}</FacilityStatus>
+        <FacilityStatus isOpen={status === "Open"}>{status}</FacilityStatus>
       </FacilityImage>
       <FacilityContent>
-        <FacilityType>{type} {AndNeeded(type2)} {type2} {AndNeeded(type3)} {type3}</FacilityType>
+        <FacilityType>
+          {type} {AndNeeded(type2)} {type2} {AndNeeded(type3)} {type3}
+        </FacilityType>
         <FacilityName>{name}</FacilityName>
         <FacilityDetails>
-          <FacilityDetailsText>Hours: {opentime} - {closetime}</FacilityDetailsText>
+          <FacilityDetailsText>
+            Hours: {opentime} - {closetime}
+          </FacilityDetailsText>
           <FacilityDetailsText>Location: {location}</FacilityDetailsText>
         </FacilityDetails>
         <FacilityActions>
-          <FacilityBtn color="#1a3064" hoverColor="#0f1e42" data-id={name}>
-            View Details
-          </FacilityBtn>
-          <Link to={`/shopItems/${name}`}><FacilityBtn color="#e67e22" hoverColor="#d35400">Pre-order</FacilityBtn></Link>
+          <Link to={`/FacilityDetails`}>
+            <FacilityBtn color="#1a3064" hoverColor="#0f1e42" data-id={name}>
+              View Details
+            </FacilityBtn>
+          </Link>
+          <Link to={`/shopItems/${name}`}>
+            <FacilityBtn color="#e67e22" hoverColor="#d35400">
+              Pre-order
+            </FacilityBtn>
+          </Link>
         </FacilityActions>
       </FacilityContent>
     </FacilityCardContainer>
