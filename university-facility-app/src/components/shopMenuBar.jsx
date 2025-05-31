@@ -86,7 +86,7 @@ const PreOrderBadge = styled.span`
 const TabNavigationComponent = ({menuData}) => {
   const [activeTab, setActiveTab] = useState("Menu");
   const [preOrderItemCount, setPreOrderItemCount] = useState(0); // State to track pre-order items
-  const tabs = ["Menu", "Reviews", "Pre-Order"];
+  const tabs = ["Menu", "Alerts", "Pre-Order"];
 
   // const menuData = [
   //   {
@@ -194,7 +194,7 @@ useEffect(() => {
             isSelected={true}
           />
         )}
-        {activeTab === "Reviews" && <div>This is the reviews content</div>}
+        {activeTab === "Alerts" && <div>This is the reviews content</div>}
         {activeTab === "Pre-Order" && (
           <PreOrderTab PreOrderItems={preOrderedItems} setPreOrderedItems={handlePreOrderChange}/>
         )}
