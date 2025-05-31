@@ -194,7 +194,7 @@ useEffect(() => {
             isSelected={true}
           />
         )}
-        {activeTab === "Alerts" && <div>This is the reviews content</div>}
+        {activeTab === "Alerts" && <div>This is the alerts content</div>}
         {activeTab === "Pre-Order" && (
           <PreOrderTab PreOrderItems={preOrderedItems} setPreOrderedItems={handlePreOrderChange}/>
         )}
