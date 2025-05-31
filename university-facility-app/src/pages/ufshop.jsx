@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
 import TabNavigationComponent from "../components/shopMenuBar";
 import { io } from "socket.io-client";
+import LoadingScreen from "../utils/Loading";
 
 const Shop = styled.div`
   margin: 2rem 0;
@@ -143,8 +144,8 @@ function ShopPage() {
   }, [shopName]);
 
   // Show loading state
-  if (!shopData) return <div>Loading shop...</div>;
-console.log(shopData);
+  if (!shopData) return <div style={{width:"100%",justifyContent:"center"}}> <LoadingScreen /></div>;
+  console.log(shopData);
   const { status, openingTime, closingTime, location, menudata } = shopData;
 
   return (
