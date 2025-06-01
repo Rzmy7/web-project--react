@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Star, MapPin, Clock, AlertCircle, User, Send } from "lucide-react";
 import styled from "styled-components";
+import BackButton from "../utils/Backbutton";
 
 // Sample data - replace with real data from your backend
 const facilityData = {
@@ -340,6 +341,7 @@ const FacilityDetails = () => {
   return (
     <Container>
       <Header>
+        <BackButton />
         <FacilityImage src={facilityData.photo} alt={facilityData.name} />
         <FacilityName>{facilityData.name}</FacilityName>
         <StatusBadge isOpen={facilityData.isOpen}>

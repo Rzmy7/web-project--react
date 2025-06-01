@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useNavigate, useParams } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import TabNavigationComponent from "../components/shopMenuBar";
 import { io } from "socket.io-client";
 import LoadingScreen from "../utils/Loading";
+import BackButton from "../utils/Backbutton";
 
 const Shop = styled.div`
   margin: 2rem 0;
@@ -21,31 +22,6 @@ const ShopHeader = styled.div`
   background-color: var(--secondary-color);
   padding-bottom: 1.5rem;
   height: fit-content;
-`;
-
-const BackButton = styled.button`
-  background: transparent;
-  border: none;
-  color: var(--primary-color);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  margin-bottom: 1.7rem;
-  font-weight: 650;
-  font-size: small;
-
-  &:before {
-    content: "←";
-    margin-right: 0.5rem;
-  }
-
-  &:hover {
-    color: var(--hover-accent-color);
-  }
-
-  &:active {
-    color: var(--dark-gray);
-  }
 `;
 
 const ShopTitle = styled.div`
@@ -101,14 +77,9 @@ const ShopInfoItem = styled.div`
 const socket = io("http://127.0.0.1:8001");
 
 function ShopPage() {
-  const navigate = useNavigate();
   const { shopName } = useParams(); // shop name from URL param
   const [shopData, setShopData] = useState(null);
 
-  // Handle browser back
-  const handleBack = () => {
-    navigate(-1);
-  };
 
   // Fetch shop data on mount or when shopName changes
   useEffect(() => {
@@ -159,7 +130,7 @@ function ShopPage() {
     >
       <Shop>
         <ShopHeader>
-          <BackButton onClick={handleBack}>Back to Home</BackButton>
+          <BackButton/>
           <ShopTitle>
             <ShopNameMain>{shopName}</ShopNameMain>
             <ShopStatus $isOpen={status === "Open"}>{status}</ShopStatus>
