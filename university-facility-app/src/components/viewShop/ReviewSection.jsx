@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from "react";
 import styled from "styled-components";
-import { Star } from 'lucide-react';
-import AddReviewForm from './AddReviewForm';
+import { Star } from "lucide-react";
+import AddReviewForm from "./AddReviewForm";
 
 // Styled components
 const ReviewItem = styled.div`
@@ -60,56 +60,72 @@ const RatingNumber = styled.span`
   font-size: 2rem;
   font-weight: 700;
   color: var(--primary-color);
-`;const StarsContainer = styled.div`
+`;
+const StarsContainer = styled.div`
   display: flex;
   gap: 2px;
 `;
-
-
+const ReviewConatainer = styled.div`
+  display:flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height:15rem;
+  overflow-y: auto;
+  margin: 2rem 0;
+`;
 
 // ReviewsSection Component
-const ReviewsSection = ({rating, reviews = [] ,totalReviews}) => {
-
+const ReviewsSection = ({ rating, reviews = [], totalReviews }) => {
   // Check if reviews is an array and has items
+  const [allReviews,setReviews] = useState(reviews);
+
   const handleReviewSubmit = (review) => {
     console.log("Submitting review:", review);
-    alert("Review submitted successfully!");
+    setReviews([review, ...allReviews]);
   };
 
+  
+
   const renderStars = (rating) => {
-      return Array.from({ length: 5 }, (_, index) => (
-        <Star
-          key={index}
-          size={20}
-          fill={index < rating ? "var(--accent-color)" : "none"}
-          color={index < rating ? "var(--accent-color)" : "var(--medium-gray)"}
-        />
-      ));
-    };
+    return Array.from({ length: 5 }, (_, index) => (
+      <Star
+        key={index}
+        size={20}
+        fill={index < rating ? "var(--accent-color)" : "none"}
+        color={index < rating ? "var(--accent-color)" : "var(--medium-gray)"}
+      />
+    ));
+  };
 
   if (!Array.isArray(reviews) || reviews.length === 0) {
     return <NoReviewsMessage>No reviews available.</NoReviewsMessage>;
   }
 
   return (
-    <div style={{borderRadius:"12px" , backgroundColor:"white", padding:"1rem",boxShadow:"1px 1px 3px 1px rgba(0,0,0,0.1)"}}>
+    <div
+      style={{
+        borderRadius: "12px",
+        backgroundColor: "white",
+        padding: "1rem",
+        boxShadow: "1px 1px 3px 1px rgba(0,0,0,0.1)",
+      }}
+    >
       <InfoTitle>
-          <Star size={20} />
-          Reviews & Ratings
-        </InfoTitle>
-         <RatingOverview>
-          <RatingNumber>{rating}</RatingNumber>
-          <div>
-            <StarsContainer>
-              {renderStars(Math.floor(rating))}
-            </StarsContainer>
-            <div style={{ color: "var(--dark-gray)", fontSize: "0.9rem" }}>
-              Based on {totalReviews} reviews
-            </div>
+        <Star size={20} />
+        Reviews & Ratings
+      </InfoTitle>
+      <RatingOverview>
+        <RatingNumber>{rating}</RatingNumber>
+        <div>
+          <StarsContainer>{renderStars(Math.floor(rating))}</StarsContainer>
+          <div style={{ color: "var(--dark-gray)", fontSize: "0.9rem" }}>
+            Based on {totalReviews} reviews
           </div>
-        </RatingOverview>
-      {reviews.map((review) => (
-        <ReviewItem key={review.id}>
+        </div>
+      </RatingOverview>
+      <ReviewConatainer>
+        {allReviews.map((review) => (
+          <ReviewItem key={review.id}>
             <ReviewHeader>
               <div
                 style={{ display: "flex", alignItems: "center", gap: "12px" }}
@@ -121,8 +137,10 @@ const ReviewsSection = ({rating, reviews = [] ,totalReviews}) => {
             </ReviewHeader>
             <ReviewText>{review.comment}</ReviewText>
           </ReviewItem>
-      ))}
-      <AddReviewForm onSubmit={handleReviewSubmit}/>
+        ))}
+      </ReviewConatainer>
+
+      <AddReviewForm onSubmit={handleReviewSubmit} />
     </div>
   );
 };

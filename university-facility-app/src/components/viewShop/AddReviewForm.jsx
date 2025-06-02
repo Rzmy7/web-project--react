@@ -58,54 +58,62 @@ const StarButton = styled.button`
 
   &:hover {
     color: var(--hover-accent-color);
-  }`;
+  }
+`;
+
+const Lable =  styled.div`
+  font-weight: 600;
+  color: var(--text-color);
+  padding-bottom: 0.4rem;
+`;
 
 const AddReviewForm = ({ onSubmit }) => {
   const [newReview, setNewReview] = useState("");
   const [newRating, setNewRating] = useState(0);
-    const [hoverRating, setHoverRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
 
   const handleSubmit = () => {
     if (newReview.trim() && newRating > 0) {
-      onSubmit({ rating: newRating, comment: newReview });
+      onSubmit({ rating: newRating, comment: newReview});
       setNewReview("");
       setNewRating(0);
     }
   };
 
- 
-
   return (
     <ReviewContainer>
       <h4 style={{ color: "var(--primary-color)" }}>Add Your Review</h4>
-      <div>
-        <label>Your Review:</label>
-
-        <StarRating>
-          {Array.from({ length: 5 }, (_, index) => (
-            <StarButton
-              key={index}
-              filled={index < (hoverRating || newRating)}
-              onClick={() => setNewRating(index + 1)}
-              onMouseEnter={() => setHoverRating(index + 1)}
-              onMouseLeave={() => setHoverRating(0)}
-            >
-              <Star
-                size={24}
-                fill={
-                  index < (hoverRating || newRating) ? "currentColor" : "none"
-                }
-              />
-            </StarButton>
-          ))}
-        </StarRating>
-
-        <TextArea
-          value={newReview}
-          onChange={(e) => setNewReview(e.target.value)}
-        />
+      <div  style={{rowGap:"0.8rem" ,  marginTop:"1rem"}} >
+        <div>
+          <Lable>Rating:</Lable>
+          <StarRating>
+            {Array.from({ length: 5 }, (_, index) => (
+              <StarButton
+                key={index}
+                filled={index < (hoverRating || newRating)}
+                onClick={() => setNewRating(index + 1)}
+                onMouseEnter={() => setHoverRating(index + 1)}
+                onMouseLeave={() => setHoverRating(0)}
+              >
+                <Star
+                  size={24}
+                  fill={
+                    index < (hoverRating || newRating) ? "currentColor" : "none"
+                  }
+                />
+              </StarButton>
+            ))}
+          </StarRating>
+        </div>
+        <div>
+          <Lable>Your Review:</Lable>
+          <TextArea
+            value={newReview}
+            onChange={(e) => setNewReview(e.target.value)}
+          />
+        </div>
       </div>
-      <SubmitButton onClick={handleSubmit}>
+      <SubmitButton onClick={handleSubmit} style={{marginTop:"1.2rem"}}>
         <Send size={16} />
         Submit Review
       </SubmitButton>

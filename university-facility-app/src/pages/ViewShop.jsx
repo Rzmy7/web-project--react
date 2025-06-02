@@ -5,8 +5,6 @@
 // import "leaflet/dist/leaflet.css";
 // import FacilityLiveMap from "../components/viewShop/FacilityMap";
 
-
-
 // // Sample data - replace with real data from your backend
 // const facilityData = {
 //   id: 1,
@@ -313,7 +311,6 @@
 //   }
 // `;
 
-
 // const FacilityDetails = () => {
 //   const [newReview, setNewReview] = useState("");
 //   const [newRating, setNewRating] = useState(0);
@@ -514,17 +511,13 @@
 
 // export default FacilityDetails;
 
-
 // FacilityDetails.js
-import React from 'react';
-import Header from '../components/viewShop/Header';
-import WeeklySchedule from '../components/viewShop/WeeklySchedule';
-import Location from '../components/viewShop/Location';
-import ReviewsSection from '../components/viewShop/ReviewSection';
-import AddReviewForm from '../components/viewShop/AddReviewForm';
-import styled from 'styled-components';
-import FacilityDetails1 from './test';
-
+import React from "react";
+import Header from "../components/viewShop/Header";
+import WeeklySchedule from "../components/viewShop/WeeklySchedule";
+import Location from "../components/viewShop/Location";
+import ReviewsSection from "../components/viewShop/ReviewSection";
+import styled from "styled-components";
 
 const Container = styled.div`
   max-width: 1800px;
@@ -536,12 +529,22 @@ const Container = styled.div`
   background-color: var(--secondary-color);
   min-height: 100vh;
   display: grid;
+  align-items: stretch;
   grid-template-areas:
-  "header header"
-  "schedule location" 
-  "reviews reviews"
-  "details details";
+    "header header"
+    "schedule location"
+    "reviews reviews"
+    "details details";
   gap: 1rem;
+
+  @media (max-width: 768px) {
+    grid-template-areas:
+      "header "
+      "schedule"
+      " location"
+      "reviews "
+      "details ";
+  }
 `;
 
 const HeaderArea = styled.div`
@@ -564,85 +567,77 @@ const DetailsArea = styled.div`
   grid-area: details;
 `;
 
-
 const FacilityDetails = () => {
   const facilityData = {
-  id: 1,
-  name: "Central Canteen",
-  photo:
-    "https://images.unsplash.com/photo-1567521464027-f127ff144326?w=800&h=400&fit=crop",
-  isOpen: true,
-  currentStatus: "Open until 8:00 PM",
-  weeklySchedule: [
-    { day: "Monday", hours: "7:00 AM - 8:00 PM", isOpen: true },
-    { day: "Tuesday", hours: "7:00 AM - 8:00 PM", isOpen: true },
-    { day: "Wednesday", hours: "7:00 AM - 8:00 PM", isOpen: true },
-    { day: "Thursday", hours: "7:00 AM - 8:00 PM", isOpen: true },
-    { day: "Friday", hours: "7:00 AM - 6:00 PM", isOpen: true },
-    { day: "Saturday", hours: "9:00 AM - 4:00 PM", isOpen: true },
-    { day: "Sunday", hours: "Closed", isOpen: false },
-  ],
-  specialNotice:
-    "🎉 New menu items available! Try our signature pasta and fresh salads.",
-  location: "Building A, Ground Floor, Room 101",
-  coordinates: { lat: 6.797307, lng: 79.901778 },
-  ownerName: "Sarah Chen",
-  rating: 4.2,
-  totalReviews: 156,
-  reviews: [
-    {
-      id: 1,
-      userName: "Alex Wong",
-      rating: 5,
-      comment: "Great food and friendly staff! The chicken rice is amazing.",
-      date: "2 days ago",
-    },
-    {
-      id: 2,
-      userName: "Maria Santos",
-      rating: 4,
-      comment:
-        "Good variety of food options. Sometimes gets crowded during lunch hours.",
-      date: "1 week ago",
-    },
-    {
-      id: 3,
-      userName: "David Lim",
-      rating: 4,
-      comment:
-        "Fresh ingredients and reasonable prices. The laksa is my favorite!",
-      date: "2 weeks ago",
-    },
-  ],
-};
-
-
+    id: 1,
+    name: "Central Canteen",
+    photo:
+      "https://images.unsplash.com/photo-1567521464027-f127ff144326?w=800&h=400&fit=crop",
+    isOpen: true,
+    currentStatus: "Open until 8:00 PM",
+    weeklySchedule: [
+      { day: "Monday", hours: "7:00 AM - 8:00 PM", isOpen: true },
+      { day: "Tuesday", hours: "7:00 AM - 8:00 PM", isOpen: true },
+      { day: "Wednesday", hours: "7:00 AM - 8:00 PM", isOpen: true },
+      { day: "Thursday", hours: "7:00 AM - 8:00 PM", isOpen: true },
+      { day: "Friday", hours: "7:00 AM - 6:00 PM", isOpen: true },
+      { day: "Saturday", hours: "9:00 AM - 4:00 PM", isOpen: true },
+      { day: "Sunday", hours: "Closed", isOpen: false },
+    ],
+    specialNotice:
+      "🎉 New menu items available! Try our signature pasta and fresh salads.",
+    location: "Building A, Ground Floor, Room 101",
+    coordinates: { lat: 6.797307, lng: 79.901778 },
+    ownerName: "Sarah Chen",
+    rating: 4.2,
+    totalReviews: 156,
+    reviews: [
+      {
+        id: 1,
+        userName: "Alex Wong",
+        rating: 5,
+        comment: "Great food and friendly staff! The chicken rice is amazing.",
+        date: "2 days ago",
+      },
+      {
+        id: 2,
+        userName: "Maria Santos",
+        rating: 4,
+        comment:
+          "Good variety of food options. Sometimes gets crowded during lunch hours.",
+        date: "1 week ago",
+      },
+      {
+        id: 3,
+        userName: "David Lim",
+        rating: 4,
+        comment:
+          "Fresh ingredients and reasonable prices. The laksa is my favorite!",
+        date: "2 weeks ago",
+      },
+    ],
+  };
 
   return (
-  <Container>
-    <HeaderArea>
-      <Header facilityData={facilityData} />
-    </HeaderArea>
+    <Container>
+      <HeaderArea>
+        <Header facilityData={facilityData} />
+      </HeaderArea>
 
-    <ScheduleArea>
-      <WeeklySchedule schedule={facilityData.weeklySchedule} />
-    </ScheduleArea>
+      <ScheduleArea>
+        <WeeklySchedule schedule={facilityData.weeklySchedule} />
+      </ScheduleArea>
 
-    <LocationArea>
-      <Location facilityData={facilityData} />
-    </LocationArea>
+      <LocationArea>
+        <Location facilityData={facilityData} />
+      </LocationArea>
 
-    <ReviewsArea>
-      <ReviewsSection reviews={facilityData.reviews} />
-    </ReviewsArea>
+      <ReviewsArea>
+        <ReviewsSection rating={facilityData.rating} totalReviews={facilityData.totalReviews} reviews={facilityData.reviews} />
+      </ReviewsArea>
 
-    <DetailsArea>
-      <FacilityDetails1 />
-    </DetailsArea>
-  </Container>
-);
-
+    </Container>
+  );
 };
 
 export default FacilityDetails;
-

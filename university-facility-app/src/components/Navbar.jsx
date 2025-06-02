@@ -218,9 +218,9 @@ function HeaderComponent() {
     <Header>
       <HeaderContainer>
         <Logo>
-          <h1>
-            UoM<span>Facilities</span>
-          </h1>
+          <Link to={"/"}><h1>
+            <span style={{color:"var(--secondary-color"}}>UoM</span><span style={{color:"var(--accent-color"}}>Facilities</span>
+          </h1></Link>
         </Logo>
         <MobileMenuBtn
           id="mobileMenuBtn"

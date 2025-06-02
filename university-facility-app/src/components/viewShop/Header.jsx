@@ -1,7 +1,7 @@
 // Header.js
 import React from 'react';
 import BackButton from "../../utils/Backbutton";
-import { Star } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import styled from "styled-components";
 
 const HeaderContainer = styled.div`
@@ -40,6 +40,19 @@ const StatusBadge = styled.div`
   margin-bottom: 16px;
 `;
 
+const SpecialNotice = styled.div`
+  background: linear-gradient(
+    135deg,
+    var(--accent-color),
+    var(--hover-accent-color)
+  );
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-weight: 500;
+`;
+
 const Header = ({ facilityData }) => (
   <HeaderContainer>
     <BackButton />
@@ -49,6 +62,15 @@ const Header = ({ facilityData }) => (
       <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "currentColor" }} />
       {facilityData.currentStatus}
     </StatusBadge>
+    {facilityData.specialNotice && (
+          <SpecialNotice>
+            <AlertCircle
+              size={16}
+              style={{ display: "inline", marginRight: "8px" }}
+            />
+            {facilityData.specialNotice}
+          </SpecialNotice>
+        )}
   </HeaderContainer>
 );
 
