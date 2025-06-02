@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "../index.css";
 import Facilities from "../components/Facilities";
 import SearchBar from "../components/Searchbar";
-import ShopPage from "../pages/ufshop";
+import MapWithUserLocation from "../utils/MapWithUserLocation";
 
 const HeroSection = styled.div`
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)),
@@ -49,12 +49,44 @@ const FindFacBtn = styled.a`
   }
 `;
 
+const MapContainer  = styled.div`
+  padding: 1.2rem;
+  padding-bottom: 2rem;
+  border: 2px solid var(--light-gray);
+  width: 100%;
+  aspect-ratio: 30/9;
+  margin-bottom: 2rem;
+`;
+
 function UOMFacHome() {
   const [facilityType, setFacilityType] = useState("all");
   const [status, setStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const places = [
+    {
+      name: "Central Canteen",
+      lat: 6.7973,
+      lng: 79.9018,
+      description: "Main dining area",
+    },
+    {
+      name: "Library Café",
+      lat: 6.7985,
+      lng: 79.9022,
+      description: "Quick snacks",
+    },
+  ];
+
   return (
-    <div style={{ width: "100%", margin: "0 auto", display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        width: "100%",
+        margin: "0 auto",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <div
         style={{
           width: "100%",
@@ -82,14 +114,15 @@ function UOMFacHome() {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />
-      <div id="facilityGrid">
+      <div style={{ scrollMarginTop: "7rem" }} id="facilityGrid">
         <Facilities
           facilityType={facilityType}
           status={status}
           searchQuery={searchQuery}
         />
       </div>
-      {/* <ShopPage shopName='Wala Canteen' status='Open' openingTime='7.00AM'  closingTime='6.00PM' location='Near here' /> */}
+<MapContainer ><MapWithUserLocation places={places} /></MapContainer >
+      
     </div>
   );
 }

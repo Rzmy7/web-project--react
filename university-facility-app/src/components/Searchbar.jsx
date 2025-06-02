@@ -108,11 +108,11 @@ function SearchBar({
           </Select>
         </div>
         <div style={{ flex: "2" }}>
-          <Label>Search for items or services</Label>
+          <Label>Search for services</Label>
           <SearchInput>
             <Input
               type="text"
-              placeholder="e.g., Fried Rice, Mango Juice, Printing..."
+              placeholder="e.g., canteen name, book shop name"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
