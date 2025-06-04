@@ -6,6 +6,7 @@ import psycopg2.extras
 from datetime import date, time, datetime
 from dotenv import load_dotenv
 import os
+from flask_mail import Mail, Message
 
 
 load_dotenv()
@@ -142,6 +143,44 @@ def insert_data():
             return "Database Error", 500
 
     return render_template('form.html')
+
+
+# --------- Mail Config ---------
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
+mail = Mail(app)
+
+
+@app.route('/send-otp', methods=['POST'])
+def send_otp():
+    try:
+        data = request.get_json()
+        print("[DEBUG] Raw request data:", data)
+
+        email = data.get('email')
+        otp = data.get('otp')
+
+        print(f"[DEBUG] Parsed email={email}, otp={otp}")
+
+        if not email or not otp:
+            return jsonify({'error': 'Email and OTP required'}), 400
+
+        msg = Message('Your OTP Code', recipients=[email])
+        msg.body = f"Your verification code is: {otp}"
+        mail.send(msg)
+
+        print(f"[DEBUG] Email sent to {email}")
+        return jsonify({'message': 'OTP sent successfully'})
+
+    except Exception as e:
+        print(f"[ERROR] {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 
 # --------- Socket Events ---------
 @socketio.on('connect')

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import "../index.css";
 import MenuTabContent from "./ShopMenu";
 import PreOrderTab from "./PreOrderTab";
+import AlertTab from "./Alert";
 
 const TabContainer = styled.div`
   background-color: #f9f9f9;
@@ -194,7 +195,7 @@ useEffect(() => {
             isSelected={true}
           />
         )}
-        {activeTab === "Alerts" && <div>This is the alerts content</div>}
+        {activeTab === "Alerts" && <AlertTab/>}
         {activeTab === "Pre-Order" && (
           <PreOrderTab PreOrderItems={preOrderedItems} setPreOrderedItems={handlePreOrderChange}/>
         )}
