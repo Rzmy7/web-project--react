@@ -84,7 +84,9 @@ const FormGroup = styled.div`
 
 const ModalFooter = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content:center;
+  flex-direction: column;
+  row-gap: 1rem;
 `;
 
 const ModalButton = styled.button`
@@ -111,6 +113,7 @@ const OtpButton = styled.button`
   padding: 0.6rem;
   background-color: var(--light-gray);
   border-radius: 0.2rem;
+  width: 6.5rem;
 
   &:hover {
     background-color: var(--medium-gray);
@@ -145,14 +148,43 @@ const SignupModal = ({ isOpen, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Add signup logic here
+
+    if (formData.password !== formData.confirmPassword) {
+      setFormError("Passwords do not match.");
+      return;
+    }
+
+    // 🔐 2. Check if verification code matches generated OTP
+    if (formData.verificationCode !== generatedOtp) {
+      setFormError("Incorrect verification code.");
+      return;
+    }
+
+    // ✅ Clear error and proceed
+    setFormError("");
+
+    const now = new Date();
+    const date = now.toLocaleDateString("en-GB");
+    const time = now.toLocaleTimeString("en-GB");
+
+    const updatedFormData = {
+      ...formData,
+      signupDate: date,
+      signupTime: time,
+    };
+
     console.log("Signup submitted");
-    console.log("Form Data:", formData);
+    console.log("Form Data:", updatedFormData);
   };
 
   const [OtpBtnLable, setOtpBtnLabel] = useState("Send OTP");
   const [OtpNum, setOtpNum] = useState(0);
   const [OtpClickable, setOtpClickable] = useState(true);
   const [generatedOtp, setGeneratedOtp] = useState("");
+  const [formError, setFormError] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+
 
   useEffect(() => {
     // Side effect logic here
@@ -167,6 +199,8 @@ const SignupModal = ({ isOpen, onClose }) => {
     mobileNumber: "",
     email: "",
     verificationCode: "",
+    signupDate: "",
+    signupTime: "",
   });
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
@@ -202,41 +236,53 @@ const SignupModal = ({ isOpen, onClose }) => {
   // };
 
   const handleOtpBtn = async () => {
-    if (!OtpClickable || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      return;
+  if (!OtpClickable || !isEmailValid || isSendingOtp) return;
 
-    const nextTry = OtpNum + 1;
-    setOtpNum(nextTry);
+  setIsSendingOtp(true);
+  setOtpBtnLabel("Sending...");
 
-    const otp = generateOtp();
-    setGeneratedOtp(otp); // Optional: for verification later
+  const nextTry = OtpNum + 1;
+  setOtpNum(nextTry);
 
-    console.log("Generated OTP:", otp);
+  const otp = generateOtp();
+  setGeneratedOtp(otp);
+  console.log("Generated OTP:", otp);
 
-    try {
-      const response = await fetch("http://127.0.0.1:8001/send-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          otp: otp,
-        }),
-      });
+  try {
+    const response = await fetch("http://127.0.0.1:8001/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: formData.email,
+        otp: otp,
+      }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to send OTP");
-      }
-
-      console.log("OTP sent successfully:", data);
-      setOtpBtnLabel("Resend OTP");
-    } catch (error) {
-      console.error("Error sending OTP:", error.message);
-      setOtpBtnLabel("Error!");
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to send OTP");
     }
+
+    console.log("OTP sent successfully:", data);
+    setOtpBtnLabel("Sent"); // ✅ Show sent text
+setOtpSent(true);
+setIsSendingOtp(false);
+
+setTimeout(() => {
+      setOtpBtnLabel("Resend OTP");
+      setIsSendingOtp(false); // ✅ Re-enable after timeout
+    }, 1500);
+
+// ✅ Delay to change to "Resend OTP"
+setTimeout(() => {
+  setOtpBtnLabel("Resend OTP");
+}, 1500);
+    setOtpSent(true); // ✅ Enable verification code input
+  } catch (error) {
+    console.error("Error sending OTP:", error.message);
+    setOtpBtnLabel("Error!");
+  }
 
     // Apply cooldown (optional based on number of tries)
     if (nextTry === 3) applyCooldown(15, "Resend OTP");
@@ -346,31 +392,56 @@ const SignupModal = ({ isOpen, onClose }) => {
             <OtpButton
               type="button"
               onClick={handleOtpBtn}
-              disabled={!OtpClickable || !isEmailValid}
+              disabled={!!OtpClickable || !isEmailValid || isSendingOtp}
             >
               {OtpBtnLable}
             </OtpButton>
           </FormGroup>
 
           <FormGroup>
-            <label htmlFor="verificationCode">Verification Code</label>
-            <input
-              type="tel"
-              id="verificationCode"
-              required
-              onChange={(e) =>
-                setFormData({ ...formData, verificationCode: e.target.value })
-              }
-            />
-          </FormGroup>
+  <label htmlFor="verificationCode">Verification Code</label>
+  <input
+    type="tel"
+    id="verificationCode"
+    required
+    disabled={!otpSent} // ✅ disable unless otpSent is true
+    style={{
+      backgroundColor: !otpSent ? "#f1f1f1" : "white",
+      cursor: !otpSent ? "not-allowed" : "auto",
+    }}
+    onChange={(e) =>
+      setFormData({ ...formData, verificationCode: e.target.value })
+    }
+  />
+</FormGroup>
+
 
           <ModalFooter>
-            <ModalButton type="button" className="cancel-btn" onClick={onClose}>
-              Cancel
-            </ModalButton>
-            <ModalButton type="submit" className="submit-btn">
-              Sign Up
-            </ModalButton>
+            <div style={{display:"flex",justifyContent:"space-between"}}>
+              <ModalButton
+                type="button"
+                className="cancel-btn"
+                onClick={onClose}
+              >
+                Cancel
+              </ModalButton>
+              <ModalButton type="submit" className="submit-btn">
+                Sign Up
+              </ModalButton>
+            </div>
+            <div>
+              {formError && (
+                <p
+                  style={{
+                    color: "red",
+                    fontWeight: 500,
+                    marginBottom: "1rem",
+                  }}
+                >
+                  {formError}
+                </p>
+              )}
+            </div>
           </ModalFooter>
         </form>
       </ModalContent>

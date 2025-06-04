@@ -55,6 +55,7 @@ const MapContainer  = styled.div`
   border: 2px solid var(--light-gray);
   width: 100%;
   aspect-ratio: 30/9;
+  min-height: 300px;
   margin-bottom: 2rem;
 `;
 

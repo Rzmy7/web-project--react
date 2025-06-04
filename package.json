@@ -5,5 +5,8 @@
     "start:frontend": "cd university-facility-app/src && npm run dev",
     "start:backend": "cd backend && python app.py",
     "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }
