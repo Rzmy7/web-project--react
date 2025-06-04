@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
 // ---------------- Styled Components ---------------- //
@@ -125,7 +125,7 @@ const OtpButton = styled.button`
   &:disabled {
     background-color: var(--ligth-gray);
     color: var(--medium-gray);
-    border: 1px solid rgba(0,0,0,0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     cursor: not-allowed;
     pointer-events: none;
     opacity: 1;
@@ -146,49 +146,121 @@ const SignupModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     // Add signup logic here
     console.log("Signup submitted");
+    console.log("Form Data:", formData);
   };
 
   const [OtpBtnLable, setOtpBtnLabel] = useState("Send OTP");
   const [OtpNum, setOtpNum] = useState(0);
   const [OtpClickable, setOtpClickable] = useState(true);
+  const [generatedOtp, setGeneratedOtp] = useState("");
 
-  const handleOtpBtn = () => {
-  if (!OtpClickable) return;
+  useEffect(() => {
+    // Side effect logic here
+    console.log(`${generatedOtp}`);
+  }, [generatedOtp]);
 
-  const nextTry = OtpNum + 1;
-  setOtpNum(nextTry);
+  const [formData, setFormData] = useState({
+    name: "",
+    password: "",
+    confirmPassword: "",
+    indexNumber: "",
+    mobileNumber: "",
+    email: "",
+    verificationCode: "",
+  });
 
-  // Simulate sending OTP
-  console.log("OTP sent!");
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
 
-  if (nextTry < 3) {
-    // 1st and 2nd click - no delay
-    setOtpBtnLabel("Resend OTP");
-  } else if (nextTry === 3) {
-    applyCooldown(15, "Resend OTP");
-  } else if (nextTry === 4) {
-    applyCooldown(20, "Resend OTP");
-  } else if (nextTry === 5) {
-    applyCooldown(30, "Resend OTP");
-  } else {
-    setOtpBtnLabel("Try again later");
-    setOtpClickable(false);
-  }
-};
+  const generateOtp = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  // const handleOtpBtn = () => {
+  //   if (!OtpClickable) return;
+
+  //   const nextTry = OtpNum + 1;
+  //   setOtpNum(nextTry);
+
+  //   // Simulate sending OTP
+  //   const otp = generateOtp();
+  //   setGeneratedOtp(otp);
+  //   console.log("OTP sent!", otp);
+
+  //   if (nextTry < 3) {
+  //     // 1st and 2nd click - no delay
+  //     setOtpBtnLabel("Resend OTP");
+  //   } else if (nextTry === 3) {
+  //     applyCooldown(15, "Resend OTP");
+  //   } else if (nextTry === 4) {
+  //     applyCooldown(20, "Resend OTP");
+  //   } else if (nextTry === 5) {
+  //     applyCooldown(30, "Resend OTP");
+  //   } else {
+  //     setOtpBtnLabel("Try again later");
+  //     setOtpClickable(false);
+  //   }
+  // };
+
+  const handleOtpBtn = async () => {
+    if (!OtpClickable || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      return;
+
+    const nextTry = OtpNum + 1;
+    setOtpNum(nextTry);
+
+    const otp = generateOtp();
+    setGeneratedOtp(otp); // Optional: for verification later
+
+    console.log("Generated OTP:", otp);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8001/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: otp,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send OTP");
+      }
+
+      console.log("OTP sent successfully:", data);
+      setOtpBtnLabel("Resend OTP");
+    } catch (error) {
+      console.error("Error sending OTP:", error.message);
+      setOtpBtnLabel("Error!");
+    }
+
+    // Apply cooldown (optional based on number of tries)
+    if (nextTry === 3) applyCooldown(15, "Resend OTP");
+    else if (nextTry === 4) applyCooldown(20, "Resend OTP");
+    else if (nextTry === 5) applyCooldown(30, "Resend OTP");
+    else if (nextTry > 5) {
+      setOtpBtnLabel("Try again later");
+      setOtpClickable(false);
+    }
+  };
 
   const applyCooldown = (seconds, nextLabel) => {
-  setOtpClickable(false);
-  let remaining = seconds;
+    setOtpClickable(false);
+    let remaining = seconds;
 
-  const timer = setInterval(() => {
-    setOtpBtnLabel(`Wait ${remaining--}s`);
-    if (remaining < 0) {
-      clearInterval(timer);
-      setOtpClickable(true);
-      setOtpBtnLabel(nextLabel);
-    }
-  }, 1000);
-};
+    const timer = setInterval(() => {
+      setOtpBtnLabel(`Wait ${remaining--}s`);
+      if (remaining < 0) {
+        clearInterval(timer);
+        setOtpClickable(true);
+        setOtpBtnLabel(nextLabel);
+      }
+    }, 1000);
+  };
 
   return (
     <ModalOverlay isOpen={isOpen} onClick={onClose}>
@@ -201,22 +273,50 @@ const SignupModal = ({ isOpen, onClose }) => {
         <form onSubmit={handleSubmit}>
           <FormGroup>
             <label htmlFor="signupName">Name</label>
-            <input type="text" id="signupName" required />
+            <input
+              type="text"
+              id="signupName"
+              required
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+            />
           </FormGroup>
 
           <FormGroup>
             <label htmlFor="signupPassword">Password</label>
-            <input type="password" id="signupPassword" required />
+            <input
+              type="password"
+              id="signupPassword"
+              required
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
           </FormGroup>
 
           <FormGroup>
             <label htmlFor="signupConfirmPassword">Confirm Password</label>
-            <input type="password" id="signupConfirmPassword" required />
+            <input
+              type="password"
+              id="signupConfirmPassword"
+              required
+              onChange={(e) =>
+                setFormData({ ...formData, confirmPassword: e.target.value })
+              }
+            />
           </FormGroup>
 
           <FormGroup>
             <label htmlFor="indexNumber">Index Number</label>
-            <input type="text" id="indexNumber" required />
+            <input
+              type="text"
+              id="indexNumber"
+              required
+              onChange={(e) =>
+                setFormData({ ...formData, indexNumber: e.target.value })
+              }
+            />
           </FormGroup>
 
           <FormGroup>
@@ -227,16 +327,26 @@ const SignupModal = ({ isOpen, onClose }) => {
               pattern="[0-9]{10}"
               maxLength="10"
               required
+              onChange={(e) =>
+                setFormData({ ...formData, mobileNumber: e.target.value })
+              }
             />
           </FormGroup>
 
           <FormGroup>
             <label htmlFor="signupEmail">Email</label>
-            <input type="email" id="signupEmail" required />
+            <input
+              type="email"
+              id="signupEmail"
+              required
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
             <OtpButton
               type="button"
               onClick={handleOtpBtn}
-              disabled={!OtpClickable}
+              disabled={!OtpClickable || !isEmailValid}
             >
               {OtpBtnLable}
             </OtpButton>
@@ -244,7 +354,14 @@ const SignupModal = ({ isOpen, onClose }) => {
 
           <FormGroup>
             <label htmlFor="verificationCode">Verification Code</label>
-            <input type="tel" id="verificationCode" required />
+            <input
+              type="tel"
+              id="verificationCode"
+              required
+              onChange={(e) =>
+                setFormData({ ...formData, verificationCode: e.target.value })
+              }
+            />
           </FormGroup>
 
           <ModalFooter>
