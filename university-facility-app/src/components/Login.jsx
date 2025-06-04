@@ -74,11 +74,11 @@ const ModalButton = styled.button`
 
   &.cancel-btn {
     background-color: var(--medium-gray);
-    color: white;
+    color: var(--text-color);
   }
 
   &.submit-btn {
-    background-color: var(--accent-color);
+    background-color: var(--primary-color);
     color: white;
   }
 `;

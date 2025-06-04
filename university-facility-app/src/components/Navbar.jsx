@@ -451,15 +451,6 @@ const Overlay = styled.div`
   align-items: center;
 `;
 
-const ModalBox = styled.div`
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 90%;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-`;
-
 // ---------------- Header Component ---------------- //
 
 function HeaderComponent() {
@@ -470,6 +461,13 @@ function HeaderComponent() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const [showLogin, setShowLogin] = useState(false);
+
+  const closeAuthBtn=(btnName)=>{
+    if(btnName==="Login"){
+      setShowLogin(false);
+      setAuthMode(null);
+    }
+  }
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -527,21 +525,19 @@ function HeaderComponent() {
 
       {authMode && (
         <Overlay onClick={() => setAuthMode(null)}>
-          <ModalBox onClick={(e) => e.stopPropagation()}>
-            {authMode === "login" ? (
-              <>
-                <LoginModal
-                  isOpen={showLogin}
-                  onClose={() => setShowLogin(false)}
-                />
-              </>
-            ) : (
-              <>
-                <h2>Sign Up</h2>
-                <SignupModal/>
-              </>
-            )}
-          </ModalBox>
+          {authMode === "login" ? (
+            <>
+              <LoginModal
+                isOpen={showLogin}
+                onClose={()=>closeAuthBtn("Login")}
+              />
+            </>
+          ) : (
+            <>
+              <SignupModal isOpen={showLogin}
+                onClose={()=>closeAuthBtn("Login")}/>
+            </>
+          )}
         </Overlay>
       )}
     </>

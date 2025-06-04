@@ -124,11 +124,7 @@ const SignupModal = ({ isOpen, onClose }) => {
           </FormGroup>
 
           <ModalFooter>
-            <ModalButton
-              type="button"
-              className="cancel-btn"
-              onClick={onClose}
-            >
+            <ModalButton type="button" className="cancel-btn" onClick={onClose}>
               Cancel
             </ModalButton>
             <ModalButton type="submit" className="submit-btn">
