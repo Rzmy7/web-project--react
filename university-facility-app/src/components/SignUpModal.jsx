@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 // ---------------- Styled Components ---------------- //
@@ -116,11 +116,11 @@ margin-top: 0.4rem;
 
   &:hover{
     background-color: var(--medium-gray);
-    transition: all 0.3s ease-in-out;
+    transition: all ease-in;
   }
 
   &:active{
-    background-color: var(--text-gray);
+    background-color: var(--text-color);
     color:var(--light-gray);
   }
 `;
@@ -133,6 +133,19 @@ const SignupModal = ({ isOpen, onClose }) => {
     // Add signup logic here
     console.log("Signup submitted");
   };
+
+  const [OtpBtnLable,setOtpBtnLable] = useState("Send OTP");
+  const [OtpNum,setOtpNum] = useState(0);
+
+  const handleOtpBtn=()=>{
+    setOtpNum(OtpNum+1);
+    if(OtpNum<=5){
+      //Backend call
+      setOtpBtnLable("Resend OTP");
+    }else{
+      setOtpBtnLable("Tried too many!");
+    }
+  }
 
   return (
     <ModalOverlay isOpen={isOpen} onClick={onClose}>
@@ -177,7 +190,7 @@ const SignupModal = ({ isOpen, onClose }) => {
           <FormGroup>
             <label htmlFor="signupEmail">Email</label>
             <input type="email" id="signupEmail" required />
-            <OtpButton>Send OTP</OtpButton>
+            <OtpButton type="button" onClick={handleOtpBtn}>{OtpBtnLable}</OtpButton>
           </FormGroup>
 
           <FormGroup>
