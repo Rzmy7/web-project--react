@@ -18,7 +18,6 @@ const ModalOverlay = styled.div`
   overflow-y: auto;
   padding: 35vh 0 2rem 0;
 
-  
   @media (min-aspect-ratio: 4/3) {
     padding-top: 4vh;
   }
@@ -31,7 +30,7 @@ const ModalOverlay = styled.div`
   @media (max-aspect-ratio: 1/2) {
     padding-top: 6vh;
   }
-  @media (aspect-ratio:128/75) {
+  @media (aspect-ratio: 128/75) {
     padding-top: 40vh;
   }
 `;
@@ -45,7 +44,6 @@ const ModalContent = styled.div`
   margin: 2rem 0 1rem 0;
   align-self: center !important;
   position: relative;
-
 `;
 
 const ModalHeader = styled.div`
@@ -109,19 +107,35 @@ const ModalButton = styled.button`
 `;
 
 const OtpButton = styled.button`
-margin-top: 0.4rem;
+  margin-top: 0.4rem;
   padding: 0.6rem;
   background-color: var(--light-gray);
-  border-radius:0.2rem ;
+  border-radius: 0.2rem;
 
-  &:hover{
+  &:hover {
     background-color: var(--medium-gray);
     transition: all ease-in;
   }
 
-  &:active{
+  &:active {
     background-color: var(--text-color);
-    color:var(--light-gray);
+    color: var(--light-gray);
+  }
+
+  &:disabled {
+    background-color: var(--ligth-gray);
+    color: var(--medium-gray);
+    border: 1px solid rgba(0,0,0,0.1);
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 1;
+
+    /* Optional: Prevent hover/active effects */
+    &:hover,
+    &:active {
+      background-color: var(--text-gray);
+      color: var(--light-gray);
+    }
   }
 `;
 
@@ -134,18 +148,47 @@ const SignupModal = ({ isOpen, onClose }) => {
     console.log("Signup submitted");
   };
 
-  const [OtpBtnLable,setOtpBtnLable] = useState("Send OTP");
-  const [OtpNum,setOtpNum] = useState(0);
+  const [OtpBtnLable, setOtpBtnLabel] = useState("Send OTP");
+  const [OtpNum, setOtpNum] = useState(0);
+  const [OtpClickable, setOtpClickable] = useState(true);
 
-  const handleOtpBtn=()=>{
-    setOtpNum(OtpNum+1);
-    if(OtpNum<=5){
-      //Backend call
-      setOtpBtnLable("Resend OTP");
-    }else{
-      setOtpBtnLable("Tried too many!");
-    }
+  const handleOtpBtn = () => {
+  if (!OtpClickable) return;
+
+  const nextTry = OtpNum + 1;
+  setOtpNum(nextTry);
+
+  // Simulate sending OTP
+  console.log("OTP sent!");
+
+  if (nextTry < 3) {
+    // 1st and 2nd click - no delay
+    setOtpBtnLabel("Resend OTP");
+  } else if (nextTry === 3) {
+    applyCooldown(15, "Resend OTP");
+  } else if (nextTry === 4) {
+    applyCooldown(20, "Resend OTP");
+  } else if (nextTry === 5) {
+    applyCooldown(30, "Resend OTP");
+  } else {
+    setOtpBtnLabel("Try again later");
+    setOtpClickable(false);
   }
+};
+
+  const applyCooldown = (seconds, nextLabel) => {
+  setOtpClickable(false);
+  let remaining = seconds;
+
+  const timer = setInterval(() => {
+    setOtpBtnLabel(`Wait ${remaining--}s`);
+    if (remaining < 0) {
+      clearInterval(timer);
+      setOtpClickable(true);
+      setOtpBtnLabel(nextLabel);
+    }
+  }, 1000);
+};
 
   return (
     <ModalOverlay isOpen={isOpen} onClick={onClose}>
@@ -190,7 +233,13 @@ const SignupModal = ({ isOpen, onClose }) => {
           <FormGroup>
             <label htmlFor="signupEmail">Email</label>
             <input type="email" id="signupEmail" required />
-            <OtpButton type="button" onClick={handleOtpBtn}>{OtpBtnLable}</OtpButton>
+            <OtpButton
+              type="button"
+              onClick={handleOtpBtn}
+              disabled={!OtpClickable}
+            >
+              {OtpBtnLable}
+            </OtpButton>
           </FormGroup>
 
           <FormGroup>
