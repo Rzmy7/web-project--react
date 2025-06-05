@@ -161,10 +161,10 @@ const ModalButton = styled(Button)`
 const Settings = () => {
   // State for shop details
   const [shopDetails, setShopDetails] = useState({
-    shopName: 'My Awesome Shop',
-    location: '123 Main St, City, Country',
-    phone: '+1234567890',
-    email: 'contact@myawesomeshop.com'
+    shopName: 'L canteen',
+    location: 'Buisness building',
+    phone: '+94754480871',
+    email: 'lcanteen@mail.com'
   });
 
   // State for business hours
