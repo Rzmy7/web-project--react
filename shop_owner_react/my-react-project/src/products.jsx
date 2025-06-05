@@ -5,7 +5,7 @@ const Section = styled.section`
   padding: 2rem;
   scroll-margin-top: 50px;
   height:fit-content;
-  
+
 `;
 
 const SectionHeader = styled.div`
@@ -257,7 +257,7 @@ function Products() {
     {
       title: 'canteen products',
       items: [
-        { id: 1, name: 'Egg bun', price: 'LKR 90.000' },
+        { id: 1, name: 'Egg bun', price: 'LKR 90.00' },
         { id: 2, name: 'Rolls', price: 'LKR 70.00' },
         { id: 3, name: 'Fish bun', price: 'LKR 50.00' }
       ]
@@ -265,7 +265,7 @@ function Products() {
     {
       title: 'juice bar products',
       items: [
-        { id: 1, name: 'Chocolate milk shake', price: 'LKR 340.000' },
+        { id: 1, name: 'Chocolate milk shake', price: 'LKR 340.00' },
         { id: 2, name: 'Watermellon', price: 'LKR 120.00' },
         { id: 3, name: 'Banana boat', price: 'LKR 350.00' }
       ]
@@ -273,7 +273,7 @@ function Products() {
     {
       title: 'bookshop accessories',
       items: [
-        { id: 1, name: 'A4 sheet', price: 'LKR 10.000' },
+        { id: 1, name: 'A4 sheet', price: 'LKR 10.00' },
         { id: 2, name: 'Pen', price: 'LKR 30.00' },
         { id: 3, name: 'Eraser', price: 'LKR 30.00' }
       ]
@@ -298,7 +298,7 @@ function Products() {
             {
               id: category.items.length + 1,
               name: newItem.name,
-              price: `LKR ${parseFloat(newItem.price).toFixed(3)}`
+              price: `LKR ${parseFloat(newItem.price).toFixed(2)}`
             }
           ]
         };
@@ -323,7 +323,7 @@ function Products() {
         return {
           ...category,
           items: category.items.map(item =>
-            item.id === editItem.id ? { ...editItem, price: `LKR ${parseFloat(editItem.price).toFixed(3)}` } : item
+            item.id === editItem.id ? { ...editItem, price: `LKR ${parseFloat(editItem.price).toFixed(2)}` } : item
           )
         };
       }
