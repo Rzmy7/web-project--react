@@ -13,11 +13,13 @@ const UserDetails = styled.div`
   border-radius: 0.3rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   z-index: 2000;
-  width: 25rem;
+  width: max-content;
   display: flex;
   flex-direction: column;
   row-gap: 1rem;
   overflow-x: auto;
+  border: 2px solid var(--light-gray);
+
   @media (max-width: 768px){
     width: 100%;
   }
