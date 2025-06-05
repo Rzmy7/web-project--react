@@ -18,6 +18,9 @@ const UserDetails = styled.div`
   flex-direction: column;
   row-gap: 1rem;
   overflow-x: auto;
+  @media (max-width: 768px){
+    width: 100%;
+  }
 `;
 
 const UserNameTitle = styled.p`

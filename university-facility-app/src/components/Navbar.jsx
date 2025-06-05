@@ -300,6 +300,7 @@ import { Link, useLocation } from "react-router-dom";
 import LoginModal from "./Login";
 import SignupModal from "./SignUpModal";
 import UserProfile from "./UserProfile";
+import {UserRound} from "lucide-react";
 
 // ---------------- Styled Components ---------------- //
 
@@ -494,6 +495,7 @@ const UserSection = styled.div`
 
 const UserIcon = styled.div`
   cursor: pointer;
+  justify-self: flex-start;
   font-size: 1.5rem;
   user-select: none;
 `;
@@ -561,7 +563,7 @@ function HeaderComponent() {
         {isLoggedIn ? (
           <>
             <UserIcon onClick={() => setShowUserDetails((prev) => !prev)}>
-              👤
+              <UserRound size={20}/>
             </UserIcon>
             {showUserDetails && user && (
               <UserProfile
@@ -602,7 +604,7 @@ function HeaderComponent() {
   <DesktopOnly>
     <UserSection>
       <UserIcon onClick={() => setShowUserDetails((prev) => !prev)}>
-        👤
+        <UserRound size={20}/>
       </UserIcon>
       {showUserDetails && user && (
         <UserProfile

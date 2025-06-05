@@ -145,7 +145,7 @@ const OtpButton = styled.button`
 // ---------------- SignupModal Component ---------------- //
 
 const SignupModal = ({ isOpen, onClose }) => {
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     // Add signup logic here
 
@@ -168,10 +168,36 @@ const SignupModal = ({ isOpen, onClose }) => {
     const time = now.toLocaleTimeString("en-GB");
 
     const updatedFormData = {
-      ...formData,
-      signupDate: date,
-      signupTime: time,
-    };
+    name: formData.name,
+    indexno: formData.indexNumber,
+    email: formData.email,
+    mobilenumber: formData.mobileNumber,
+    password: formData.password,
+    signUpDate: date,
+    signUpTime: time,
+  };
+    try {
+    const response = await fetch("http://127.0.0.1:8001/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(updatedFormData)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("Signup successful!");
+      // Optionally reset the form
+    } else {
+      setFormError(result.error || "Signup failed");
+    }
+
+  } catch (error) {
+    console.error("Error:", error);
+    setFormError("Network or server error.");
+  }
 
     console.log("Signup submitted");
     console.log("Form Data:", updatedFormData);
@@ -392,7 +418,7 @@ setTimeout(() => {
             <OtpButton
               type="button"
               onClick={handleOtpBtn}
-              disabled={!!OtpClickable || !isEmailValid || isSendingOtp}
+              disabled={!OtpClickable || !isEmailValid || isSendingOtp}
             >
               {OtpBtnLable}
             </OtpButton>

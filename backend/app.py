@@ -7,6 +7,7 @@ from datetime import date, time, datetime
 from dotenv import load_dotenv
 import os
 from flask_mail import Mail, Message
+import bcrypt
 
 
 load_dotenv()
@@ -179,6 +180,78 @@ def send_otp():
 
     except Exception as e:
         print(f"[ERROR] {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+    user = cur.fetchone()
+
+    if not user:
+        return jsonify({"error": "Email not found"}), 404
+
+    db_password = user[5]  # adjust index based on your schema
+
+    if not bcrypt.checkpw(password.encode("utf-8"), db_password.encode("utf-8")):
+        return jsonify({"error": "Incorrect password"}), 401
+
+    user_data = {
+        "name": user[1],
+        "email": user[3],
+        "indexNumber": user[2],
+        "mobileNumber": user[4],
+    }
+
+    return jsonify({"message": "Login successful", "user": user_data})
+
+    
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+
+    name = data.get('name')
+    index_no = data.get('indexno')
+    email = data.get('email')
+    mobile = data.get('mobilenumber')
+    password = data.get('password')
+    signUpTime = data.get('signUpTime')
+    signUpDate =  data.get('signUpDate')
+
+    if not all([name, index_no, email, mobile, password]):
+        return jsonify({'error': 'All fields are required'}), 400
+
+    hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Check if email already exists
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        if cur.fetchone():
+            return jsonify({'error': 'Email already registered'}), 409
+
+        # Insert new user
+        cur.execute("""
+            INSERT INTO users (Name, IndexNO, Email, MobileNumber, Password, signupdate, signuptime)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (name, index_no, email, mobile, hashed_pw, signUpDate, signUpTime))
+
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({'message': 'User registered successfully'}), 201
+
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
