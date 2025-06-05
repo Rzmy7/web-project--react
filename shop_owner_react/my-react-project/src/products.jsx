@@ -61,8 +61,9 @@ const ItemList = styled.div`
 `;
 
 const FoodItem = styled.div`
-  border: 1px solid #e0e0e0;
-  border-radius: 5px;
+  border: 1px solid var(--medium-gray);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
   padding: 15px;
   display: flex;
   justify-content: space-between;
