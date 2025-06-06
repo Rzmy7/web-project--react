@@ -185,6 +185,115 @@ def get_shop_menu(shop_name):
     except Exception as e:
         print(f"Error fetching shop items: {e}")
         return jsonify({'error': str(e)}), 500
+    
+    
+# ... (your existing imports and setup)
+
+@app.route('/api/facility/<string:facility_id>', methods=['GET'])
+def get_facility_details(facility_id):
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        query = """
+        SELECT
+            s.shop_id AS id,
+            s.shop_name AS name,
+            s.shop_image AS photo,
+            s.open_status AS isOpen,
+            s."Location" AS location,
+            s.latitude,
+            s.longitude,
+            -- Fetch weekly schedule
+            COALESCE(json_agg(json_build_object(
+                'day', so.day,
+                'hours', CONCAT(so.opening_time::text, ' - ', so.closing_time::text),
+                'isOpen', TRUE
+            ) ORDER BY CASE so.day
+                WHEN 'Monday' THEN 1
+                WHEN 'Tuesday' THEN 2
+                WHEN 'Wednesday' THEN 3
+                WHEN 'Thursday' THEN 4
+                WHEN 'Friday' THEN 5
+                WHEN 'Saturday' THEN 6
+                WHEN 'Sunday' THEN 7
+            END) FILTER (WHERE so.shop_id IS NOT NULL), '[]') AS weeklySchedule,
+            -- Fetch special notices (only active ones)
+            (
+                SELECT notice_info
+                FROM notice
+                WHERE shop_id = s.shop_id
+                AND (startdate IS NULL OR startdate <= CURRENT_DATE)
+                AND (enddate IS NULL OR enddate >= CURRENT_DATE)
+                AND (starttime IS NULL OR starttime::time <= CURRENT_TIME::time)
+                AND (endtime IS NULL OR endtime::time >= CURRENT_TIME::time)
+                ORDER BY priority DESC
+                LIMIT 1
+            ) AS specialNotice,
+            -- Calculate average rating and total reviews
+            COALESCE(AVG(cr.star_mark), 0) AS rating,
+            COUNT(cr.client_id) AS totalReviews,
+            -- Fetch recent reviews
+            COALESCE(json_agg(json_build_object(
+                'id', cr.client_id,
+                'userName', u.full_name,
+                'rating', cr.star_mark,
+                'comment', cr.review,
+                'date', cr.date
+            ) ORDER BY cr.date DESC, cr."time" DESC) FILTER (WHERE cr.client_id IS NOT NULL), '[]') AS reviews
+        FROM shop s
+        LEFT JOIN shop_open so ON s.shop_id = so.shop_id
+        LEFT JOIN client_reviews cr ON s.shop_id = cr.shop_id
+        LEFT JOIN client c ON cr.client_id = c.user_id
+        LEFT JOIN users u ON c.user_id = u.user_id
+        WHERE s.shop_id = %s
+        GROUP BY s.shop_id, s.shop_name, s.shop_image, s.open_status, s."Location", s.latitude, s.longitude;
+        """
+
+        cur.execute(query, (facility_id,))
+        result = cur.fetchone()
+
+        if not result:
+            return jsonify({'error': 'Facility not found'}), 404
+
+        # More specific error handling for potential key access issues
+        try:
+            formatted_result = {
+                'id': result.get('id'),
+                'name': result.get('name'),
+                'photo': result.get('photo'),
+                'isOpen': result.get('isOpen'),
+                'currentStatus': "Open" if result.get('isOpen') else "Closed", # Safely access isOpen
+                'weeklySchedule': result.get('weeklySchedule', []), # Provide default empty list
+                'specialNotice': result.get('specialNotice'),
+                'location': result.get('location'),
+                'coordinates': {'lat': result.get('latitude'), 'lng': result.get('longitude')},
+                'ownerName': None, # You'll need to fetch this from shop_owner table if needed
+                'rating': round(result.get('rating', 0), 1), # Safely access rating, default to 0
+                'totalReviews': result.get('totalReviews', 0), # Safely access totalReviews, default to 0
+                'reviews': result.get('reviews', []) # Provide default empty list
+            }
+        except Exception as data_processing_error:
+            print(f"Error processing facility data for ID {facility_id}: {data_processing_error}")
+            return jsonify({'error': 'Error processing facility data'}), 500
+
+        return jsonify(formatted_result)
+
+    except psycopg2.Error as db_error:
+        print(f"Database error fetching facility details for ID {facility_id}: {db_error}")
+        return jsonify({'error': 'Database error fetching facility details'}), 500
+    except Exception as e:
+        print(f"Unexpected error fetching facility details for ID {facility_id}: {e}")
+        return jsonify({'error': 'An unexpected error occurred'}), 500
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+# ... (rest of your Flask code)
+
 
 
 # --------- Route to Insert Shop Data via Form ---------

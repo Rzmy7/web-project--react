@@ -57,6 +57,7 @@ function App() {
           <Route path="/shopItems/:shopName" element={<ShopPage />} />
           <Route path="/UOMFacHome" element={<UOMFacHome />} />
           <Route path="/FacilityDetails" element={<FacilityDetails />} />
+          <Route path="/facility/:facilityId" element={<FacilityDetails />} />
         </Routes>
       </MainContent>
       <Footer />
