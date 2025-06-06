@@ -300,7 +300,7 @@ import { Link, useLocation } from "react-router-dom";
 import LoginModal from "./Login";
 import SignupModal from "./SignUpModal";
 import UserProfile from "./UserProfile";
-import {UserRound} from "lucide-react";
+import { UserRound } from "lucide-react";
 
 // ---------------- Styled Components ---------------- //
 
@@ -507,6 +507,13 @@ const DesktopOnly = styled.div`
   }
 `;
 
+const MobileOnly = styled.div`
+  display: block;
+
+  @media (min-width: 769px) {
+    display: none;
+  }
+`;
 
 // ---------------- Header Component ---------------- //
 
@@ -556,77 +563,89 @@ function HeaderComponent() {
           </MobileMenuBtn>
 
           <Nav $isOpen={isMenuOpen}>
-  <ul>
-    {/* Mobile view – show user or auth buttons */}
-    {isMenuOpen && (
-      <li style={{ marginBottom: "1rem" }}>
-        {isLoggedIn ? (
-          <>
-            <UserIcon onClick={() => setShowUserDetails((prev) => !prev)}>
-              <UserRound size={20}/>
-            </UserIcon>
-            {showUserDetails && user && (
-              <UserProfile
-                user={user}
-                setIsLoggedIn={setIsLoggedIn}
-                setUser={setUser}
-                setShowUserDetails={setShowUserDetails}
-              />
-            )}
-          </>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            <LoginBtn onClick={() => setAuthMode("login")}>Login</LoginBtn>
-            <SignupBtn onClick={() => setAuthMode("signup")}>Sign Up</SignupBtn>
-          </div>
-        )}
-      </li>
-    )}
+            <ul>
+              {/* Mobile view – show user or auth buttons */}
+              {isMenuOpen && (
+                <MobileOnly>
+                  {" "}
+                  <li style={{ marginBottom: "1rem" }}>
+                    {isLoggedIn ? (
+                      <>
+                        <UserIcon
+                          onClick={() => setShowUserDetails((prev) => !prev)}
+                        >
+                          <UserRound size={20} />
+                        </UserIcon>
+                        {showUserDetails && user && (
+                          <UserProfile
+                            user={user}
+                            setIsLoggedIn={setIsLoggedIn}
+                            setUser={setUser}
+                            setShowUserDetails={setShowUserDetails}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        <LoginBtn onClick={() => setAuthMode("login")}>
+                          Login
+                        </LoginBtn>
+                        <SignupBtn onClick={() => setAuthMode("signup")}>
+                          Sign Up
+                        </SignupBtn>
+                      </div>
+                    )}
+                  </li>
+                </MobileOnly>
+              )}
 
-    {[
-      "Home",
-      "Facilities",
-      "About",
-      "Review",
-      "UoMFacilities",
-      "UoMFacHome",
-    ].map((item, index) => (
-      <li key={item} style={{ "--index": index }}>
-        <Link to={`/${item === "Home" ? "" : item}`}>{item}</Link>
-      </li>
-    ))}
-  </ul>
-</Nav>
-
-
+              {[
+                "Home",
+                "Facilities",
+                "About",
+                "Review",
+                "UoMFacilities",
+                "UoMFacHome",
+              ].map((item, index) => (
+                <li key={item} style={{ "--index": index }}>
+                  <Link to={`/${item === "Home" ? "" : item}`}>{item}</Link>
+                </li>
+              ))}
+            </ul>
+          </Nav>
 
           {isLoggedIn ? (
-  <DesktopOnly>
-    <UserSection>
-      <UserIcon onClick={() => setShowUserDetails((prev) => !prev)}>
-        <UserRound size={20}/>
-      </UserIcon>
-      {showUserDetails && user && (
-        <UserProfile
-          user={user}
-          setIsLoggedIn={setIsLoggedIn}
-          setUser={setUser}
-          setShowUserDetails={setShowUserDetails}
-        />
-      )}
-    </UserSection>
-  </DesktopOnly>
-) : (
-  <DesktopOnly>
-  <AuthButtons>
-    <LoginBtn onClick={() => setAuthMode("login")}>Login</LoginBtn>
-    <SignupBtn onClick={() => setAuthMode("signup")}>Sign Up</SignupBtn>
-  </AuthButtons>
-</DesktopOnly>
-
-)}
-
-
+            <DesktopOnly>
+              <UserSection>
+                <UserIcon onClick={() => setShowUserDetails((prev) => !prev)}>
+                  <UserRound size={20} />
+                </UserIcon>
+                {showUserDetails && user && (
+                  <UserProfile
+                    user={user}
+                    setIsLoggedIn={setIsLoggedIn}
+                    setUser={setUser}
+                    setShowUserDetails={setShowUserDetails}
+                  />
+                )}
+              </UserSection>
+            </DesktopOnly>
+          ) : (
+            <DesktopOnly>
+              <AuthButtons>
+                <LoginBtn onClick={() => setAuthMode("login")}>Login</LoginBtn>
+                <SignupBtn onClick={() => setAuthMode("signup")}>
+                  Sign Up
+                </SignupBtn>
+              </AuthButtons>
+            </DesktopOnly>
+          )}
         </HeaderContainer>
       </Header>
 
@@ -634,9 +653,17 @@ function HeaderComponent() {
         <Overlay onClick={handleCloseModal}>
           <div onClick={(e) => e.stopPropagation()}>
             {authMode === "login" ? (
-              <LoginModal isOpen onClose={handleCloseModal} />
+              <LoginModal
+                isOpen
+                onClose={handleCloseModal}
+                goToLogin={() => setAuthMode("signup")}
+              />
             ) : (
-              <SignupModal isOpen onClose={handleCloseModal} />
+              <SignupModal
+                isOpen
+                onClose={handleCloseModal}
+                onSignupSuccess={() => setAuthMode("login")}
+              />
             )}
           </div>
         </Overlay>
