@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { useState } from "react";
 
 // Styled Components
 const ModalOverlay = styled.div`
@@ -83,12 +84,50 @@ const ModalButton = styled.button`
   }
 `;
 
+const LinkSignup = styled.p`
+  font-size:small;
+  font-style: italic;
+  margin: 0.5rem 0;
+
+  span{
+    color: var(--primary-color);
+    cursor: pointer;
+  }
+` ;
+
 // Component
-const LoginModal = ({ isOpen, onClose }) => {
-  const handleSubmit = (e) => {
+const LoginModal = ({ isOpen, onClose,goToLogin }) => {
+  const [loginData, setLoginData] = useState({
+    email: "",
+    password: "",
+  });
+  const [loginError, setLoginError] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Perform login logic
-    console.log("Logging in...");
+    setLoginError("");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8001/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("user", JSON.stringify(result.user)); // Save to localStorage
+        alert("Login successful!");
+        onClose(); // Close modal
+        window.location.reload(); // Optional: refresh UI
+      } else {
+        setLoginError(result.error || "Login failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setLoginError("Server or network error");
+    }
   };
 
   return (
@@ -102,20 +141,38 @@ const LoginModal = ({ isOpen, onClose }) => {
         <form onSubmit={handleSubmit}>
           <FormGroup>
             <label htmlFor="loginEmail">Email</label>
-            <input type="email" id="loginEmail" required />
+            <input
+              type="email"
+              id="loginEmail"
+              required
+              value={loginData.email}
+              onChange={(e) =>
+                setLoginData({ ...loginData, email: e.target.value })
+              }
+            />
           </FormGroup>
 
           <FormGroup>
             <label htmlFor="loginPassword">Password</label>
-            <input type="password" id="loginPassword" required />
+            <input
+              type="password"
+              id="loginPassword"
+              required
+              value={loginData.password}
+              onChange={(e) =>
+                setLoginData({ ...loginData, password: e.target.value })
+              }
+            />
           </FormGroup>
 
+          <LinkSignup>Don't have an account?<span onClick={goToLogin}>SignUp</span> </LinkSignup>
+
+          {loginError && (
+            <p style={{ color: "red", fontWeight: "500" }}>{loginError}</p>
+          )}
+
           <ModalFooter>
-            <ModalButton
-              type="button"
-              className="cancel-btn"
-              onClick={onClose}
-            >
+            <ModalButton type="button" className="cancel-btn" onClick={onClose}>
               Cancel
             </ModalButton>
             <ModalButton type="submit" className="submit-btn">

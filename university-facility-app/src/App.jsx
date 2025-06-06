@@ -49,7 +49,7 @@ function App() {
       <ScrollToTop />
       <MainContent>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<UOMFacHome />} />
           <Route path="/facilities" element={<Facilities />} />
           <Route path="/about" element={<About />} />
           <Route path="/review" element={<Review />} />

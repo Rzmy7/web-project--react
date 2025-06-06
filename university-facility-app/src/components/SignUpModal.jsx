@@ -84,7 +84,9 @@ const FormGroup = styled.div`
 
 const ModalFooter = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  flex-direction: column;
+  row-gap: 1rem;
 `;
 
 const ModalButton = styled.button`
@@ -111,6 +113,7 @@ const OtpButton = styled.button`
   padding: 0.6rem;
   background-color: var(--light-gray);
   border-radius: 0.2rem;
+  width: 6.5rem;
 
   &:hover {
     background-color: var(--medium-gray);
@@ -138,21 +141,101 @@ const OtpButton = styled.button`
     }
   }
 `;
+const LinkSignup = styled.p`
+  font-size:small;
+  font-style: italic;
+  margin: 0.5rem 0;
+
+  span{
+    color: var(--primary-color);
+    cursor: pointer;
+  }
+` ;
 
 // ---------------- SignupModal Component ---------------- //
 
-const SignupModal = ({ isOpen, onClose }) => {
-  const handleSubmit = (e) => {
+const SignupModal = ({ isOpen, onClose, onSignupSuccess }) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Add signup logic here
+
+    if (formData.password !== formData.confirmPassword) {
+      setFormError("Passwords do not match.");
+      return;
+    }
+
+    // 🔐 2. Check if verification code matches generated OTP
+    if (formData.verificationCode !== generatedOtp) {
+      setFormError("Incorrect verification code.");
+      return;
+    }
+
+    // ✅ Clear error and proceed
+    setFormError("");
+
+    const now = new Date();
+    const date = now.toLocaleDateString("en-GB");
+    const time = now.toLocaleTimeString("en-GB");
+
+    const updatedFormData = {
+      name: formData.name,
+      indexno: formData.indexNumber,
+      email: formData.email,
+      mobilenumber: formData.mobileNumber,
+      password: formData.password,
+      signUpDate: date,
+      signUpTime: time,
+    };
+    try {
+      const response = await fetch("http://127.0.0.1:8001/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedFormData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("Signup successful!");
+          console.log("trigg");
+          console.log("✅ SignupModal props:", { isOpen, onClose, onSignupSuccess });
+
+          if (onSignupSuccess) onSignupSuccess();
+          setFormData({
+            name: "",
+            password: "",
+            confirmPassword: "",
+            indexNumber: "",
+            mobileNumber: "",
+            email: "",
+            verificationCode: "",
+            signupDate: "",
+            signupTime: "",
+          });
+        
+
+        // Optionally reset the form
+      } else {
+        setFormError(result.error || "Signup failed");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setFormError("Network or server error.");
+    }
+
     console.log("Signup submitted");
-    console.log("Form Data:", formData);
+    console.log("Form Data:", updatedFormData);
   };
 
   const [OtpBtnLable, setOtpBtnLabel] = useState("Send OTP");
   const [OtpNum, setOtpNum] = useState(0);
   const [OtpClickable, setOtpClickable] = useState(true);
   const [generatedOtp, setGeneratedOtp] = useState("");
+  const [formError, setFormError] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
 
   useEffect(() => {
     // Side effect logic here
@@ -167,6 +250,8 @@ const SignupModal = ({ isOpen, onClose }) => {
     mobileNumber: "",
     email: "",
     verificationCode: "",
+    signupDate: "",
+    signupTime: "",
   });
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
@@ -175,50 +260,23 @@ const SignupModal = ({ isOpen, onClose }) => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
-  // const handleOtpBtn = () => {
-  //   if (!OtpClickable) return;
-
-  //   const nextTry = OtpNum + 1;
-  //   setOtpNum(nextTry);
-
-  //   // Simulate sending OTP
-  //   const otp = generateOtp();
-  //   setGeneratedOtp(otp);
-  //   console.log("OTP sent!", otp);
-
-  //   if (nextTry < 3) {
-  //     // 1st and 2nd click - no delay
-  //     setOtpBtnLabel("Resend OTP");
-  //   } else if (nextTry === 3) {
-  //     applyCooldown(15, "Resend OTP");
-  //   } else if (nextTry === 4) {
-  //     applyCooldown(20, "Resend OTP");
-  //   } else if (nextTry === 5) {
-  //     applyCooldown(30, "Resend OTP");
-  //   } else {
-  //     setOtpBtnLabel("Try again later");
-  //     setOtpClickable(false);
-  //   }
-  // };
-
   const handleOtpBtn = async () => {
-    if (!OtpClickable || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      return;
+    if (!OtpClickable || !isEmailValid || isSendingOtp) return;
+
+    setIsSendingOtp(true);
+    setOtpBtnLabel("Sending...");
 
     const nextTry = OtpNum + 1;
     setOtpNum(nextTry);
 
     const otp = generateOtp();
-    setGeneratedOtp(otp); // Optional: for verification later
-
+    setGeneratedOtp(otp);
     console.log("Generated OTP:", otp);
 
     try {
       const response = await fetch("http://127.0.0.1:8001/send-otp", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: formData.email,
           otp: otp,
@@ -232,7 +290,20 @@ const SignupModal = ({ isOpen, onClose }) => {
       }
 
       console.log("OTP sent successfully:", data);
-      setOtpBtnLabel("Resend OTP");
+      setOtpBtnLabel("Sent"); // ✅ Show sent text
+      setOtpSent(true);
+      setIsSendingOtp(false);
+
+      setTimeout(() => {
+        setOtpBtnLabel("Resend OTP");
+        setIsSendingOtp(false); // ✅ Re-enable after timeout
+      }, 1500);
+
+      // ✅ Delay to change to "Resend OTP"
+      setTimeout(() => {
+        setOtpBtnLabel("Resend OTP");
+      }, 1500);
+      setOtpSent(true); // ✅ Enable verification code input
     } catch (error) {
       console.error("Error sending OTP:", error.message);
       setOtpBtnLabel("Error!");
@@ -346,7 +417,7 @@ const SignupModal = ({ isOpen, onClose }) => {
             <OtpButton
               type="button"
               onClick={handleOtpBtn}
-              disabled={!OtpClickable || !isEmailValid}
+              disabled={!OtpClickable || !isEmailValid || isSendingOtp}
             >
               {OtpBtnLable}
             </OtpButton>
@@ -358,19 +429,45 @@ const SignupModal = ({ isOpen, onClose }) => {
               type="tel"
               id="verificationCode"
               required
+              disabled={!otpSent} // ✅ disable unless otpSent is true
+              style={{
+                backgroundColor: !otpSent ? "#f1f1f1" : "white",
+                cursor: !otpSent ? "not-allowed" : "auto",
+              }}
               onChange={(e) =>
                 setFormData({ ...formData, verificationCode: e.target.value })
               }
             />
           </FormGroup>
 
+          <LinkSignup>Don't have an account?<span onClick={onSignupSuccess}>SignUp</span> </LinkSignup>
+
           <ModalFooter>
-            <ModalButton type="button" className="cancel-btn" onClick={onClose}>
-              Cancel
-            </ModalButton>
-            <ModalButton type="submit" className="submit-btn">
-              Sign Up
-            </ModalButton>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <ModalButton
+                type="button"
+                className="cancel-btn"
+                onClick={onClose}
+              >
+                Cancel
+              </ModalButton>
+              <ModalButton type="submit" className="submit-btn">
+                Sign Up
+              </ModalButton>
+            </div>
+            <div>
+              {formError && (
+                <p
+                  style={{
+                    color: "red",
+                    fontWeight: 500,
+                    marginBottom: "1rem",
+                  }}
+                >
+                  {formError}
+                </p>
+              )}
+            </div>
           </ModalFooter>
         </form>
       </ModalContent>
