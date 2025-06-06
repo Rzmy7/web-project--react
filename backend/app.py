@@ -9,6 +9,7 @@ import os
 from flask_mail import Mail, Message
 import bcrypt
 
+from psycopg2.extras import RealDictCursor
 
 load_dotenv()
 
@@ -34,14 +35,97 @@ def convert_types(row):
         key: (value.isoformat() if isinstance(value, (datetime, date, time)) else value)
         for key, value in row.items()
     }
+    
 
 # --------- API Route to Fetch All Shop Data ---------
-@app.route('/api/data', methods=['GET'])
-def get_data():
+# @app.route('/api/data', methods=['GET'])
+# def get_data():
+#     try:
+#         conn = get_db_connection()
+#         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+#         cur.execute("SELECT * FROM shop;")
+#         rows = cur.fetchall()
+#         result = [convert_types(row) for row in rows]
+#         cur.close()
+#         conn.close()
+#         return jsonify(result)
+#     except Exception as e:
+#         print(f"Error fetching data: {e}")
+#         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/test_db', methods=['GET'])
+def test_db():
+    now = datetime.now()
+    day_name_now = now.strftime("%A")
     try:
         conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("SELECT * FROM shop;")
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT 1;")
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        if result:
+            return jsonify({'status': 'success', 'message': 'Database connection successful','date':day_name_now}), 200
+        else:
+            return jsonify({'status': 'failure', 'message': 'Database connection failed'}), 500
+    except Exception as e:
+        print(f"Error connecting to the database: {e}")
+        return jsonify({'status': 'failure', 'message': str(e)}), 500
+
+
+@app.route('/api/data', methods=['GET'])
+def get_data():
+    now = datetime.now()
+    day_name_now = now.strftime("%A")  # Get the current day name (e.g., "Monday")
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+        WITH ShopTypes AS (
+            SELECT 
+                s.shop_id,
+                s.shop_name AS "name",
+                s."Location" AS "location",
+                CASE 
+                    WHEN s.open_status THEN 'Open'
+                    ELSE 'Closed'
+                END AS "status",
+                s.shop_image AS "picture",
+                so.opening_time AS "opentime",
+                so.closing_time AS "closetime",
+                CASE 
+                    WHEN fc.fshop_id IS NOT NULL THEN 'Canteen'
+                    WHEN jb.jshop_id IS NOT NULL THEN 'Juice Bar'
+                    WHEN bs.bshop_id IS NOT NULL THEN 'Bookshop'
+                END AS "type",
+                CASE 
+                    WHEN fc.fshop_id IS NOT NULL THEN 
+                        CASE 
+                            WHEN jb.jshop_id IS NOT NULL THEN 'Juice Bar'
+                            WHEN bs.bshop_id IS NOT NULL THEN 'Bookshop'
+                        END
+                    WHEN jb.jshop_id IS NOT NULL THEN 
+                        CASE 
+                            WHEN bs.bshop_id IS NOT NULL THEN 'Bookshop'
+                        END
+                END AS "type2",
+                CASE 
+                    WHEN fc.fshop_id IS NOT NULL AND jb.jshop_id IS NOT NULL THEN 
+                        CASE 
+                            WHEN bs.bshop_id IS NOT NULL THEN 'Bookshop'
+                        END
+                    WHEN jb.jshop_id IS NOT NULL AND bs.bshop_id IS NOT NULL THEN 'Bookshop'
+                END AS "type3"
+            FROM shop s
+            INNER JOIN shop_open so ON s.shop_id = so.shop_id
+            LEFT JOIN food_canteen fc ON s.shop_id = fc.fshop_id
+            LEFT JOIN juice_bar jb ON s.shop_id = jb.jshop_id
+            LEFT JOIN bookshop bs ON s.shop_id = bs.bshop_id
+            WHERE so.day = %s  -- Filter for the current day
+        )
+        SELECT * FROM ShopTypes;
+        """, (day_name_now,))
         rows = cur.fetchall()
         result = [convert_types(row) for row in rows]
         cur.close()
