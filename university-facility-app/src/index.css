@@ -1,4 +1,8 @@
 /* In your CSS file (e.g., index.css) */
+
+@import "leaflet/dist/leaflet.css";
+
+
 * {
     margin: 0;
     padding: 0;

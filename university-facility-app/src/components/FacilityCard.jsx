@@ -41,7 +41,7 @@ const FacilityStatus = styled.span`
   font-size: 0.8rem;
   font-weight: 600;
   color: #f8f9fa;
-  background-color: ${({ isOpen }) => (isOpen ? "#27ae60" : "#e74c3c")};
+  background-color: ${({ $isOpen }) => ($isOpen ? "#27ae60" : "#e74c3c")};
 `;
 
 const FacilityContent = styled.div`
@@ -101,6 +101,7 @@ const FacilityBtn = styled.button`
 `;
 
 function FacilityCard({
+  id,
   name,
   type,
   type2,
@@ -122,7 +123,7 @@ function FacilityCard({
     <FacilityCardContainer data-type={type} data-status={status} id={name}>
       <FacilityImage>
         <FacilityImgTag src={picture} alt={name} />
-        <FacilityStatus isOpen={status === "Open"}>{status}</FacilityStatus>
+        <FacilityStatus $isOpen={status === "Open"}>{status}</FacilityStatus>
       </FacilityImage>
       <FacilityContent>
         <FacilityType>
@@ -136,13 +137,13 @@ function FacilityCard({
           <FacilityDetailsText>Location: {location}</FacilityDetailsText>
         </FacilityDetails>
         <FacilityActions>
-          <Link to={`/FacilityDetails`}>
-            <FacilityBtn color="#1a3064" hoverColor="#0f1e42" data-id={name}>
+          <Link to={`/facility/${id}`}>
+            <FacilityBtn color="#1a3064" $hoverColor="#0f1e42" data-id={name}>
               View Details
             </FacilityBtn>
           </Link>
-          <Link to={`/shopItems/${name}`}>
-            <FacilityBtn color="#e67e22" hoverColor="#d35400">
+          <Link to={`/facilityItems/${id}`}>
+            <FacilityBtn color="#e67e22" $hoverColor="#d35400">
               Pre-order
             </FacilityBtn>
           </Link>
