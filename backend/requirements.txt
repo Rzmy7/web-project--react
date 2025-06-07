@@ -1,4 +1,8 @@
-flask
+Flask
+flask-cors
 flask-socketio
+psycopg2-binary
+python-dotenv
+flask-mail
+bcrypt
 eventlet
-psycopg2

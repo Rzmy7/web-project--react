@@ -108,11 +108,11 @@ function SearchBar({
           </Select>
         </div>
         <div style={{ flex: "2" }}>
-          <Label>Search for items or services</Label>
+          <Label>Search for services</Label>
           <SearchInput>
             <Input
               type="text"
-              placeholder="e.g., Fried Rice, Mango Juice, Printing..."
+              placeholder="e.g., canteen name, book shop name"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -124,9 +124,9 @@ function SearchBar({
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
