@@ -443,7 +443,7 @@ const SignupModal = ({ isOpen, onClose, onSignupSuccess }) => {
           </FormGroup>
 
           <LinkSignup>
-            Don't have an account?<span onClick={onSignupSuccess}>SignUp</span>{" "}
+            Don't have an account?<span onClick={onSignupSuccess}>Log in</span>{" "}
           </LinkSignup>
 
           <ModalFooter>
