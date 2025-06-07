@@ -115,6 +115,8 @@ const LoginModal = ({ isOpen, onClose,goToLogin }) => {
       });
 
       const result = await response.json();
+      console.log(result);
+      console.log(result.user);
 
       if (response.ok) {
         localStorage.setItem("user", JSON.stringify(result.user)); // Save to localStorage

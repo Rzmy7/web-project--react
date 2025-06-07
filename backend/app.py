@@ -601,8 +601,13 @@ def login_user():
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        # Fetch user by email
-        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        # Join users + client tables
+        cur.execute("""
+            SELECT u.user_id, u.full_name, u.email, u.mobile_number, c.index_no, u.user_password
+            FROM users u
+            JOIN client c ON c.user_id = u.user_id
+            WHERE u.email = %s
+        """, (email,))
         user = cur.fetchone()
 
         cur.close()
@@ -614,8 +619,6 @@ def login_user():
         if not bcrypt.checkpw(password.encode('utf-8'), user['user_password'].encode('utf-8')):
             return jsonify({'error': 'Incorrect password'}), 401
 
-
-        # Exclude password from response
         user.pop('user_password', None)
 
         return jsonify({'message': 'Login successful', 'user': user}), 200
