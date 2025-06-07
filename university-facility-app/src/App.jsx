@@ -54,7 +54,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/review" element={<Review />} />
           <Route path="/UoMFacilities" element={<UOMFacilities />} />
-          <Route path="/shopItems/:shopName" element={<ShopPage />} />
+          <Route path="/facilityItems/:shopId" element={<ShopPage />} />
           <Route path="/UOMFacHome" element={<UOMFacHome />} />
           <Route path="/FacilityDetails" element={<FacilityDetails />} />
           <Route path="/facility/:facilityId" element={<FacilityDetails />} />

@@ -142,7 +142,7 @@ function FacilityCard({
               View Details
             </FacilityBtn>
           </Link>
-          <Link to={`/shopItems/${name}`}>
+          <Link to={`/facilityItems/${id}`}>
             <FacilityBtn color="#e67e22" $hoverColor="#d35400">
               Pre-order
             </FacilityBtn>
