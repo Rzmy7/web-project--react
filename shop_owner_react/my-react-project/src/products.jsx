@@ -197,7 +197,7 @@ const ModalForm = styled.div`
   flex-direction: column;
   gap: 1rem;
 
-  input {
+  input, select {
     padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -254,37 +254,37 @@ function Products() {
     {
       title: 'canteen products',
       items: [
-        { id: 1, name: 'Egg bun', price: 'LKR 90.000' },
-        { id: 2, name: 'Rolls', price: 'LKR 70.00' },
-        { id: 3, name: 'Fish bun', price: 'LKR 50.00' }
+        { id: 1, name: 'Egg bun', price: 'LKR 90.000', type: 'Main Dishes' },
+        { id: 2, name: 'Rolls', price: 'LKR 70.00', type: 'Main Dishes' },
+        { id: 3, name: 'Fish bun', price: 'LKR 50.00', type: 'Main Dishes' }
       ]
     },
     {
       title: 'juice bar products',
       items: [
-        { id: 1, name: 'Chocolate milk shake', price: 'LKR 340.000' },
-        { id: 2, name: 'Watermellon', price: 'LKR 120.00' },
-        { id: 3, name: 'Banana boat', price: 'LKR 350.00' }
+        { id: 1, name: 'Chocolate milk shake', price: 'LKR 340.000', type: 'Drinks' },
+        { id: 2, name: 'Watermellon', price: 'LKR 120.00', type: 'Drinks' },
+        { id: 3, name: 'Banana boat', price: 'LKR 350.00', type: 'Drinks' }
       ]
     },
     {
       title: 'bookshop accessories',
       items: [
-        { id: 1, name: 'A4 sheet', price: 'LKR 10.000' },
-        { id: 2, name: 'Pen', price: 'LKR 30.00' },
-        { id: 3, name: 'Eraser', price: 'LKR 30.00' }
+        { id: 1, name: 'A4 sheet', price: 'LKR 10.000', type: 'Main Dishes' },
+        { id: 2, name: 'Pen', price: 'LKR 30.00', type: 'Main Dishes' },
+        { id: 3, name: 'Eraser', price: 'LKR 30.00', type: 'Main Dishes' }
       ]
     }
   ]);
 
   const [showModal, setShowModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [newItem, setNewItem] = useState({ name: '', price: '', category: '' });
+  const [newItem, setNewItem] = useState({ name: '', price: '', category: '', type: 'Main Dishes' });
   const [editItem, setEditItem] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
 
   const handleAddItem = () => {
-    if (!newItem.name || !newItem.price) return;
+    if (!newItem.name || !newItem.price || !newItem.type) return;
 
     setCategories(categories.map(category => {
       if (category.title === newItem.category) {
@@ -295,7 +295,8 @@ function Products() {
             {
               id: category.items.length + 1,
               name: newItem.name,
-              price: `LKR ${parseFloat(newItem.price).toFixed(3)}`
+              price: `LKR ${parseFloat(newItem.price).toFixed(3)}`,
+              type: newItem.type
             }
           ]
         };
@@ -303,7 +304,7 @@ function Products() {
       return category;
     }));
 
-    setNewItem({ name: '', price: '', category: '' });
+    setNewItem({ name: '', price: '', category: '', type: 'Main Dishes' });
     setShowModal(false);
   };
 
@@ -313,7 +314,7 @@ function Products() {
   };
 
   const handleSaveEdit = () => {
-    if (!editItem.name || !editItem.price) return;
+    if (!editItem.name || !editItem.price || !editItem.type) return;
 
     setCategories(categories.map(category => {
       if (category.title === editItem.category) {
@@ -363,7 +364,7 @@ function Products() {
           <h2>{category.title}</h2>
           <AddButton>
             <button onClick={() => {
-              setNewItem({ name: '', price: '', category: category.title });
+              setNewItem({ name: '', price: '', category: category.title, type: 'Main Dishes' });
               setShowModal(true);
             }}>
               Add new items
@@ -414,6 +415,13 @@ function Products() {
                   value={editItem ? editItem.price.replace('LKR ', '') : newItem.price}
                   onChange={(e) => (editItem ? setEditItem({ ...editItem, price: e.target.value }) : setNewItem({ ...newItem, price: e.target.value }))}
                 />
+                <select
+                  value={editItem ? editItem.type : newItem.type}
+                  onChange={(e) => (editItem ? setEditItem({ ...editItem, type: e.target.value }) : setNewItem({ ...newItem, type: e.target.value }))}
+                >
+                  <option value="Main Dishes">Main Dishes</option>
+                  <option value="Drinks">Drinks</option>
+                </select>
                 <button className="submit-btn" onClick={editItem ? handleSaveEdit : handleAddItem}>
                   {editItem ? 'Save Changes' : 'Add Item'}
                 </button>

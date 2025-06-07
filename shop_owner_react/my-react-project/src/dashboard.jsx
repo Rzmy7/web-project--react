@@ -5,7 +5,8 @@ const Section = styled.section`
   background-color: var(--secondary-color, #ecf0f1);
   width: 100%;
   max-width: 1800px;
-  padding: 30px;
+  padding: 2rem;
+  scroll-margin-top: 50px;
   margin-bottom: 30px;
   box-sizing: border-box;
 `;
@@ -15,9 +16,28 @@ const DashboardTitle = styled.div`
   color: var(--primary-color, #2c3e50);
   border-bottom: 2px solid var(--primary-color, #2c3e50);
   padding-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
   h2 {
     font-size: 28px;
+    margin: 0;
+  }
+`;
+
+const LogoutButton = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: var(--danger, #e74c3c);
+  color: var(--secondary-color, #ecf0f1);
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #c0392b;
   }
 `;
 
@@ -59,7 +79,7 @@ const ImageWrapper = styled.div`
 `;
 
 const CanteenImage = styled.img`
-  width: 200%;
+  width: 100%;
   max-width: 400px;
   height: auto;
   border-radius: 7px;
@@ -101,7 +121,7 @@ const StatusWrapper = styled.div`
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start
+  justify-content: flex-start;
   align-items: flex-end;
 
   @media (max-width: 1000px) {
@@ -117,7 +137,6 @@ const ShopStatusStyle = styled.div`
   font-size: 16px;
   font-weight: bold;
   line-height: 20px;
-  
 `;
 
 const CheckboxWrapper = styled.label`
@@ -254,7 +273,6 @@ const NotifiAlert = styled.div`
   border: 1px solid var(--light-gray, #ccc);
   padding: 20px 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  border-radius: 5px;
   border-left: 2px solid var(--accent-color, #e74c3c);
   justify-content: space-between;
 `;
@@ -292,7 +310,7 @@ const NotifiBtns = styled.div`
   }
 `;
 
-function Dashboard() {
+function Dashboard({ onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -308,10 +326,11 @@ function Dashboard() {
     <Section id="dashboard">
       <DashboardTitle>
         <h2>Hello! Wasantha</h2>
+        <LogoutButton onClick={onLogout}>Logout</LogoutButton>
       </DashboardTitle>
 
       <OwnerDetails>
-        <Title>L canteen</Title>
+        <Title>L Canteen</Title>
         <ContentRow>
           <ImageWrapper>
             {imageError ? (
@@ -374,7 +393,7 @@ function Dashboard() {
       </DashboardStats>
 
       <Notifications>
-        <h2>Notifications..</h2>
+        <h2>Notifications</h2>
         {[1, 2, 3].map((_, index) => (
           <NotifiAlert key={index}>
             <span>You have alert!</span>
