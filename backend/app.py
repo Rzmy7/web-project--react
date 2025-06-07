@@ -58,6 +58,43 @@ def convert_types(row):
 #         print(f"Error fetching data: {e}")
 #         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/places', methods=['GET'])
+def get_places():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        cur.execute("""
+            SELECT 
+                shop_name AS name,
+                latitude AS lat,
+                longitude AS lng,
+                "Location" AS description
+            FROM shop
+            WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
+        """)
+
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        # Convert Decimal to float for JavaScript compatibility
+        places = [
+            {
+                'name': row['name'],
+                'lat': float(row['lat']),
+                'lng': float(row['lng']),
+                'description': row['description']
+            } for row in rows
+        ]
+
+        return jsonify(places)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
 
 @app.route('/api/test_db', methods=['GET'])
 def test_db():
@@ -479,18 +516,18 @@ def get_facility_details(facility_id):
 
     -- Review list
     COALESCE((
-        SELECT json_agg(json_build_object(
-            'id', cr.client_id,
-            'userName', u.full_name,
-            'rating', cr.star_mark,
-            'comment', cr.review,
-            'date', cr.date
-        ) ORDER BY cr.date DESC, cr."time" DESC)
-        FROM client_reviews cr
-        JOIN client c ON cr.client_id = c.user_id
-        JOIN users u ON c.user_id = u.user_id
-        WHERE cr.shop_id = s.shop_id
-    ), '[]') AS reviews
+    SELECT json_agg(json_build_object(
+        'id', cr.client_id,
+        'userName', u.full_name,
+        'rating', cr.star_mark,
+        'comment', cr.review,
+        'dateTime', to_char(cr."time", 'YYYY-MM-DD"T"HH24:MI:SS')
+    ) ORDER BY cr."time" DESC)
+    FROM client_reviews cr
+    JOIN client c ON cr.client_id = c.user_id
+    JOIN users u ON c.user_id = u.user_id
+    WHERE cr.shop_id = s.shop_id
+), '[]') AS reviews
 
 FROM shop s inner join users u on s.shopowner_id=u.user_id
 

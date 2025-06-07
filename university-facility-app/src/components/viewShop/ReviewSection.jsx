@@ -4,6 +4,12 @@ import { Star } from 'lucide-react';
 import AddReviewForm from './AddReviewForm';
 import axios from 'axios';
 
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
+
+
 // Styled components
 const ReviewItem = styled.div`
   padding: 16px 0;
@@ -88,98 +94,219 @@ const ErrorMessage = styled.div`
 `;
 
 // ReviewsSection Component
-const ReviewsSection = ({ facilityId = 1 }) => {
-  const [reviews, setReviews] = useState([]);
+// const ReviewsSection = ({ facilityId = 1}) => {
+//   const [reviews, setReviews] = useState([]);
+//   const [rating, setRating] = useState(0);
+//   const [totalReviews, setTotalReviews] = useState(0);
+//   const [error, setError] = useState('');
+//   const storedUser = localStorage.getItem('user');
+//   const user = storedUser ? JSON.parse(storedUser) : null;
+
+//   // Fetch reviews and calculate rating
+//   useEffect(() => {
+//     const fetchReviews = async () => {
+//       try {
+//         console.log(`Fetching reviews for facilityId: ${facilityId}`);
+//         const response = await axios.get(`http://127.0.0.1:8001/api/facility/${facilityId}`);
+//         console.log('API GET response:', response.data);
+//         const fetchedReviews = Array.isArray(response.data) ? response.data : 
+//                               response.data.reviews || [];
+//         setReviews(fetchedReviews);
+//         const totalStars = fetchedReviews.reduce((sum, review) => sum + (Number(review.stars) || 0), 0);
+//         const avgRating = fetchedReviews.length > 0 ? (totalStars / fetchedReviews.length).toFixed(1) : 0;
+//         setRating(avgRating);
+//         setTotalReviews(fetchedReviews.length);
+//         setError('');
+//       } catch (err) {
+//         setError('Failed to fetch reviews. Please try again.');
+//         console.error('Error fetching reviews:', err.message, err.response?.data);
+//       }
+//     };
+
+//     fetchReviews();
+//   }, [facilityId]);
+
+//   // Submit handler
+//   const handleReviewSubmit = async (review) => {
+//     console.log('Received review from AddReviewForm:', review);
+//     if (!user || !user.full_name) {
+//       setError('You must be logged in to submit a review.');
+//       console.error('User not logged in or missing full_name:', user);
+//       return;
+//     }
+
+//     if (!review || !review.comment || !review.rating) {
+//       setError('Review must include a comment and rating.');
+//       console.error('Invalid review data:', review);
+//       return;
+//     }
+
+//     const now = new Date();
+//     const isoTimestamp = now.toISOString();
+//     const reviewData = {
+//       userName: user.full_name,
+//       comment: review.comment,
+//       stars: Number(review.rating),
+//       timestamp: isoTimestamp,
+//       time: 'Just Now',
+//       id: `${facilityId}-${Date.now()}`,
+//     };
+//     console.log('Submitting review to backend:', reviewData);
+
+//     // Optimistically update UI
+//     setReviews((prevReviews) => {
+//       const updatedReviews = [...prevReviews, reviewData];
+//       const totalStars = updatedReviews.reduce((sum, r) => sum + (Number(r.stars) || 0), 0);
+//       const avgRating = updatedReviews.length > 0 ? (totalStars / updatedReviews.length).toFixed(1) : 0;
+//       setRating(avgRating);
+//       setTotalReviews(updatedReviews.length);
+//       setError('');
+//       console.log('Optimistically updated reviews:', updatedReviews);
+//       return updatedReviews;
+//     });
+
+//     try {
+//       // Replace with the correct POST endpoint
+//       const response = await axios.post(`http://127.0.0.1:8001/api/reviews`, reviewData);
+//       console.log('API POST response:', response.data);
+//       // Update ID if provided by backend
+//       if (response.data.id) {
+//         setReviews((prevReviews) =>
+//           prevReviews.map((r) =>
+//             r.id === reviewData.id ? { ...r, id: response.data.id } : r
+//           )
+//         );
+//       }
+//     } catch (err) {
+//       setError('Failed to save review to backend. It’s still shown locally.');
+//       console.error('Error submitting review:', err.message, err.response?.data);
+//       // Optional: Rollback optimistic update if needed
+//       // setReviews((prevReviews) => prevReviews.filter((r) => r.id !== reviewData.id));
+//     }
+//   };
+
+//   // Render stars
+//   const renderStars = (rating) => {
+//     const safeRating = Number(rating) || 0;
+//     return Array.from({ length: 5 }, (_, index) => (
+//       <Star
+//         key={index}
+//         size={20}
+//         fill={index < Math.floor(safeRating) ? 'var(--accent-color, #e74c3c)' : 'none'}
+//         color={index < Math.floor(safeRating) ? 'var(--accent-color, #e74c3c)' : 'var(--medium-gray, #ddd)'}
+//       />
+//     ));
+//   };
+
+//   return (
+//     <div
+//       style={{
+//         borderRadius: '12px',
+//         backgroundColor: 'white',
+//         padding: '1rem',
+//         boxShadow: '1px 1px 3px 1px rgba(0,0,0,0.1)',
+//       }}
+//     >
+//       <InfoTitle>
+//         <Star size={20} />
+//         Reviews & Ratings
+//       </InfoTitle>
+
+//       <RatingOverview>
+//         <RatingNumber>{rating}</RatingNumber>
+//         <div>
+//           <StarsContainer>{renderStars(rating)}</StarsContainer>
+//           <div style={{ color: 'var(--dark-gray, #555)', fontSize: '0.9rem' }}>
+//             Based on {totalReviews} reviews
+//           </div>
+//         </div>
+//       </RatingOverview>
+
+//       {error && <ErrorMessage>{error}</ErrorMessage>}
+
+//       {reviews.length === 0 ? (
+//         <NoReviewsMessage>No reviews yet. Be the first!</NoReviewsMessage>
+//       ) : (
+//         <ReviewContainer>
+//           {reviews.map((review) => (
+//             <ReviewItem key={review.id}>
+//               <ReviewHeader>
+//                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+//                   <ReviewerName>{review.userName || 'Anonymous'}</ReviewerName>
+//                   <StarsContainer>{renderStars(review.stars)}</StarsContainer>
+//                 </div>
+//                 <ReviewDate>{review.time || new Date(review.timestamp).toLocaleString()}</ReviewDate>
+//               </ReviewHeader>
+//               <ReviewText>{review.comment}</ReviewText>
+//             </ReviewItem>
+//           ))}
+//         </ReviewContainer>
+//       )}
+
+//       <AddReviewForm onSubmit={handleReviewSubmit} />
+//     </div>
+//   );
+// };
+
+const ReviewsSection = ({ facilityId, reviews: initialReviews = [] }) => {
+  const [reviews, setReviews] = useState(initialReviews);
   const [rating, setRating] = useState(0);
-  const [totalReviews, setTotalReviews] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(initialReviews.length);
   const [error, setError] = useState('');
+
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
 
-  // Fetch reviews and calculate rating
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        console.log(`Fetching reviews for facilityId: ${facilityId}`);
-        const response = await axios.get(`http://127.0.0.1:8001/api/facility/${facilityId}`);
-        console.log('API GET response:', response.data);
-        const fetchedReviews = Array.isArray(response.data) ? response.data : 
-                              response.data.reviews || [];
-        setReviews(fetchedReviews);
-        const totalStars = fetchedReviews.reduce((sum, review) => sum + (Number(review.stars) || 0), 0);
-        const avgRating = fetchedReviews.length > 0 ? (totalStars / fetchedReviews.length).toFixed(1) : 0;
-        setRating(avgRating);
-        setTotalReviews(fetchedReviews.length);
-        setError('');
-      } catch (err) {
-        setError('Failed to fetch reviews. Please try again.');
-        console.error('Error fetching reviews:', err.message, err.response?.data);
-      }
-    };
+    setReviews(initialReviews);
+    const totalStars = initialReviews.reduce((sum, r) => sum + Number(r.rating || 0), 0);
+    const avg = initialReviews.length > 0 ? (totalStars / initialReviews.length).toFixed(1) : '0';
+    setRating(avg);
+    setTotalReviews(initialReviews.length);
+  }, [initialReviews]); // run once
 
-    fetchReviews();
-  }, [facilityId]);
-
-  // Submit handler
   const handleReviewSubmit = async (review) => {
-    console.log('Received review from AddReviewForm:', review);
     if (!user || !user.full_name) {
       setError('You must be logged in to submit a review.');
-      console.error('User not logged in or missing full_name:', user);
       return;
     }
 
-    if (!review || !review.comment || !review.rating) {
+    if (!review?.comment || !review?.rating) {
       setError('Review must include a comment and rating.');
-      console.error('Invalid review data:', review);
       return;
     }
 
     const now = new Date();
-    const isoTimestamp = now.toISOString();
     const reviewData = {
       userName: user.full_name,
       comment: review.comment,
-      stars: Number(review.rating),
-      timestamp: isoTimestamp,
-      time: 'Just Now',
+      rating: Number(review.rating),
+      dateTime: now.toISOString(),
       id: `${facilityId}-${Date.now()}`,
     };
-    console.log('Submitting review to backend:', reviewData);
 
-    // Optimistically update UI
-    setReviews((prevReviews) => {
-      const updatedReviews = [...prevReviews, reviewData];
-      const totalStars = updatedReviews.reduce((sum, r) => sum + (Number(r.stars) || 0), 0);
-      const avgRating = updatedReviews.length > 0 ? (totalStars / updatedReviews.length).toFixed(1) : 0;
-      setRating(avgRating);
-      setTotalReviews(updatedReviews.length);
-      setError('');
-      console.log('Optimistically updated reviews:', updatedReviews);
-      return updatedReviews;
+    setReviews((prev) => {
+      const updated = [...prev, reviewData];
+      const totalStars = updated.reduce((sum, r) => sum + Number(r.rating || 0), 0);
+      const avg = updated.length > 0 ? (totalStars / updated.length).toFixed(1) : '0';
+      setRating(avg);
+      setTotalReviews(updated.length);
+      return updated;
     });
 
     try {
-      // Replace with the correct POST endpoint
-      const response = await axios.post(`http://127.0.0.1:8001/api/reviews`, reviewData);
-      console.log('API POST response:', response.data);
-      // Update ID if provided by backend
-      if (response.data.id) {
-        setReviews((prevReviews) =>
-          prevReviews.map((r) =>
-            r.id === reviewData.id ? { ...r, id: response.data.id } : r
-          )
+      const res = await axios.post(`http://127.0.0.1:8001/api/reviews`, reviewData);
+      if (res.data.id) {
+        setReviews((prev) =>
+          prev.map((r) => (r.id === reviewData.id ? { ...r, id: res.data.id } : r))
         );
       }
     } catch (err) {
       setError('Failed to save review to backend. It’s still shown locally.');
-      console.error('Error submitting review:', err.message, err.response?.data);
-      // Optional: Rollback optimistic update if needed
-      // setReviews((prevReviews) => prevReviews.filter((r) => r.id !== reviewData.id));
+      console.error('Submit error:', err.message, err.response?.data);
     }
   };
 
-  // Render stars
   const renderStars = (rating) => {
     const safeRating = Number(rating) || 0;
     return Array.from({ length: 5 }, (_, index) => (
@@ -227,9 +354,13 @@ const ReviewsSection = ({ facilityId = 1 }) => {
               <ReviewHeader>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <ReviewerName>{review.userName || 'Anonymous'}</ReviewerName>
-                  <StarsContainer>{renderStars(review.stars)}</StarsContainer>
+                  <StarsContainer>{renderStars(review.rating)}</StarsContainer>
                 </div>
-                <ReviewDate>{review.time || new Date(review.timestamp).toLocaleString()}</ReviewDate>
+                <ReviewDate>
+                  {review.dateTime
+                    ? dayjs(review.dateTime).fromNow()
+                    : 'Just now'}
+                </ReviewDate>
               </ReviewHeader>
               <ReviewText>{review.comment}</ReviewText>
             </ReviewItem>
@@ -241,5 +372,6 @@ const ReviewsSection = ({ facilityId = 1 }) => {
     </div>
   );
 };
+
 
 export default ReviewsSection;
