@@ -151,7 +151,7 @@ function Navbar({ setActiveSection ,shopOwner}) {
         </NavContainer>
 
         <UserInfo>
-          <UserAvatar></UserAvatar>
+          <UserAvatar>{shopOwner.full_name[0]}</UserAvatar>
           <span>{shopOwner.full_name}</span>
         </UserInfo>
 
