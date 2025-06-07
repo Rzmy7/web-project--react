@@ -502,7 +502,7 @@ function About() {
 
       <SubTitle>Acknowledgments</SubTitle>
       <Paragraph>
-        We thank our project supervisor, Dr. [Supervisor Name], and the University of Moratuwa’s Faculty of [Faculty Name] for their guidance. Special thanks to our peers for their feedback and support.
+       University of Moratuwa’s Faculty of information technology for their guidance. Special thanks to our peers for their feedback and support.
       </Paragraph>
     </AboutContainer>
   );
