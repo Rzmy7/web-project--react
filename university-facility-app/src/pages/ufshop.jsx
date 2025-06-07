@@ -161,7 +161,7 @@ function ShopPage() {
           </ShopInfo>
         </ShopHeader>
 
-        <TabNavigationComponent menuData={menuData} />
+        <TabNavigationComponent menuData={menuData} shopId={shopId} />
       </Shop>
     </div>
   );

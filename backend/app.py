@@ -791,6 +791,104 @@ def signup_client():
         return jsonify({'error': str(e)}), 500
     
     
+@app.route('/api/place_order', methods=['POST'])
+def place_order():
+    data = request.get_json()
+
+    client_id = data.get('client_id')
+    item_id = data.get('item_id')
+    item_name = data.get('item_name')
+    shop_id = data.get('shop_id')
+    quantity = data.get('quantity')
+    notes = data.get('notes', "")
+    order_time = datetime.now()
+
+    if not all([client_id, item_id, item_name, shop_id, quantity]):
+        return jsonify({'status': 'failure', 'message': 'Missing required fields'}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Check food item
+        cur.execute("SELECT food_id FROM food WHERE food_id = %s AND food_name = %s", (item_id, item_name))
+        if cur.fetchone():
+            item_type = 'food'
+            cur.execute("""
+                INSERT INTO food_orders (client_id, food_id, fshop_id, time, quantity, notes, order_status)
+                VALUES (%s, %s, %s, %s, %s, %s,%s)
+            """, (client_id, item_id, shop_id, order_time, quantity, notes,'pending'))
+
+        else:
+            # Check juice item
+            cur.execute("SELECT juice_id FROM juice WHERE juice_id = %s AND juice_name = %s", (item_id, item_name))
+            if cur.fetchone():
+                item_type = 'juice'
+                cur.execute("""
+                    INSERT INTO juice_orders (client_id, juice_id, jshop_id, time, quantity, notes, order_status)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (client_id, item_id, shop_id, order_time, quantity, notes, 'pending'))
+
+            else:
+                # Check book/accessory item
+                cur.execute("SELECT baccc_id FROM book_accassaries WHERE baccc_id = %s AND baccc_name = %s", (item_id, item_name))
+                if cur.fetchone():
+                    item_type = 'book'
+                    cur.execute("""
+                        INSERT INTO bookaccessories_orders (client_id, bacc_id, bshop_id, time, quantity, notes, order_status)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (client_id, item_id, shop_id, order_time, quantity, notes,'pending'))
+                else:
+                    return jsonify({'status': 'failure', 'message': 'Invalid item_id or item_name'}), 400
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({'status': 'success', 'message': f'{item_type.capitalize()} order placed successfully'}), 200
+
+    except Exception as e:
+        print(f"Error placing order: {e}")
+        return jsonify({'status': 'failure', 'message': str(e)}), 500
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 #-----------------shop-Owner----------------------------
 @app.route('/shop-owner-login', methods=['POST'])
