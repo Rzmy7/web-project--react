@@ -294,37 +294,109 @@ def get_shop_menu(facility_id):
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
         query = """
-        SELECT 
-            s.shop_name AS "shopName",
-            s.open_status AS "status",
-            so.opening_time AS "openingTime",
-            so.closing_time AS "closingTime",
-            s."Location" AS "location",
-            json_build_array(
+      SELECT 
+    s.shop_name AS "shopName",
+    s.open_status AS "status",
+    so.opening_time AS "openingTime",
+    so.closing_time AS "closingTime",
+    s."Location" AS "location",
+
+    -- menuData with custom ordering
+    COALESCE((
+        SELECT json_agg(category_obj ORDER BY order_index)
+        FROM (
+            -- 🥘 Grouped Food Categories
+            SELECT 
                 json_build_object(
-                    'id', 'cat-1',
-                    'name', 'All Items',
-                    'items', COALESCE((
-                        SELECT json_agg(json_build_object(
-                            'id', f.food_id,
-                            'name', f.food_name,
-                            'price', fh.food_price,
-                            'status', CASE 
-                                WHEN fh.food_avalability THEN 'available' 
-                                ELSE 'unavailable' 
-                            END
-                        ))
-                        FROM food_has fh
-                        JOIN food f ON f.food_id = fh.food_id
-                        WHERE fh.shop_id = s.shop_id
-                    ), '[]'::json)
-                )
-            ) AS "menuData"
-        FROM shop s
-        LEFT JOIN shop_open so ON so.shop_id = s.shop_id
-            AND so.day = to_char(CURRENT_DATE, 'FMDay')
-        WHERE s.shop_id = %s
-        LIMIT 1;
+                    'id', CONCAT('cat-food-', LOWER(REPLACE(fc.food_catogery, ' ', '_'))),
+                    'name', INITCAP(fc.food_catogery),
+                    'items', fc.items
+                ) AS category_obj,
+                CASE 
+                    WHEN LOWER(fc.food_catogery) = 'main dishes' THEN 1
+                    WHEN LOWER(fc.food_catogery) = 'drinks' THEN 2
+                    ELSE 99
+                END AS order_index
+            FROM (
+                SELECT f.food_catogery, json_agg(json_build_object(
+                    'id', f.food_id,
+                    'name', f.food_name,
+                    'price', fh.food_price,
+                    'status', CASE 
+                        WHEN fh.food_avalability THEN 'available' 
+                        ELSE 'unavailable' 
+                    END
+                )) AS items
+                FROM food_has fh
+                JOIN food f ON f.food_id = fh.food_id
+                WHERE fh.shop_id = s.shop_id
+                GROUP BY f.food_catogery
+            ) fc
+            WHERE fc.items IS NOT NULL
+
+            UNION ALL
+
+            -- 🧃 Juice Items
+            SELECT 
+                json_build_object(
+                    'id', 'cat-juice',
+                    'name', 'Juice Items',
+                    'items', juice_items
+                ) AS category_obj,
+                3 AS order_index
+            FROM (
+                SELECT json_agg(json_build_object(
+                    'id', j.juice_id,
+                    'name', j.juice_name,
+                    'price', jh.juice_price,
+                    'status', CASE 
+                        WHEN jh.juice_avalability THEN 'available' 
+                        ELSE 'unavailable' 
+                    END
+                )) AS juice_items
+                FROM juice_bar jb
+                JOIN juice_has jh ON jb.jshop_id = jh.shop_id
+                JOIN juice j ON j.juice_id = jh.juice_id
+                WHERE jb.jshop_id = s.shop_id
+            ) sub
+            WHERE juice_items IS NOT NULL
+
+            UNION ALL
+
+            -- 📚 Book Accessories
+            SELECT 
+                json_build_object(
+                    'id', 'cat-books',
+                    'name', 'Book Accessories',
+                    'items', book_items
+                ) AS category_obj,
+                4 AS order_index
+            FROM (
+                SELECT json_agg(json_build_object(
+                    'id', b.baccc_id,
+                    'name', b.bacc_name,
+                    'price', bh.bacc_price,
+                    'status', CASE 
+                        WHEN bh.bacc_avalability THEN 'available' 
+                        ELSE 'unavailable' 
+                    END
+                )) AS book_items
+                FROM bookshop bs
+                JOIN bookaccessories_has bh ON bs.bshop_id = bh.shop_id
+                JOIN book_accassaries b ON b.baccc_id = bh.bacc_id
+                WHERE bs.bshop_id = s.shop_id
+            ) sub
+            WHERE book_items IS NOT NULL
+
+        ) category_union
+    ), '[]') AS "menuData"
+
+FROM shop s
+LEFT JOIN shop_open so 
+    ON so.shop_id = s.shop_id AND so.day = to_char(CURRENT_DATE, 'FMDay')
+WHERE s.shop_id = %s
+LIMIT 1;
+
         """
 
         print(f"Executing query with facility_id: {facility_id}")
