@@ -140,7 +140,7 @@ def get_data():
         print(f"Error fetching data: {e}")
         return jsonify({'error': str(e)}), 500
     
-@app.route('/api/shopItems/<shop_name>', methods=['GET'])
+@app.route('/api/shopItems/<string:facility_id>', methods=['GET'])
 def get_shop_menu(shop_name):
     try:
         conn = get_db_connection()
@@ -194,138 +194,6 @@ def get_shop_menu(shop_name):
     
 # ... (your existing imports and setup)
 
-# @app.route('/api/facility/<string:facility_id>', methods=['GET'])
-# def get_facility_details(facility_id):
-#     conn = None
-#     cur = None
-#     try:
-#         conn = get_db_connection()
-#         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-#         query = """
-#        SELECT
-#     s.shop_id AS id,
-#     s.shop_name AS name,
-#     s.shop_image AS photo,
-#     s.open_status AS isOpen,
-#     s."Location" AS location,
-#     s.latitude,
-#     s.longitude,
-
-#     -- Weekly schedule via lateral join
-#     COALESCE(ws.weekly_schedule, '[]') ::json AS weeklySchedule,
-
-#     -- Special notice
-#     (
-#         SELECT notice_info
-#         FROM notice
-#         WHERE shop_id = s.shop_id
-#         AND (startdate IS NULL OR startdate <= CURRENT_DATE)
-#         AND (enddate IS NULL OR enddate >= CURRENT_DATE)
-#         AND (starttime IS NULL OR starttime::time <= CURRENT_TIME::time)
-#         AND (endtime IS NULL OR endtime::time >= CURRENT_TIME::time)
-#         ORDER BY priority DESC
-#         LIMIT 1
-#     ) AS specialNotice,
-
-#     -- Rating
-#     (
-#         SELECT COALESCE(AVG(cr.star_mark), 0)
-#         FROM client_reviews cr
-#         WHERE cr.shop_id = s.shop_id
-#     ) AS rating,
-
-#     -- Total reviews
-#     (
-#         SELECT COUNT(*)
-#         FROM client_reviews cr
-#         WHERE cr.shop_id = s.shop_id
-#     ) AS totalReviews,
-
-#     -- Review list
-#     COALESCE((
-#         SELECT json_agg(json_build_object(
-#             'id', cr.client_id,
-#             'userName', u.full_name,
-#             'rating', cr.star_mark,
-#             'comment', cr.review,
-#             'date', cr.date
-#         ) ORDER BY cr.date DESC, cr."time" DESC)
-#         FROM client_reviews cr
-#         JOIN client c ON cr.client_id = c.user_id
-#         JOIN users u ON c.user_id = u.user_id
-#         WHERE cr.shop_id = s.shop_id
-#     ), '[]') AS reviews
-
-# FROM shop s
-
-# -- LATERAL JOIN for weekly schedule
-# LEFT JOIN LATERAL (
-#     SELECT json_agg(json_build_object(
-#         'day', so.day,
-#         'hours', CONCAT(to_char(so.opening_time, 'HH24:MI'), ' - ', to_char(so.closing_time, 'HH24:MI')),
-#         'isOpen', TRUE
-#     ) ORDER BY CASE so.day
-#         WHEN 'Monday' THEN 1
-#         WHEN 'Tuesday' THEN 2
-#         WHEN 'Wednesday' THEN 3
-#         WHEN 'Thursday' THEN 4
-#         WHEN 'Friday' THEN 5
-#         WHEN 'Saturday' THEN 6
-#         WHEN 'Sunday' THEN 7
-#     END) AS weekly_schedule
-#     FROM shop_open so
-#     WHERE so.shop_id = s.shop_id
-# ) ws ON TRUE
-
-# WHERE s.shop_id = %s;
-
-
-
-#         """
-
-#         cur.execute(query, (facility_id,))
-#         result = cur.fetchone()
-
-#         if not result:
-#             return jsonify({'error': 'Facility not found'}), 404
-
-#         try:
-#             formatted_result = {
-#                 'id': result.get('id'),
-#                 'name': result.get('name'),
-#                 'photo': result.get('photo'),
-#                 'isOpen': result.get('isOpen'),
-#                 'currentStatus': "Open" if result.get('isOpen') else "Closed",
-#                 'weeklySchedule': result.get('weeklySchedule', []),
-#                 'specialNotice': result.get('specialNotice'),
-#                 'location': result.get('location'),
-#                 'coordinates': {'lat': result.get('latitude'), 'lng': result.get('longitude')},
-#                 'ownerName': None,  # You'll need to fetch this from shop_owner table if needed
-#                 'rating': round(result.get('rating', 0), 1),
-#                 'totalReviews': result.get('totalReviews', 0),
-#                 'reviews': result.get('reviews', [])
-#             }
-#         except Exception as data_processing_error:
-#             print(f"Error processing facility data for ID {facility_id}: {data_processing_error}")
-#             return jsonify({'error': 'Error processing facility data'}), 500
-
-#         return jsonify(formatted_result)
-
-#     except psycopg2.Error as db_error:
-#         print(f"Database error fetching facility details for ID {facility_id}: {db_error}")
-#         return jsonify({'error': 'Database error fetching facility details'}), 500
-#     except Exception as e:
-#         print(f"Unexpected error fetching facility details for ID {facility_id}: {e}")
-#         return jsonify({'error': 'An unexpected error occurred'}), 500
-#     finally:
-#         if cur:
-#             cur.close()
-#         if conn:
-#             conn.close()
-
-
-
 @app.route('/api/facility/<string:facility_id>', methods=['GET'])
 def get_facility_details(facility_id):
     conn = None
@@ -339,7 +207,7 @@ def get_facility_details(facility_id):
     s.shop_id AS id,
     s.shop_name AS name,
     s.shop_image AS photo,
-    s.open_status AS isOpen,
+    s.open_status AS "isOpen",
     s."Location" AS location,
     s.latitude,
     s.longitude,
@@ -359,7 +227,7 @@ def get_facility_details(facility_id):
         AND (endtime IS NULL OR endtime::time >= CURRENT_TIME::time)
         ORDER BY priority DESC
         LIMIT 1
-    ) AS specialNotice,
+    ) AS "specialNotice",
 
     -- Rating
     (
