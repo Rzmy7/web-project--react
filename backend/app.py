@@ -211,6 +211,82 @@ def get_data():
 
 
 
+# @app.route('/api/shopItems/<string:facility_id>', methods=['GET'])
+# def get_shop_menu(facility_id):
+#     try:
+#         conn = get_db_connection()
+#         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+#         query = """
+#         SELECT 
+#             s.shop_name AS "shopName",
+#             s.open_status AS "status",
+#             so.opening_time AS "openingTime",
+#             so.closing_time AS "closingTime",
+#             s."Location" AS "location",
+#             json_build_array(
+#                 json_build_object(
+#                     'id', 'cat-1',
+#                     'name', 'Main Dishes',
+#                     'items', COALESCE((
+#                         SELECT json_agg(json_build_object(
+#                             'id', f.food_id,
+#                             'name', f.food_name,
+#                             'price', fh.food_price,
+#                             'status', CASE WHEN fh.food_avalability THEN 'available' ELSE 'unavailable' END
+#                         ))
+#                         FROM food_has fh
+#                         JOIN food f ON f.food_id = fh.food_id
+#                         WHERE fh.shop_id = s.shop_id
+#                           AND LOWER(f.food_name) NOT LIKE '%%juice%%'
+#                           AND LOWER(f.food_name) NOT LIKE '%%cola%%'
+#                     ), '[]')
+#                 ),
+#                 json_build_object(
+#                     'id', 'cat-2',
+#                     'name', 'Drinks',
+#                     'items', COALESCE((
+#                         SELECT json_agg(json_build_object(
+#                             'id', f.food_id,
+#                             'name', f.food_name,
+#                             'price', fh.food_price,
+#                             'status', CASE WHEN fh.food_avalability THEN 'available' ELSE 'unavailable' END
+#                         ))
+#                         FROM food_has fh
+#                         JOIN food f ON f.food_id = fh.food_id
+#                         WHERE fh.shop_id = s.shop_id
+#                           AND (
+#                               LOWER(f.food_name) LIKE '%%juice%%'
+#                               OR LOWER(f.food_name) LIKE '%%cola%%'
+#                           )
+#                     ), '[]')
+#                 )
+#             ) AS "menuData"
+#         FROM shop s
+#         LEFT JOIN shop_open so ON so.shop_id = s.shop_id
+#             AND so.day = to_char(CURRENT_DATE, 'FMDay')
+#         WHERE s.shop_id = %s
+#         LIMIT 1;
+#         """
+
+#         print(f"Executing query with facility_id: {facility_id}")
+#         cur.execute(query, (facility_id,))
+#         result = cur.fetchone()
+
+#         cur.close()
+#         conn.close()
+
+#         if result is None:
+#             return jsonify({'error': 'Shop not found'}), 404
+
+#         return jsonify(result)
+
+#     except Exception as e:
+#         logging.exception("Error fetching shop items")
+#         return jsonify({'error': 'Internal server error'}), 500
+
+# # ... (your existing imports and setup)
+
 @app.route('/api/shopItems/<string:facility_id>', methods=['GET'])
 def get_shop_menu(facility_id):
     try:
@@ -227,39 +303,21 @@ def get_shop_menu(facility_id):
             json_build_array(
                 json_build_object(
                     'id', 'cat-1',
-                    'name', 'Main Dishes',
+                    'name', 'All Items',
                     'items', COALESCE((
                         SELECT json_agg(json_build_object(
                             'id', f.food_id,
                             'name', f.food_name,
                             'price', fh.food_price,
-                            'status', CASE WHEN fh.food_avalability THEN 'available' ELSE 'unavailable' END
+                            'status', CASE 
+                                WHEN fh.food_avalability THEN 'available' 
+                                ELSE 'unavailable' 
+                            END
                         ))
                         FROM food_has fh
                         JOIN food f ON f.food_id = fh.food_id
                         WHERE fh.shop_id = s.shop_id
-                          AND LOWER(f.food_name) NOT LIKE '%%juice%%'
-                          AND LOWER(f.food_name) NOT LIKE '%%cola%%'
-                    ), '[]')
-                ),
-                json_build_object(
-                    'id', 'cat-2',
-                    'name', 'Drinks',
-                    'items', COALESCE((
-                        SELECT json_agg(json_build_object(
-                            'id', f.food_id,
-                            'name', f.food_name,
-                            'price', fh.food_price,
-                            'status', CASE WHEN fh.food_avalability THEN 'available' ELSE 'unavailable' END
-                        ))
-                        FROM food_has fh
-                        JOIN food f ON f.food_id = fh.food_id
-                        WHERE fh.shop_id = s.shop_id
-                          AND (
-                              LOWER(f.food_name) LIKE '%%juice%%'
-                              OR LOWER(f.food_name) LIKE '%%cola%%'
-                          )
-                    ), '[]')
+                    ), '[]'::json)
                 )
             ) AS "menuData"
         FROM shop s
@@ -270,7 +328,7 @@ def get_shop_menu(facility_id):
         """
 
         print(f"Executing query with facility_id: {facility_id}")
-        cur.execute(query, (facility_id,))
+        cur.execute(query, (facility_id.strip(),))
         result = cur.fetchone()
 
         cur.close()
@@ -278,15 +336,18 @@ def get_shop_menu(facility_id):
 
         if result is None:
             return jsonify({'error': 'Shop not found'}), 404
+        
+        if result.get('openingTime'):
+            result['openingTime'] = str(result['openingTime'])
+        if result.get('closingTime'):
+            result['closingTime'] = str(result['closingTime'])
 
         return jsonify(result)
 
     except Exception as e:
-        logging.exception("Error fetching shop items")
-        return jsonify({'error': 'Internal server error'}), 500
-
-# ... (your existing imports and setup)
-
+        import traceback
+        traceback.print_exc()  # For debugging only
+        return jsonify({'error': str(e)}), 500  # For development use only
 
 
 
