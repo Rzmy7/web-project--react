@@ -93,7 +93,7 @@ function Facilities({ facilityType, status, searchQuery }) {
     <FacilitiesContainer>
       <FacilitiesGrid>
         {filteredFacilities.map((f, index) => (
-          <FacilityCard key={f.shopid || index} {...f} />
+          <FacilityCard key={f.shop_id || index} id={f.shop_id} {...f} />
         ))}
       </FacilitiesGrid>
     </FacilitiesContainer>

@@ -101,6 +101,7 @@ const FacilityBtn = styled.button`
 `;
 
 function FacilityCard({
+  id,
   name,
   type,
   type2,
@@ -136,7 +137,7 @@ function FacilityCard({
           <FacilityDetailsText>Location: {location}</FacilityDetailsText>
         </FacilityDetails>
         <FacilityActions>
-          <Link to={`/FacilityDetails`}>
+          <Link to={`/facility/${id}`}>
             <FacilityBtn color="#1a3064" $hoverColor="#0f1e42" data-id={name}>
               View Details
             </FacilityBtn>
