@@ -88,10 +88,6 @@ const ErrorMessage = styled.div`
 `;
 
 // Simple in-memory credentials (replace with backend API in production)
-const ADMIN_CREDENTIALS = {
-  email: 'owner@lcanteen.com',
-  password: 'admin123' // Password set by admin
-};
 
 function App() {
   const [activeSection, setActiveSection] = useState('dashboard');
