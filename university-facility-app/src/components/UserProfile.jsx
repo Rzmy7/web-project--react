@@ -61,10 +61,10 @@ const UserProfile=({user,setUser,setIsLoggedIn,setShowUserDetails})=>{
     
     return(
 <UserDetails>
-        <UserNameTitle>{user.name}</UserNameTitle>
+        <UserNameTitle>{user.full_name}</UserNameTitle>
         <UserInfos><span>{user.email}</span></UserInfos>
-        <UserInfos>Index:<span> {user.indexNumber}</span></UserInfos>
-        <UserInfos>Mobile: <span>{user.mobileNumber}</span></UserInfos>
+        <UserInfos>Index:<span> {user.index_no}</span></UserInfos>
+        <UserInfos>Mobile: <span>{user.mobile_number}</span></UserInfos>
         <LogoutBtn onClick={handleLogout}>Log Out</LogoutBtn>
       </UserDetails>
     );

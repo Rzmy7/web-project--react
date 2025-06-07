@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import {  useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import TabNavigationComponent from "../components/shopMenuBar";
 import { io } from "socket.io-client";
 import LoadingScreen from "../utils/Loading";
@@ -77,47 +77,52 @@ const ShopInfoItem = styled.div`
 const socket = io("http://127.0.0.1:8001");
 
 function ShopPage() {
-  const { shopName } = useParams(); // shop name from URL param
+  const { shopId } = useParams(); // Change here
   const [shopData, setShopData] = useState(null);
-
 
   // Fetch shop data on mount or when shopName changes
   useEffect(() => {
-    fetch(`http://127.0.0.1:8001/api/shopItems/${shopName}`)
+    if (!shopId) return;
+    fetch(`http://127.0.0.1:8001/api/shopItems/${shopId}`) // Fetch by ID
       .then((res) => res.json())
       .then((data) => {
         if (!data.error) {
+          console.log("✅ shopData fetched:", data); 
           setShopData(data);
         } else {
           console.error("Shop not found");
         }
       })
       .catch((err) => console.error("Fetch error:", err));
-  }, [shopName]);
+  }, [shopId]);
 
-  // Setup Socket.IO for real-time updates
   useEffect(() => {
-    if (!shopName) return;
+    if (!shopId) return;
 
-    socket.emit("join_shop", shopName);
+    socket.emit("join_shop", shopId);
 
     socket.on("shop_updated", (updatedData) => {
-      if (updatedData.shopName === shopName) {
+      if (updatedData.id === shopId || updatedData.shopId === shopId) {
         console.log("Shop data updated via socket:", updatedData);
         setShopData(updatedData);
       }
     });
 
     return () => {
-      socket.emit("leave_shop", shopName);
+      socket.emit("leave_shop", shopId);
       socket.off("shop_updated");
     };
-  }, [shopName]);
+  }, [shopId]);
 
-  // Show loading state
-  if (!shopData) return <div style={{width:"100%",justifyContent:"center"}}> <LoadingScreen /></div>;
-  console.log(shopData);
-  const { status, openingTime, closingTime, location, menudata } = shopData;
+  if (!shopData)
+    return (
+      <div style={{ width: "100%", justifyContent: "center" }}>
+        <LoadingScreen />
+      </div>
+    );
+
+  const { shopName, status, openingTime, closingTime, location, menuData } =
+    shopData;
 
   return (
     <div
@@ -130,7 +135,7 @@ function ShopPage() {
     >
       <Shop>
         <ShopHeader>
-          <BackButton/>
+          <BackButton />
           <ShopTitle>
             <ShopNameMain>{shopName}</ShopNameMain>
             <ShopStatus $isOpen={status === "Open"}>{status}</ShopStatus>
@@ -150,7 +155,7 @@ function ShopPage() {
         </ShopHeader>
 
         {/* Pass menudata to TabNavigationComponent if needed */}
-        <TabNavigationComponent menuData={menudata} />
+        <TabNavigationComponent menuData={menuData} />
       </Shop>
     </div>
   );

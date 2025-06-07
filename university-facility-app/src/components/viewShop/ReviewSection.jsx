@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Star } from "lucide-react";
 import AddReviewForm from "./AddReviewForm";
@@ -40,6 +40,7 @@ const NoReviewsMessage = styled.p`
   font-style: italic;
   margin-bottom: 2rem;
 `;
+
 const InfoTitle = styled.h3`
   color: var(--primary-color);
   margin: 0 0 16px 0;
@@ -57,16 +58,19 @@ const RatingOverview = styled.div`
   padding-bottom: 16px;
   border-bottom: 1px solid var(--light-gray);
 `;
+
 const RatingNumber = styled.span`
   font-size: 2rem;
   font-weight: 700;
   color: var(--primary-color);
 `;
+
 const StarsContainer = styled.div`
   display: flex;
   gap: 2px;
 `;
-const ReviewConatainer = styled.div`
+
+const ReviewContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: fit-content;
@@ -76,95 +80,28 @@ const ReviewConatainer = styled.div`
 `;
 
 // ReviewsSection Component
-const ReviewsSection = ({ rating, totalReviews }) => {
-  const [allReviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
-
-  // ✅ Fetch reviews on load
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const response = await fetch("http://127.0.0.1:8001/reviews");
-        const data = await response.json();
-        if (response.ok) {
-          setReviews(data);
-        } else {
-          console.error("Error loading reviews:", data.error);
-        }
-      } catch (err) {
-        console.error("Error fetching reviews:", err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReviews();
-  }, []);
+const ReviewsSection = ({ rating, totalReviews, reviews }) => {
+  const storedUser  = localStorage.getItem("user");
+  const user = storedUser  ? JSON.parse(storedUser ) : null;
 
   // ✅ Submit handler
-
-
   const handleReviewSubmit = async (review) => {
     const now = new Date();
     const isoTimestamp = now.toISOString();
 
     const reviewData = {
-    userName: user?.name,
-    comment: review.comment,
-    stars: review.rating,
-    timestamp: isoTimestamp,
-    time: "Just Now", // For frontend display, optional
+      userName: user?.name,
+      comment: review.comment,
+      stars: review.rating,
+      timestamp: isoTimestamp,
+      time: "Just Now", // For frontend display, optional
+    };
+
+    console.log("Submitting review:", reviewData);
+    // Here you can handle the submission logic if needed
   };
-
-  setReviews([reviewData, ...allReviews]);
-  console.log("Submitting review:", reviewData);
-
-    try {
-      const response = await fetch("http://127.0.0.1:8001/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reviewData),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setReviews((prev) => [reviewData, ...prev]); // Add to top
-        console.log("Review submitted");
-      } else {
-        console.error("Failed to submit review:", result.error);
-      }
-    } catch (err) {
-      console.error("Error submitting review:", err);
-    }
-  };
-
-  
-  
-//   const handleReviewSubmit = (review) => {
-//   const now = new Date();
-//   const isoTimestamp = now.toISOString();
-
-//   const reviewData = {
-//     userName: user?.name,
-//     comment: review.comment,
-//     stars: review.rating,
-//     timestamp: isoTimestamp,
-//     date: "Just Now", // For frontend display, optional
-//   };
-
-//   setReviews([reviewData, ...allReviews]);
-//   console.log("Submitting review:", reviewData);
-
-//   // Optionally send reviewData to backend here
-// };
-
 
   // ✅ Render stars
-  
   const renderStars = (rating) =>
     Array.from({ length: 5 }, (_, index) => (
       <Star
@@ -199,29 +136,23 @@ const ReviewsSection = ({ rating, totalReviews }) => {
         </div>
       </RatingOverview>
 
-      {loading ? (
-        <NoReviewsMessage>Loading reviews...</NoReviewsMessage>
-      ) : allReviews.length === 0 ? (
+      {reviews.length === 0 ? (
         <NoReviewsMessage>No reviews yet. Be the first!</NoReviewsMessage>
       ) : (
-        <ReviewConatainer>
-          {allReviews.map((review, idx) => (
+        <ReviewContainer>
+          {reviews.map((review, idx) => (
             <ReviewItem key={idx}>
               <ReviewHeader>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
-                >
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <ReviewerName>{review.userName}</ReviewerName>
                   <StarsContainer>{renderStars(review.stars)}</StarsContainer>
                 </div>
-                <ReviewDate>
-                  {review.time}
-                </ReviewDate>
+                <ReviewDate>{review.time}</ReviewDate>
               </ReviewHeader>
               <ReviewText>{review.comment}</ReviewText>
             </ReviewItem>
           ))}
-        </ReviewConatainer>
+        </ReviewContainer>
       )}
 
       <AddReviewForm onSubmit={handleReviewSubmit} />
