@@ -350,7 +350,7 @@ useEffect(() => {
       ) : (
         <ReviewContainer>
           {reviews.map((review) => (
-            <ReviewItem key={review.id}>
+            <ReviewItem key={review.id && review.dateTime}>
               <ReviewHeader>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <ReviewerName>{review.userName || 'Anonymous'}</ReviewerName>
