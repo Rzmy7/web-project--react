@@ -10,6 +10,11 @@ from flask_mail import Mail, Message
 import bcrypt
 
 from psycopg2.extras import RealDictCursor
+import json
+
+
+
+
 
 load_dotenv()
 
@@ -189,6 +194,8 @@ def get_shop_menu(shop_name):
     
 # ... (your existing imports and setup)
 
+# @app.route('/api/facility/<string:facility_id>', methods=['GET'])
+# def get_facility_details(facility_id):
 #     conn = None
 #     cur = None
 #     try:
@@ -196,61 +203,85 @@ def get_shop_menu(shop_name):
 #         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
 #         query = """
-#         SELECT
-#             s.shop_id AS id,
-#             s.shop_name AS name,
-#             s.shop_image AS photo,
-#             s.open_status AS isOpen,
-#             s."Location" AS location,
-#             s.latitude,
-#             s.longitude,
-#             -- Fetch weekly schedule
-#             COALESCE(json_agg(json_build_object(
-#                 'day', so.day,
-#                 'hours', CONCAT(so.opening_time::text, ' - ', so.closing_time::text),
-#                 'isOpen', TRUE
-#             ) ORDER BY CASE so.day
-#                 WHEN 'Monday' THEN 1
-#                 WHEN 'Tuesday' THEN 2
-#                 WHEN 'Wednesday' THEN 3
-#                 WHEN 'Thursday' THEN 4
-#                 WHEN 'Friday' THEN 5
-#                 WHEN 'Saturday' THEN 6
-#                 WHEN 'Sunday' THEN 7
-#             END) FILTER (WHERE so.shop_id IS NOT NULL), '[]') AS weeklySchedule,
-#             -- Fetch special notices (only active ones)
-#             (
-#                 SELECT notice_info
-#                 FROM notice
-#                 WHERE shop_id = s.shop_id
-#                 AND (startdate IS NULL OR startdate <= CURRENT_DATE)
-#                 AND (enddate IS NULL OR enddate >= CURRENT_DATE)
-#                 AND (starttime IS NULL OR starttime::time <= CURRENT_TIME::time)
-#                 AND (endtime IS NULL OR endtime::time >= CURRENT_TIME::time)
-#                 ORDER BY priority DESC
-#                 LIMIT 1
-#             ) AS specialNotice,
-#             -- Calculate average rating and total reviews
-#             COALESCE(AVG(cr.star_mark), 0) AS rating,
-#             COUNT(DISTINCT cr.client_id) AS totalReviews,
-#             -- Fetch recent reviews
-#             COALESCE(json_agg(json_build_object(
-#                 'id', cr.client_id,
-#                 'userName', u.full_name,
-#                 'rating', cr.star_mark,
-#                 'comment', cr.review,
-#                 'date', cr.date
-#             ) ORDER BY cr.date DESC, cr."time" DESC) FILTER (WHERE cr.client_id IS NOT NULL), '[]') AS reviews
-#         FROM shop s
-#         LEFT JOIN shop_open so ON s.shop_id = so.shop_id
-#         LEFT JOIN (
-#             SELECT DISTINCT client_id, shop_id, star_mark, review, date
-#             FROM client_reviews
-#         ) cr ON s.shop_id = cr.shop_id
-#         LEFT JOIN client c ON cr.client_id = c.user_id
-#         LEFT JOIN users u ON c.user_id = u.user_id
-#         WHERE s.shop_id = %s
-#         GROUP BY s.shop_id, s.shop_name, s.shop_image, s.open_status, s."Location", s.latitude, s.longitude;
+#        SELECT
+#     s.shop_id AS id,
+#     s.shop_name AS name,
+#     s.shop_image AS photo,
+#     s.open_status AS isOpen,
+#     s."Location" AS location,
+#     s.latitude,
+#     s.longitude,
+
+#     -- Weekly schedule via lateral join
+#     COALESCE(ws.weekly_schedule, '[]') ::json AS weeklySchedule,
+
+#     -- Special notice
+#     (
+#         SELECT notice_info
+#         FROM notice
+#         WHERE shop_id = s.shop_id
+#         AND (startdate IS NULL OR startdate <= CURRENT_DATE)
+#         AND (enddate IS NULL OR enddate >= CURRENT_DATE)
+#         AND (starttime IS NULL OR starttime::time <= CURRENT_TIME::time)
+#         AND (endtime IS NULL OR endtime::time >= CURRENT_TIME::time)
+#         ORDER BY priority DESC
+#         LIMIT 1
+#     ) AS specialNotice,
+
+#     -- Rating
+#     (
+#         SELECT COALESCE(AVG(cr.star_mark), 0)
+#         FROM client_reviews cr
+#         WHERE cr.shop_id = s.shop_id
+#     ) AS rating,
+
+#     -- Total reviews
+#     (
+#         SELECT COUNT(*)
+#         FROM client_reviews cr
+#         WHERE cr.shop_id = s.shop_id
+#     ) AS totalReviews,
+
+#     -- Review list
+#     COALESCE((
+#         SELECT json_agg(json_build_object(
+#             'id', cr.client_id,
+#             'userName', u.full_name,
+#             'rating', cr.star_mark,
+#             'comment', cr.review,
+#             'date', cr.date
+#         ) ORDER BY cr.date DESC, cr."time" DESC)
+#         FROM client_reviews cr
+#         JOIN client c ON cr.client_id = c.user_id
+#         JOIN users u ON c.user_id = u.user_id
+#         WHERE cr.shop_id = s.shop_id
+#     ), '[]') AS reviews
+
+# FROM shop s
+
+# -- LATERAL JOIN for weekly schedule
+# LEFT JOIN LATERAL (
+#     SELECT json_agg(json_build_object(
+#         'day', so.day,
+#         'hours', CONCAT(to_char(so.opening_time, 'HH24:MI'), ' - ', to_char(so.closing_time, 'HH24:MI')),
+#         'isOpen', TRUE
+#     ) ORDER BY CASE so.day
+#         WHEN 'Monday' THEN 1
+#         WHEN 'Tuesday' THEN 2
+#         WHEN 'Wednesday' THEN 3
+#         WHEN 'Thursday' THEN 4
+#         WHEN 'Friday' THEN 5
+#         WHEN 'Saturday' THEN 6
+#         WHEN 'Sunday' THEN 7
+#     END) AS weekly_schedule
+#     FROM shop_open so
+#     WHERE so.shop_id = s.shop_id
+# ) ws ON TRUE
+
+# WHERE s.shop_id = %s;
+
+
+
 #         """
 
 #         cur.execute(query, (facility_id,))
@@ -259,21 +290,25 @@ def get_shop_menu(shop_name):
 #         if not result:
 #             return jsonify({'error': 'Facility not found'}), 404
 
-#         formatted_result = {
-#             'id': result.get('id'),
-#             'name': result.get('name'),
-#             'photo': result.get('photo'),
-#             'isOpen': result.get('isOpen'),
-#             'currentStatus': "Open" if result.get('isOpen') else "Closed",
-#             'weeklySchedule': result.get('weeklySchedule', []),
-#             'specialNotice': result.get('specialNotice'),
-#             'location': result.get('location'),
-#             'coordinates': {'lat': result.get('latitude'), 'lng': result.get('longitude')},
-#             'ownerName': None,  # Fetch if needed from shop_owner table
-#             'rating': round(result.get('rating', 0), 1),
-#             'totalReviews': result.get('totalReviews', 0),
-#             'reviews': result.get('reviews', [])
-#         }
+#         try:
+#             formatted_result = {
+#                 'id': result.get('id'),
+#                 'name': result.get('name'),
+#                 'photo': result.get('photo'),
+#                 'isOpen': result.get('isOpen'),
+#                 'currentStatus': "Open" if result.get('isOpen') else "Closed",
+#                 'weeklySchedule': result.get('weeklySchedule', []),
+#                 'specialNotice': result.get('specialNotice'),
+#                 'location': result.get('location'),
+#                 'coordinates': {'lat': result.get('latitude'), 'lng': result.get('longitude')},
+#                 'ownerName': None,  # You'll need to fetch this from shop_owner table if needed
+#                 'rating': round(result.get('rating', 0), 1),
+#                 'totalReviews': result.get('totalReviews', 0),
+#                 'reviews': result.get('reviews', [])
+#             }
+#         except Exception as data_processing_error:
+#             print(f"Error processing facility data for ID {facility_id}: {data_processing_error}")
+#             return jsonify({'error': 'Error processing facility data'}), 500
 
 #         return jsonify(formatted_result)
 
@@ -289,6 +324,8 @@ def get_shop_menu(shop_name):
 #         if conn:
 #             conn.close()
 
+
+
 @app.route('/api/facility/<string:facility_id>', methods=['GET'])
 def get_facility_details(facility_id):
     conn = None
@@ -298,58 +335,95 @@ def get_facility_details(facility_id):
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
         query = """
-        SELECT
-            s.shop_id AS id,
-            s.shop_name AS name,
-            s.shop_image AS photo,
-            s.open_status AS isOpen,
-            s."Location" AS location,
-            s.latitude,
-            s.longitude,
-            -- Fetch weekly schedule
-            COALESCE(json_agg(json_build_object(
-                'day', so.day,
-                'hours', CONCAT(so.opening_time::text, ' - ', so.closing_time::text),
-                'isOpen', TRUE
-            ) ORDER BY CASE so.day
-                WHEN 'Monday' THEN 1
-                WHEN 'Tuesday' THEN 2
-                WHEN 'Wednesday' THEN 3
-                WHEN 'Thursday' THEN 4
-                WHEN 'Friday' THEN 5
-                WHEN 'Saturday' THEN 6
-                WHEN 'Sunday' THEN 7
-            END) FILTER (WHERE so.shop_id IS NOT NULL), '[]') AS weeklySchedule,
-            -- Fetch special notices (only active ones)
-            (
-                SELECT notice_info
-                FROM notice
-                WHERE shop_id = s.shop_id
-                AND (startdate IS NULL OR startdate <= CURRENT_DATE)
-                AND (enddate IS NULL OR enddate >= CURRENT_DATE)
-                AND (starttime IS NULL OR starttime::time <= CURRENT_TIME::time)
-                AND (endtime IS NULL OR endtime::time >= CURRENT_TIME::time)
-                ORDER BY priority DESC
-                LIMIT 1
-            ) AS specialNotice,
-            -- Calculate average rating and total reviews
-            COALESCE(AVG(cr.star_mark), 0) AS rating,
-            COUNT(cr.client_id) AS totalReviews,
-            -- Fetch recent reviews
-            COALESCE(json_agg(json_build_object(
-                'id', cr.client_id,
-                'userName', u.full_name,
-                'rating', cr.star_mark,
-                'comment', cr.review,
-                'date', cr.date
-            ) ORDER BY cr.date DESC, cr."time" DESC) FILTER (WHERE cr.client_id IS NOT NULL), '[]') AS reviews
-        FROM shop s
-        LEFT JOIN shop_open so ON s.shop_id = so.shop_id
-        LEFT JOIN client_reviews cr ON s.shop_id = cr.shop_id
-        LEFT JOIN client c ON cr.client_id = c.user_id
-        LEFT JOIN users u ON c.user_id = u.user_id
-        WHERE s.shop_id = %s
-        GROUP BY s.shop_id, s.shop_name, s.shop_image, s.open_status, s."Location", s.latitude, s.longitude;
+       SELECT
+    s.shop_id AS id,
+    s.shop_name AS name,
+    s.shop_image AS photo,
+    s.open_status AS isOpen,
+    s."Location" AS location,
+    s.latitude,
+    s.longitude,
+	u.full_name AS "ownerName",
+
+    -- Weekly schedule via lateral join
+    COALESCE(ws.weekly_schedule, '[]') AS "weeklySchedule",
+
+    -- Special notice
+    (
+        SELECT notice_info
+        FROM notice
+        WHERE shop_id = s.shop_id
+        AND (startdate IS NULL OR startdate <= CURRENT_DATE)
+        AND (enddate IS NULL OR enddate >= CURRENT_DATE)
+        AND (starttime IS NULL OR starttime::time <= CURRENT_TIME::time)
+        AND (endtime IS NULL OR endtime::time >= CURRENT_TIME::time)
+        ORDER BY priority DESC
+        LIMIT 1
+    ) AS specialNotice,
+
+    -- Rating
+    (
+        SELECT COALESCE(AVG(cr.star_mark), 0)
+        FROM client_reviews cr
+        WHERE cr.shop_id = s.shop_id
+    ) AS rating,
+
+    -- Total reviews
+    (
+        SELECT COUNT(*)
+        FROM client_reviews cr
+        WHERE cr.shop_id = s.shop_id
+    ) AS totalReviews,
+
+    -- Review list
+    COALESCE((
+        SELECT json_agg(json_build_object(
+            'id', cr.client_id,
+            'userName', u.full_name,
+            'rating', cr.star_mark,
+            'comment', cr.review,
+            'date', cr.date
+        ) ORDER BY cr.date DESC, cr."time" DESC)
+        FROM client_reviews cr
+        JOIN client c ON cr.client_id = c.user_id
+        JOIN users u ON c.user_id = u.user_id
+        WHERE cr.shop_id = s.shop_id
+    ), '[]') AS reviews
+
+FROM shop s inner join users u on s.shopowner_id=u.user_id
+
+-- LATERAL JOIN for weekly schedule
+-- LATERAL JOIN for weekly schedule
+LEFT JOIN LATERAL (
+    SELECT json_agg(json_build_object(
+        'day', so.day,
+        'hours', 
+            CASE 
+                WHEN so.opening_time IS NULL OR so.closing_time IS NULL 
+                THEN 'Closed'
+                ELSE CONCAT(to_char(so.opening_time, 'HH24:MI'), ' - ', to_char(so.closing_time, 'HH24:MI'))
+            END,
+        'isOpen', 
+            CASE 
+                WHEN so.opening_time IS NULL OR so.closing_time IS NULL 
+                THEN FALSE 
+                ELSE TRUE 
+            END
+    ) ORDER BY CASE so.day
+        WHEN 'Monday' THEN 1
+        WHEN 'Tuesday' THEN 2
+        WHEN 'Wednesday' THEN 3
+        WHEN 'Thursday' THEN 4
+        WHEN 'Friday' THEN 5
+        WHEN 'Saturday' THEN 6
+        WHEN 'Sunday' THEN 7
+    END) AS weekly_schedule
+    FROM shop_open so
+    WHERE so.shop_id = s.shop_id
+) ws ON TRUE
+
+
+WHERE s.shop_id = 'SH01';
         """
 
         cur.execute(query, (facility_id,))
@@ -358,25 +432,33 @@ def get_facility_details(facility_id):
         if not result:
             return jsonify({'error': 'Facility not found'}), 404
 
-        try:
-            formatted_result = {
-                'id': result.get('id'),
-                'name': result.get('name'),
-                'photo': result.get('photo'),
-                'isOpen': result.get('isOpen'),
-                'currentStatus': "Open" if result.get('isOpen') else "Closed",
-                'weeklySchedule': result.get('weeklySchedule', []),
-                'specialNotice': result.get('specialNotice'),
-                'location': result.get('location'),
-                'coordinates': {'lat': result.get('latitude'), 'lng': result.get('longitude')},
-                'ownerName': None,  # You'll need to fetch this from shop_owner table if needed
-                'rating': round(result.get('rating', 0), 1),
-                'totalReviews': result.get('totalReviews', 0),
-                'reviews': result.get('reviews', [])
-            }
-        except Exception as data_processing_error:
-            print(f"Error processing facility data for ID {facility_id}: {data_processing_error}")
-            return jsonify({'error': 'Error processing facility data'}), 500
+        # Deserialize JSON fields if needed
+        def safe_parse_json(value):
+            if isinstance(value, str):
+                try:
+                    return json.loads(value)
+                except json.JSONDecodeError:
+                    return []
+            return value or []
+
+        formatted_result = {
+            'id': result.get('id'),
+            'name': result.get('name'),
+            'photo': result.get('photo'),
+            'isOpen': result.get('isOpen'),
+            'currentStatus': "Open" if result.get('isOpen') else "Closed",
+            'weeklySchedule': safe_parse_json(result.get('weeklySchedule')),
+            'specialNotice': result.get('specialNotice'),
+            'location': result.get('location'),
+            'coordinates': {
+                'lat': result.get('latitude'),
+                'lng': result.get('longitude')
+            },
+            'ownerName': result.get('ownerName'),  # Extend here if you plan to pull from shop_owner table
+            'rating': round(result.get('rating', 0), 1),
+            'totalReviews': result.get('totalReviews', 0),
+            'reviews': safe_parse_json(result.get('reviews'))
+        }
 
         return jsonify(formatted_result)
 
@@ -391,6 +473,8 @@ def get_facility_details(facility_id):
             cur.close()
         if conn:
             conn.close()
+
+
 
 
 # --------- Route to Insert Shop Data via Form ---------
