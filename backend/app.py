@@ -681,6 +681,75 @@ def signup_client():
         traceback.print_exc()
         conn.rollback()
         return jsonify({'error': str(e)}), 500
+    
+    
+    
+#-----------------shop-Owner----------------------------
+@app.route('/shop-owner-login', methods=['POST'])
+def login_shop_owner():
+    try:
+        data = request.get_json()
+        email = data.get('email', '').lower()
+        password = data.get('password')
+
+        if not email or not password:
+            return jsonify({'error': 'Email and password are required'}), 400
+
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        # JOIN users with shop_owner
+        cur.execute("""
+            SELECT u.user_id, u.full_name, u.email, u.user_password
+            FROM users u
+            JOIN shop_owner so ON so.user_id = u.user_id
+            WHERE u.email = %s
+        """, (email,))
+        shop_owner = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
+        if shop_owner is None:
+            return jsonify({'error': 'Shop owner not found'}), 404
+
+        # Plain-text password comparison (not secure)
+        if shop_owner['user_password'] != password:
+            return jsonify({'error': 'Incorrect password'}), 401
+
+        # Remove password before sending response
+        shop_owner.pop('user_password', None)
+
+        return jsonify({'message': 'Shop owner login successful', 'shop_owner': shop_owner}), 200
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Server error'}), 500
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 # --------- Socket Events ---------
 @socketio.on('connect')

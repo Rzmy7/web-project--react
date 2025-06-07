@@ -100,18 +100,33 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // Simulate backend authentication
-    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+  const handleLogin = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await fetch("http://127.0.0.1:8001/shop-owner-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("shopOwner", JSON.stringify(result.shop_owner)); // Store shop owner data
       setIsAuthenticated(true);
       setError('');
       setEmail('');
       setPassword('');
     } else {
-      setError('Invalid email or password');
+      setError(result.error || "Login failed");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setError("Server error");
+  }
+};
+
 
   const handleLogout = () => {
     setIsAuthenticated(false);
