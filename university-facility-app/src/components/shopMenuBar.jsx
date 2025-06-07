@@ -163,6 +163,12 @@ const [preOrderedItems, setPreOrderedItems] = useState([]);
 };
 
 useEffect(() => {
+  const total = preOrderedItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  setPreOrderItemCount(total);
+}, [preOrderedItems]);
+
+
+useEffect(() => {
   console.log("Current Pre-Ordered Items:", preOrderedItems);
 }, [preOrderedItems]);
 
@@ -197,7 +203,13 @@ useEffect(() => {
         )}
         {activeTab === "Alerts" && <AlertTab/>}
         {activeTab === "Pre-Order" && (
-          <PreOrderTab PreOrderItems={preOrderedItems} setPreOrderedItems={handlePreOrderChange} shopId={shopId}/>
+          <PreOrderTab
+  PreOrderItems={preOrderedItems}
+  setPreOrderedItems={handlePreOrderChange}
+  shopId={shopId}
+  noPreOrder={() => setPreOrderedItems([])}  // this will clear all items
+/>
+
         )}
       </TabContent>
     </TabContainer>

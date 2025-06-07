@@ -140,7 +140,10 @@ const formatCurrency = (value) => {
 };
 
 
-const PreOrderTab = ({ PreOrderItems = [] ,setPreOrderedItems ,shopId}) => {
+const PreOrderTab = ({ PreOrderItems = [], setPreOrderedItems, shopId, noPreOrder }) => {
+  // rest of your component
+
+
   const initializedItems = PreOrderItems.map(item => ({
     ...item,
     quantity: item.quantity || 1,
@@ -228,9 +231,11 @@ const PreOrderTab = ({ PreOrderItems = [] ,setPreOrderedItems ,shopId}) => {
 
     // Optionally clear state
     setOrderedItems([]);
-    setAdditionalNotes("");
-    localStorage.removeItem("orderedItems");
-    localStorage.removeItem("additionalNotes");
+setAdditionalNotes("");
+localStorage.removeItem("orderedItems");
+localStorage.removeItem("additionalNotes");
+noPreOrder(); // clears in parent and resets badge
+
   } catch (err) {
     console.error("Failed to submit order:", err);
     alert("Something went wrong when submitting your order.");
