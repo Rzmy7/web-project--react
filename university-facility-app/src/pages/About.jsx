@@ -260,40 +260,40 @@ function About() {
 
   const groupMembers = [
     {
-      name: "Poorna Dissanayake",
-      role: "Team Lead & Frontend Developer",
+      name: "Poorna Rashmika",
+      role: "Team Lead & Backend Developer",
       contribution:
-        "Led the project, designed the UI, implemented ShopPage and ReviewsSection components, and integrated socket.io for real-time updates.",
-      bio: "Passionate about creating user-friendly web apps, Poorna specializes in React and real-time systems.",
-      github: "https://github.com/poorna-d",
-      linkedin: "https://linkedin.com/in/poorna-d",
+        "Led project coordination, developed Flask API endpoints for shop items and reviews, integrated python-socketio for real-time updates, and ensured seamless backend-frontend communication.",
+      bio: "A skilled Python developer with a focus on Flask and real-time systems, Poorna drives the team with a vision for efficient backend solutions.",
+      github: "https://github.com/poorna-rashmika",
+      linkedin: "https://linkedin.com/in/poorna-rashmika",
     },
     {
-      name: "Kumara Silva",
-      role: "Backend Developer",
-      contribution:
-        "Developed the backend API, set up the database for facilities and reviews, and handled real-time shop status updates via socket.io.",
-      bio: "Experienced in Node.js and database management, Kumara ensures robust server-side functionality.",
-      github: "https://github.com/kumara-s",
-      linkedin: "https://linkedin.com/in/kumara-s",
-    },
-    {
-      name: "Amila Perera",
+      name: "Sachintha Dilshan",
       role: "Frontend Developer",
       contribution:
-        "Built the FacilityCard component, implemented routing with react-router-dom, and styled components using styled-components.",
-      bio: "Amila focuses on responsive design and smooth user experiences with modern frontend tools.",
-      github: "https://github.com/amila-p",
-      linkedin: "https://linkedin.com/in/amila-p",
+        "Implemented ShopPage and FacilityCard components, handled time formatting (12:00:00 to 12:00), set up react-router-dom for navigation, and styled the app with styled-components.",
+      bio: "A React specialist passionate about creating responsive and user-friendly interfaces, Sachintha enhances the app’s frontend experience.",
+      github: "https://github.com/sachintha-dilshan",
+      linkedin: "https://linkedin.com/in/sachintha-dilshan",
     },
     {
-      name: "Nimali Wijesinghe",
-      role: "UI/UX Designer & Tester",
+      name: "Nagitha Samarakkodi",
+      role: "Database Handler",
       contribution:
-        "Designed wireframes, ensured consistent styling across components, and performed testing for ShopPage and ReviewsSection.",
-      bio: "Nimali combines creativity and precision to craft intuitive interfaces and rigorous testing.",
-      github: "https://github.com/nimali-w",
-      linkedin: "https://linkedin.com/in/nimali-w",
+        "Designed and optimized PostgreSQL schemas on DigitalOcean for facilities, reviews, and shop data, wrote complex queries for data retrieval, and ensured database scalability.",
+      bio: "An expert in database management, Nagitha ensures the app’s data is robust, secure, and efficiently accessible.",
+      github: "https://github.com/nagitha-samarakkodi",
+      linkedin: "https://linkedin.com/in/nagitha-samarakkodi",
+    },
+    {
+      name: "Sanduni Liyange",
+      role: "UI/UX Designer",
+      contribution:
+        "Crafted wireframes and mockups for ShopPage and ReviewsSection, designed intuitive user flows, and conducted usability testing to refine the app’s interface.",
+      bio: "A creative designer with a keen eye for user experience, Sanduni shapes the app’s visual and navigational appeal.",
+      github: "https://github.com/sanduni-liyange",
+      linkedin: "https://linkedin.com/in/sanduni-liyange",
     },
   ];
 
@@ -319,6 +319,14 @@ function About() {
       description: "Real-time bidirectional event-based communication.",
     },
     {
+      name: "Flask",
+      description: "Python micro-framework for backend API development.",
+    },
+    {
+      name: "PostgreSQL",
+      description: "Open-source relational database hosted on DigitalOcean.",
+    },
+    {
       name: "lucide-react",
       description: "Icon library for React applications.",
     },
@@ -326,24 +334,28 @@ function About() {
 
   const timelineEvents = [
     {
-      date: "January 2025",
-      title: "Project Planning",
-      description: "Defined project scope, designed wireframes, and assigned roles.",
-    },
-    {
-      date: "February 2025",
-      title: "Backend Development",
-      description: "Built APIs for facilities, reviews, and real-time updates.",
-    },
-    {
       date: "March 2025",
-      title: "Frontend Development",
-      description: "Implemented ShopPage, FacilityCard, and ReviewsSection.",
+      title: "Project Kickoff & Planning",
+      description:
+        "Defined project scope, created wireframes, set up Flask backend, and assigned team roles.",
     },
     {
       date: "April 2025",
+      title: "Core Development",
+      description:
+        "Developed Flask APIs, configured PostgreSQL on DigitalOcean, and built ShopPage and FacilityCard components.",
+    },
+    {
+      date: "May 2025",
+      title: "Feature Implementation",
+      description:
+        "Integrated socket.io for real-time updates, implemented ReviewsSection, and added routing with react-router-dom.",
+    },
+    {
+      date: "June 2025",
       title: "Testing & Deployment",
-      description: "Conducted testing and deployed the app for university use.",
+      description:
+        "Conducted user testing, fixed bugs, and deployed the app for University of Moratuwa use.",
     },
   ];
 
@@ -392,7 +404,7 @@ function About() {
 
       <SubTitle>Project Overview</SubTitle>
       <Paragraph>
-        This facility management system, developed for the University of Moratuwa, allows students and staff to browse campus facilities, submit reviews, and pre-order from shops. With real-time shop status updates via socket.io, intuitive facility cards, and a robust review system, the app enhances the campus dining and service experience.
+        This facility management system, developed for the University of Moratuwa, allows students and staff to browse campus facilities, submit reviews, and pre-order from shops. Powered by a Flask backend and PostgreSQL on DigitalOcean, it features real-time shop status updates via socket.io, intuitive facility cards, and a robust review system to enhance the campus experience.
       </Paragraph>
 
       <SubTitle>Our Team</SubTitle>
