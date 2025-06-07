@@ -423,7 +423,7 @@ LEFT JOIN LATERAL (
 ) ws ON TRUE
 
 
-WHERE s.shop_id = 'SH01';
+WHERE s.shop_id = %s;
         """
 
         cur.execute(query, (facility_id,))
