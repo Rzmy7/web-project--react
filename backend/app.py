@@ -341,6 +341,10 @@ def get_shop_menu(facility_id):
             result['openingTime'] = str(result['openingTime'])
         if result.get('closingTime'):
             result['closingTime'] = str(result['closingTime'])
+        if result.get('status') is not None:
+            result['status'] = "Open" if result['status'] else "Closed"
+
+        
 
         return jsonify(result)
 
