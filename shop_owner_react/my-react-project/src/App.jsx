@@ -6,6 +6,7 @@ import Products from './products';
 import Preorder from './preorder';
 import Reviews from './reviews';
 import Settings from './Settings';
+import About from './About';
 
 // Main Content Styles
 const MainContent = styled.div`
