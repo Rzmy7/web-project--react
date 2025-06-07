@@ -76,18 +76,25 @@ const ShopInfoItem = styled.div`
 
 const socket = io("http://127.0.0.1:8001");
 
+// Utility function to format time (HH:mm:ss -> HH:mm)
+const formatTime = (time) => {
+  if (!time) return "";
+  // Remove seconds (e.g., "12:00:00" -> "12:00")
+  return time.split(":").slice(0, 2).join(":");
+};
+
 function ShopPage() {
-  const { shopId } = useParams(); // Change here
+  const { shopId } = useParams();
   const [shopData, setShopData] = useState(null);
 
-  // Fetch shop data on mount or when shopName changes
+  // Fetch shop data on mount or when shopId changes
   useEffect(() => {
     if (!shopId) return;
-    fetch(`http://127.0.0.1:8001/api/shopItems/${shopId}`) // Fetch by ID
+    fetch(`http://127.0.0.1:8001/api/shopItems/${shopId}`)
       .then((res) => res.json())
       .then((data) => {
         if (!data.error) {
-          console.log("✅ shopData fetched:", data); 
+          console.log("✅ shopData fetched:", data);
           setShopData(data);
         } else {
           console.error("Shop not found");
@@ -144,7 +151,7 @@ function ShopPage() {
             <ShopInfoItem>
               <span>Hours:</span>
               <span>
-                {openingTime} - {closingTime}
+                {formatTime(openingTime)} - {formatTime(closingTime)}
               </span>
             </ShopInfoItem>
             <ShopInfoItem className="location">
@@ -154,7 +161,6 @@ function ShopPage() {
           </ShopInfo>
         </ShopHeader>
 
-        {/* Pass menudata to TabNavigationComponent if needed */}
         <TabNavigationComponent menuData={menuData} />
       </Shop>
     </div>
