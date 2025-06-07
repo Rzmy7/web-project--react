@@ -142,15 +142,15 @@ const OtpButton = styled.button`
   }
 `;
 const LinkSignup = styled.p`
-  font-size:small;
+  font-size: small;
   font-style: italic;
   margin: 0.5rem 0;
 
-  span{
+  span {
     color: var(--primary-color);
     cursor: pointer;
   }
-` ;
+`;
 
 // ---------------- SignupModal Component ---------------- //
 
@@ -173,19 +173,18 @@ const SignupModal = ({ isOpen, onClose, onSignupSuccess }) => {
     // ✅ Clear error and proceed
     setFormError("");
 
-    const now = new Date();
-    const date = now.toLocaleDateString("en-GB");
-    const time = now.toLocaleTimeString("en-GB");
+    // const now = new Date();
+    // const date = now.toLocaleDateString("en-GB");
+    // const time = now.toLocaleTimeString("en-GB");
 
     const updatedFormData = {
-      name: formData.name,
-      indexno: formData.indexNumber,
+      full_name: formData.name,
+      index_no: formData.indexNumber,
       email: formData.email,
-      mobilenumber: formData.mobileNumber,
-      password: formData.password,
-      signUpDate: date,
-      signUpTime: time,
+      mobile_number: formData.mobileNumber,
+      user_password: formData.password,
     };
+
     try {
       const response = await fetch("http://127.0.0.1:8001/signup", {
         method: "POST",
@@ -199,22 +198,25 @@ const SignupModal = ({ isOpen, onClose, onSignupSuccess }) => {
 
       if (response.ok) {
         alert("Signup successful!");
-          console.log("trigg");
-          console.log("✅ SignupModal props:", { isOpen, onClose, onSignupSuccess });
+        console.log("trigg");
+        console.log("✅ SignupModal props:", {
+          isOpen,
+          onClose,
+          onSignupSuccess,
+        });
 
-          if (onSignupSuccess) onSignupSuccess();
-          setFormData({
-            name: "",
-            password: "",
-            confirmPassword: "",
-            indexNumber: "",
-            mobileNumber: "",
-            email: "",
-            verificationCode: "",
-            signupDate: "",
-            signupTime: "",
-          });
-        
+        if (onSignupSuccess) onSignupSuccess();
+        setFormData({
+          name: "",
+          password: "",
+          confirmPassword: "",
+          indexNumber: "",
+          mobileNumber: "",
+          email: "",
+          verificationCode: "",
+          signupDate: "",
+          signupTime: "",
+        });
 
         // Optionally reset the form
       } else {
@@ -440,7 +442,9 @@ const SignupModal = ({ isOpen, onClose, onSignupSuccess }) => {
             />
           </FormGroup>
 
-          <LinkSignup>Don't have an account?<span onClick={onSignupSuccess}>SignUp</span> </LinkSignup>
+          <LinkSignup>
+            Don't have an account?<span onClick={onSignupSuccess}>SignUp</span>{" "}
+          </LinkSignup>
 
           <ModalFooter>
             <div style={{ display: "flex", justifyContent: "space-between" }}>

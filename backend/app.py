@@ -586,78 +586,98 @@ def send_otp():
         print(f"[ERROR] {str(e)}")
         return jsonify({'error': str(e)}), 500
     
-@app.route("/login", methods=["POST"])
-def login():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+@app.route('/login', methods=['POST'])
+def login_user():
+    try:
+        data = request.get_json()
+        print("[DEBUG] Login payload:", data)
 
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM users WHERE email = %s", (email,))
-    user = cur.fetchone()
+        email = data.get('email', '').lower()
+        password = data.get('password')
 
-    if not user:
-        return jsonify({"error": "Email not found"}), 404
+        if not email or not password:
+            return jsonify({'error': 'Email and password are required'}), 400
 
-    db_password = user[5]  # adjust index based on your schema
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-    if not bcrypt.checkpw(password.encode("utf-8"), db_password.encode("utf-8")):
-        return jsonify({"error": "Incorrect password"}), 401
+        # Fetch user by email
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
 
-    user_data = {
-        "name": user[1],
-        "email": user[3],
-        "indexNumber": user[2],
-        "mobileNumber": user[4],
-    }
+        cur.close()
+        conn.close()
 
-    return jsonify({"message": "Login successful", "user": user_data})
+        if user is None:
+            return jsonify({'error': 'User not found'}), 404
+
+        if not bcrypt.checkpw(password.encode('utf-8'), user['user_password'].encode('utf-8')):
+            return jsonify({'error': 'Incorrect password'}), 401
+
+
+        # Exclude password from response
+        user.pop('user_password', None)
+
+        return jsonify({'message': 'Login successful', 'user': user}), 200
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Server error'}), 500
 
     
-
 @app.route('/signup', methods=['POST'])
-def signup():
+def signup_client():
     data = request.get_json()
 
-    name = data.get('name')
-    index_no = data.get('indexno')
-    email = data.get('email')
-    mobile = data.get('mobilenumber')
-    password = data.get('password')
-    signUpTime = data.get('signUpTime')
-    signUpDate =  data.get('signUpDate')
+    full_name = data.get('full_name')
+    mobile_number = data.get('mobile_number')
+    email = data.get('email', '').lower()
+    user_password = data.get('user_password')
+    index_no = data.get('index_no')
+    
+    hashed_password = bcrypt.hashpw(user_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-    if not all([name, index_no, email, mobile, password]):
-        return jsonify({'error': 'All fields are required'}), 400
-
-    hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    if not all([full_name, mobile_number, email, user_password, index_no]):
+        return jsonify({'error': 'Missing required fields'}), 400
 
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Check if email already exists
-        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
-        if cur.fetchone():
-            return jsonify({'error': 'Email already registered'}), 409
-
-        # Insert new user
+        # Start transaction
         cur.execute("""
-            INSERT INTO users (Name, IndexNO, Email, MobileNumber, Password, signupdate, signuptime)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (name, index_no, email, mobile, hashed_pw, signUpDate, signUpTime))
+            INSERT INTO users (full_name, mobile_number, email, user_password, signup_time, signup_date)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING user_id;
+        """, (
+            full_name,
+            mobile_number,
+            email,
+            hashed_password,
+            datetime.now(),
+            date.today()
+        ))
 
+        user_id = cur.fetchone()[0]
+
+        # Insert into client table
+        cur.execute("""
+            INSERT INTO client (user_id, index_no)
+            VALUES (%s, %s);
+        """, (user_id, index_no))
 
         conn.commit()
         cur.close()
         conn.close()
 
-        return jsonify({'message': 'User registered successfully'}), 201
+        return jsonify({'message': 'Client signed up successfully', 'user_id': user_id}), 201
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        conn.rollback()
         return jsonify({'error': str(e)}), 500
-
 
 # --------- Socket Events ---------
 @socketio.on('connect')
