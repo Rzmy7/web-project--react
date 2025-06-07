@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import styled from 'styled-components';
 import Navbar from './navbar';
 import Dashboard from './dashboard';
@@ -96,39 +96,47 @@ const ADMIN_CREDENTIALS = {
 function App() {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [shopOwner, setShopOwner] = useState(null);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async (e) => {
-  e.preventDefault();
-
-  try {
-    const response = await fetch("http://127.0.0.1:8001/shop-owner-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      localStorage.setItem("shopOwner", JSON.stringify(result.shop_owner)); // Store shop owner data
+  useEffect(() => {
+    const stored = localStorage.getItem("shopOwner");
+    if (stored) {
+      setShopOwner(JSON.parse(stored));
       setIsAuthenticated(true);
-      setError('');
-      setEmail('');
-      setPassword('');
-    } else {
-      setError(result.error || "Login failed");
     }
-  } catch (err) {
-    console.error(err);
-    setError("Server error");
-  }
-};
+  }, []);
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://127.0.0.1:8001/shop-owner-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("shopOwner", JSON.stringify(result.shop_owner));
+        // Auto-reload page to refresh UI
+        window.location.reload();
+      } else {
+        setError(result.error || "Login failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
+    }
+  };
 
   const handleLogout = () => {
+    localStorage.removeItem("shopOwner");
+    setShopOwner(null);
     setIsAuthenticated(false);
     setActiveSection('dashboard');
   };
@@ -161,9 +169,9 @@ function App() {
 
   return (
     <>
-      <Navbar setActiveSection={setActiveSection} onLogout={handleLogout} />
+      <Navbar setActiveSection={setActiveSection} onLogout={handleLogout} shopOwner={shopOwner}/>
       <MainContent>
-        {activeSection === 'dashboard' && <Dashboard onLogout={handleLogout} />}
+        {activeSection === 'dashboard' && <Dashboard shopOwner={shopOwner} onLogout={handleLogout}/>}
         {activeSection === 'products' && <Products />}
         {activeSection === 'preorder' && <Preorder />}
         {activeSection === 'reviews' && <Reviews />}
@@ -172,5 +180,6 @@ function App() {
     </>
   );
 }
+
 
 export default App;

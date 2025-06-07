@@ -310,7 +310,7 @@ const NotifiBtns = styled.div`
   }
 `;
 
-function Dashboard({ onLogout }) {
+function Dashboard({ onLogout,shopOwner }) {
   const [isOpen, setIsOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -325,7 +325,7 @@ function Dashboard({ onLogout }) {
   return (
     <Section id="dashboard">
       <DashboardTitle>
-        <h2>Hello! Wasantha</h2>
+        <h2>Hello! {shopOwner.full_name}</h2>
         <LogoutButton onClick={onLogout}>Logout</LogoutButton>
       </DashboardTitle>
 

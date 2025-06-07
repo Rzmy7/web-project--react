@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 import styled from 'styled-components';
 
 const Header = styled.header`
@@ -100,8 +100,9 @@ const MobileMenuBtn = styled.button`
   }
 `;
 
-function Navbar({ setActiveSection }) {
+function Navbar({ setActiveSection ,shopOwner}) {
   const [menuOpen, setMenuOpen] = useState(false);
+ 
 
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId);
@@ -150,8 +151,8 @@ function Navbar({ setActiveSection }) {
         </NavContainer>
 
         <UserInfo>
-          <UserAvatar>LW</UserAvatar>
-          <span>Wasantha</span>
+          <UserAvatar></UserAvatar>
+          <span>{shopOwner.full_name}</span>
         </UserInfo>
 
         <MobileMenuBtn onClick={() => setMenuOpen(!menuOpen)}>
