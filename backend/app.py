@@ -11,6 +11,33 @@ import bcrypt
 from psycopg2.extras import RealDictCursor
 import json
 import logging
+from apscheduler.schedulers.background import BackgroundScheduler
+
+
+
+
+
+
+
+
+def clear_orders_daily():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM food_orders;")
+        cur.execute("DELETE FROM juice_orders;")
+        cur.execute("DELETE FROM bookaccessories_orders;")
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("✅ Daily order tables cleared.")
+    except Exception as e:
+        print(f"❌ Error during daily clearing: {e}")
+
+# Schedule the job
+scheduler = BackgroundScheduler()
+scheduler.add_job(clear_orders_daily, 'cron', hour=0, minute=0)  # Every day at 00:00
+scheduler.start()
 
 
 
