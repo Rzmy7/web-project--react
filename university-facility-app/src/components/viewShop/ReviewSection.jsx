@@ -257,55 +257,55 @@ const ReviewsSection = ({ facilityId, reviews: initialReviews = [] }) => {
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
 
-  useEffect(() => {
-    setReviews(initialReviews);
-    const totalStars = initialReviews.reduce((sum, r) => sum + Number(r.rating || 0), 0);
-    const avg = initialReviews.length > 0 ? (totalStars / initialReviews.length).toFixed(1) : '0';
-    setRating(avg);
-    setTotalReviews(initialReviews.length);
-  }, [initialReviews]); // run once
+  const updateRatingAndCount = (reviewsList) => {
+  const totalStars = reviewsList.reduce((sum, r) => sum + Number(r.rating || 0), 0);
+  const avg = reviewsList.length > 0 ? (totalStars / reviewsList.length).toFixed(1) : '0';
+  setRating(avg);
+  setTotalReviews(reviewsList.length);
+};
 
-  const handleReviewSubmit = async (review) => {
-    if (!user || !user.full_name) {
-      setError('You must be logged in to submit a review.');
-      return;
-    }
+useEffect(() => {
+  setReviews(initialReviews);
+  updateRatingAndCount(initialReviews);
+}, [initialReviews]);
 
-    if (!review?.comment || !review?.rating) {
-      setError('Review must include a comment and rating.');
-      return;
-    }
 
-    const now = new Date();
-    const reviewData = {
-      userName: user.full_name,
-      comment: review.comment,
-      rating: Number(review.rating),
-      dateTime: now.toISOString(),
-      id: `${facilityId}-${Date.now()}`,
-    };
+
+  // useEffect(() => {
+  //   setReviews(initialReviews);
+  //   const totalStars = initialReviews.reduce((sum, r) => sum + Number(r.rating || 0), 0);
+  //   const avg = initialReviews.length > 0 ? (totalStars / initialReviews.length).toFixed(1) : '0';
+  //   setRating(avg);
+  //   setTotalReviews(initialReviews.length);
+  // }, [initialReviews]); // run once
+
+  const handleReviewSubmit = async (reviewData) => {
+  try {
+    const res = await axios.post(`http://127.0.0.1:8001/reviews`, reviewData);
+    console.log('Review submitted:', res.data);
+
+    // Optimistically add to local state
+    const formattedReview = {
+  id: `${reviewData.shop_id}-${Date.now()}`,
+  userName: user.full_name,
+  dateTime: new Date().toISOString(),
+  comment: reviewData.review,           // normalize field name
+  rating: reviewData.star_mark,         // normalize field name
+};
 
     setReviews((prev) => {
-      const updated = [...prev, reviewData];
-      const totalStars = updated.reduce((sum, r) => sum + Number(r.rating || 0), 0);
-      const avg = updated.length > 0 ? (totalStars / updated.length).toFixed(1) : '0';
-      setRating(avg);
-      setTotalReviews(updated.length);
-      return updated;
-    });
+  const updated = [...prev, formattedReview];
+  updateRatingAndCount(updated);
+  return updated;
+});
 
-    try {
-      const res = await axios.post(`http://127.0.0.1:8001/api/reviews`, reviewData);
-      if (res.data.id) {
-        setReviews((prev) =>
-          prev.map((r) => (r.id === reviewData.id ? { ...r, id: res.data.id } : r))
-        );
-      }
-    } catch (err) {
-      setError('Failed to save review to backend. It’s still shown locally.');
-      console.error('Submit error:', err.message, err.response?.data);
-    }
-  };
+
+  } catch (err) {
+    setError('Failed to submit review. Please try again.');
+    console.error('Submit error:', err.message, err.response?.data);
+  }
+};
+
 
   const renderStars = (rating) => {
     const safeRating = Number(rating) || 0;
@@ -368,10 +368,14 @@ const ReviewsSection = ({ facilityId, reviews: initialReviews = [] }) => {
         </ReviewContainer>
       )}
 
-      <AddReviewForm onSubmit={handleReviewSubmit} />
+      <AddReviewForm
+  onSubmit={handleReviewSubmit}
+  clientId={user?.user_id}
+  shopId={facilityId}
+/>
+
     </div>
   );
 };
-
 
 export default ReviewsSection;

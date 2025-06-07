@@ -245,7 +245,7 @@ const FacilityDetails = () => {
       </LocationArea>
 
       <ReviewsArea>
-        <ReviewsSection rating={facilityData.rating} totalReviews={facilityData.totalReviews} reviews={facilityData.reviews} />
+        <ReviewsSection facilityId={facilityId} reviews={facilityData.reviews} />
       </ReviewsArea>
 
     </Container>

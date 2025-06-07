@@ -3,12 +3,11 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import psycopg2
 import psycopg2.extras
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timedelta
 from dotenv import load_dotenv
 import os
 from flask_mail import Mail, Message
 import bcrypt
-
 from psycopg2.extras import RealDictCursor
 import json
 import logging
@@ -838,8 +837,53 @@ def login_shop_owner():
 
     
     
-    
-    
+
+
+@app.route('/reviews', methods=['POST'])
+def create_review():
+    data = request.get_json()
+
+    required_fields = ['client_id', 'shop_id', 'time']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields: client_id, shop_id, time'}), 400
+
+    try:
+        client_id = data['client_id']
+        shop_id = data['shop_id']
+        review = data.get('review')
+        star_mark = data.get('star_mark')
+        time_str = data.get('time')  # 'YYYY-MM-DD HH:MM:SS'
+
+        print("Original received time (UTC):", time_str)
+
+        time_obj = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S') if time_str else datetime.utcnow()
+
+        # Add 5 hours 30 minutes for Sri Lanka (UTC+5:30)
+        # time_obj = time_obj + timedelta(hours=5, minutes=30)
+
+        print("Time after +5:30 offset:", time_obj)
+
+        # Optional: store date separately
+        date_obj = time_obj.date()
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        insert_query = """
+            INSERT INTO client_reviews (client_id, shop_id, date, time, review, star_mark)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        cur.execute(insert_query, (client_id, shop_id, date_obj, time_obj, review, star_mark))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'message': 'Review added successfully'}), 201
+
+    except Exception as e:
+        print("Insert review error:", e)
+        return jsonify({'error': str(e)}), 500
     
     
     
