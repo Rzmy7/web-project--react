@@ -609,7 +609,7 @@ function HeaderComponent() {
                 "Home",
                 "Facilities",
                 "About",
-                "Review",
+                "Orders",
                 "UoMFacilities",
                 "UoMFacHome",
               ].map((item, index) => (

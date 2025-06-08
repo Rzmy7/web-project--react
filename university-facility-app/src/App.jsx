@@ -11,8 +11,10 @@ import styled from "styled-components";
 import Footer from "./components/Footer";
 import FacilityDetails from "./pages/ViewShop";
 import ScrollToTop from "./utils/ScrolledUp";
+import OrderPage from "./pages/Orders";
 import "./index.css";
 import socket from "./socket";
+
 
 import { useRef, useEffect } from "react";
 
@@ -60,7 +62,7 @@ function App() {
           <Route path="/" element={<UOMFacHome />} />
           <Route path="/facilities" element={<Facilities />} />
           <Route path="/about" element={<About />} />
-          <Route path="/review" element={<Review />} />
+          <Route path="/Orders" element={<OrderPage />} />
           <Route path="/UoMFacilities" element={<UOMFacilities />} />
           <Route path="/facilityItems/:shopId" element={<ShopPage />} />
           <Route path="/UOMFacHome" element={<UOMFacHome />} />
