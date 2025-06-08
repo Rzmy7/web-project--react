@@ -12,6 +12,7 @@ import Footer from "./components/Footer";
 import FacilityDetails from "./pages/ViewShop";
 import ScrollToTop from "./utils/ScrolledUp";
 import "./index.css";
+import socket from "./socket";
 
 import { useRef, useEffect } from "react";
 
@@ -43,6 +44,13 @@ function App() {
       });
     }
   }, [pathname]);
+  useEffect(() => {
+    socket.connect();
+
+    return () => {
+      socket.disconnect(); // Clean up
+    };
+  }, []);
   return (
     <div ref={scrollRef} style={{ overflowY: "scroll", height: "100vh" }}>
       <Navbar />

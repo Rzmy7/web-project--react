@@ -7,3 +7,4 @@ flask-mail
 bcrypt
 eventlet
 APScheduler
+pytz

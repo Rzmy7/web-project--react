@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import FacilityCard from "./FacilityCard";
 import { io } from "socket.io-client";
+// import socket from "../socket";
 import LoadingScreen from "../utils/Loading";
 
 const FacilitiesContainer = styled.div`

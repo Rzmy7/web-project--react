@@ -12,9 +12,7 @@ from psycopg2.extras import RealDictCursor
 import json
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
-
-
-
+import pytz
 
 
 
@@ -27,6 +25,7 @@ def clear_orders_daily():
         cur.execute("DELETE FROM food_orders;")
         cur.execute("DELETE FROM juice_orders;")
         cur.execute("DELETE FROM bookaccessories_orders;")
+        cur.execute("DELETE FROM shop_alert;")
         conn.commit()
         cur.close()
         conn.close()
@@ -878,11 +877,172 @@ def place_order():
         print(f"Error placing order: {e}")
         return jsonify({'status': 'failure', 'message': str(e)}), 500
 
+
+
+@app.route('/reviews', methods=['POST'])
+def create_review():
+    data = request.get_json()
+
+    required_fields = ['client_id', 'shop_id', 'time']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields: client_id, shop_id, time'}), 400
+
+    try:
+        client_id = data['client_id']
+        shop_id = data['shop_id']
+        review = data.get('review')
+        star_mark = data.get('star_mark')
+        time_str = data.get('time')  # 'YYYY-MM-DD HH:MM:SS'
+
+        print("Original received time (UTC):", time_str)
+
+        time_obj = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S') if time_str else datetime.utcnow()
+
+        # Add 5 hours 30 minutes for Sri Lanka (UTC+5:30)
+        # time_obj = time_obj + timedelta(hours=5, minutes=30)
+
+        print("Time after +5:30 offset:", time_obj)
+
+        # Optional: store date separately
+        date_obj = time_obj.date()
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        insert_query = """
+            INSERT INTO client_reviews (client_id, shop_id, date, time, review, star_mark)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        cur.execute(insert_query, (client_id, shop_id, date_obj, time_obj, review, star_mark))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'message': 'Review added successfully'}), 201
+
+    except Exception as e:
+        print("Insert review error:", e)
+        return jsonify({'error': str(e)}), 500
+    
+
+
+
+
+    
+# @app.route('/api/alerts/<string:facility_id>', methods=['GET'])
+# def get_alerts(facility_id):
+#     try:
+#         conn = get_db_connection()
+#         cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+#         # Fetch alerts for the specific facility_id
+#         cur.execute("SELECT * FROM shop_alert WHERE shop_id = %s ORDER BY time DESC", (facility_id,))
+        
+#         alerts = cur.fetchall()
+#         cur.close()
+#         conn.close()
+        
+#         return jsonify(alerts)
+#     except Exception as e:
+#         print(f"Error fetching alerts: {e}")
+#         return jsonify({'error': str(e)}), 500    
+    
+
+# @app.route('/api/add_alert', methods=['POST'])
+# def add_alert():
+#     data = request.json
+#     shop_id = data.get('shop_id')
+#     alert = data.get('alert')
+
+#     if not shop_id or not alert:
+#         return jsonify({'error': 'shop_id and alert are required'}), 400
+
+#     try:
+#         conn = get_db_connection()
+#         cur = conn.cursor()
+
+#         # Get the current time in Asia/Kolkata time zone
+#         kolkata_tz = pytz.timezone('Asia/Kolkata')
+#         current_time = datetime.now(kolkata_tz).strftime("%Y-%m-%d %H:%M:%S")
+
+#         cur.execute("INSERT INTO shop_alert (shop_id, alert, time) VALUES (%s, %s, %s)", (shop_id, alert, current_time))
+#         conn.commit()
+#         cur.close()
+#         conn.close()
+
+#         # Emit the new alert to all connected clients via Socket.IO
+#         from app import socketio
+#         socketio.emit('new_alert', {'shop_id': shop_id, 'alert': alert, 'time': current_time})
+
+#         return jsonify({'message': 'Alert added successfully'}), 201
+#     except Exception as e:
+#         print(f"Error adding alert: {e}")
+#         return jsonify({'error': str(e)}), 500
+
     
     
-    
-    
-    
+@app.route('/api/alerts/<string:facility_id>', methods=['GET'])
+def get_alerts(facility_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Fetch alerts without id column
+        cur.execute("SELECT shop_id, alert, time FROM shop_alert WHERE shop_id = %s ORDER BY time DESC", (facility_id,))
+        alerts = cur.fetchall()
+        
+        # Convert time to RFC 2822 for frontend
+        for alert in alerts:
+            alert['time'] = alert['time'].astimezone(pytz.UTC).strftime("%a, %d %b %Y %H:%M:%S GMT")
+        
+        cur.close()
+        conn.close()
+        return jsonify(alerts)
+    except Exception as e:
+        print(f"Error fetching alerts for facility_id {facility_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/add_alert', methods=['POST'])
+def add_alert():
+    data = request.json
+    shop_id = data.get('shop_id')
+    alert = data.get('alert')
+
+    if not shop_id or not alert:
+        return jsonify({'error': 'shop_id and alert are required'}), 400
+
+    try:
+        # Get current time in Asia/Kolkata
+        kolkata_tz = pytz.timezone('Asia/Kolkata')
+        current_time = datetime.now(kolkata_tz)
+
+        # Prepare alert data for broadcast (RFC 2822 time)
+        alert_data = {
+            'shop_id': shop_id,
+            'alert': alert,
+            'time': current_time.astimezone(pytz.UTC).strftime("%a, %d %b %Y %H:%M:%S GMT")
+        }
+
+        # Broadcast to all clients first
+        socketio.emit('new_alert', alert_data)
+
+        # Then save to database
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO shop_alert (shop_id, alert, time) VALUES (%s, %s, %s)",
+            (shop_id, alert, current_time)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({'message': 'Alert added successfully'}), 201
+    except Exception as e:
+        print(f"Error adding alert for shop_id {shop_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
     
     
     
@@ -964,53 +1124,7 @@ def login_shop_owner():
     
 
 
-@app.route('/reviews', methods=['POST'])
-def create_review():
-    data = request.get_json()
 
-    required_fields = ['client_id', 'shop_id', 'time']
-    if not all(field in data for field in required_fields):
-        return jsonify({'error': 'Missing required fields: client_id, shop_id, time'}), 400
-
-    try:
-        client_id = data['client_id']
-        shop_id = data['shop_id']
-        review = data.get('review')
-        star_mark = data.get('star_mark')
-        time_str = data.get('time')  # 'YYYY-MM-DD HH:MM:SS'
-
-        print("Original received time (UTC):", time_str)
-
-        time_obj = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S') if time_str else datetime.utcnow()
-
-        # Add 5 hours 30 minutes for Sri Lanka (UTC+5:30)
-        # time_obj = time_obj + timedelta(hours=5, minutes=30)
-
-        print("Time after +5:30 offset:", time_obj)
-
-        # Optional: store date separately
-        date_obj = time_obj.date()
-
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        insert_query = """
-            INSERT INTO client_reviews (client_id, shop_id, date, time, review, star_mark)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        cur.execute(insert_query, (client_id, shop_id, date_obj, time_obj, review, star_mark))
-        conn.commit()
-
-        cur.close()
-        conn.close()
-
-        return jsonify({'message': 'Review added successfully'}), 201
-
-    except Exception as e:
-        print("Insert review error:", e)
-        return jsonify({'error': str(e)}), 500
-    
-    
     
     
     

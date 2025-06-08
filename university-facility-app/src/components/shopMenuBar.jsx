@@ -84,7 +84,7 @@ const PreOrderBadge = styled.span`
   align-items: center;
 `;
 
-const TabNavigationComponent = ({menuData,shopId}) => {
+const TabNavigationComponent = ({menuData,shopId,alerts}) => {
   const [activeTab, setActiveTab] = useState("Menu");
   const [preOrderItemCount, setPreOrderItemCount] = useState(0); // State to track pre-order items
   const tabs = ["Menu", "Alerts", "Pre-Order"];
@@ -201,7 +201,7 @@ useEffect(() => {
             isSelected={true}
           />
         )}
-        {activeTab === "Alerts" && <AlertTab/>}
+        {activeTab === "Alerts" && <AlertTab shopId={shopId} alerts={alerts}/>}
         {activeTab === "Pre-Order" && (
           <PreOrderTab
   PreOrderItems={preOrderedItems}
