@@ -14,6 +14,7 @@ import ScrollToTop from "./utils/ScrolledUp";
 import OrderPage from "./pages/Orders";
 import "./index.css";
 import socket from "./socket";
+import { ToastContainer } from 'react-toastify';
 
 
 import { useRef, useEffect } from "react";
@@ -70,6 +71,17 @@ function App() {
           <Route path="/facility/:facilityId" element={<FacilityDetails />} />
         </Routes>
       </MainContent>
+      <ToastContainer 
+          position="top-right" 
+          autoClose={3000} 
+          hideProgressBar={false} 
+          newestOnTop={false} 
+          closeOnClick 
+          rtl={false} 
+          pauseOnFocusLoss 
+          draggable 
+          pauseOnHover 
+        />
       <Footer />
     </div>
   );

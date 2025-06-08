@@ -1043,6 +1043,140 @@ def add_alert():
         print(f"Error adding alert for shop_id {shop_id}: {e}")
         return jsonify({'error': str(e)}), 500
 
+
+@app.route('/api/orders/<int:client_id>', methods=['GET'])
+def get_orders(client_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Fetch food orders
+        cur.execute("""
+            SELECT 
+                fo.client_id,
+                fo.food_id AS item_id,
+                fo.fshop_id AS shop_id,
+                fo.time,
+                fo.quantity,
+                fo.notes,
+                fo.order_status,
+                f.food_name AS item_name,
+                s.shop_name,
+                CAST(fh.food_price AS NUMERIC) AS price
+            FROM food_orders fo
+            JOIN food f ON fo.food_id = f.food_id
+            JOIN food_canteen fc ON fo.fshop_id = fc.fshop_id
+            JOIN shop s ON fc.fshop_id = s.shop_id
+            JOIN food_has fh ON fo.food_id = fh.food_id AND fo.fshop_id = fh.shop_id
+            WHERE fo.client_id = %s
+        """, (client_id,))
+        food_orders = cur.fetchall()
+
+        # Fetch juice orders
+        cur.execute("""
+            SELECT 
+                jo.client_id,
+                jo.juice_id AS item_id,
+                jo.jshop_id AS shop_id,
+                jo.time,
+                jo.quantity,
+                jo.notes,
+                jo.order_status,
+                j.juice_name AS item_name,
+                s.shop_name,
+                CAST(jh.juice_price AS NUMERIC) AS price
+            FROM juice_orders jo
+            JOIN juice j ON jo.juice_id = j.juice_id
+            JOIN juice_bar jb ON jo.jshop_id = jb.jshop_id
+            JOIN shop s ON jb.jshop_id = s.shop_id
+            JOIN juice_has jh ON jo.juice_id = jh.juice_id AND jo.jshop_id = jh.shop_id
+            WHERE jo.client_id = %s
+        """, (client_id,))
+        juice_orders = cur.fetchall()
+
+        # Fetch book accessories orders
+        cur.execute("""
+            SELECT 
+                bo.client_id,
+                bo.bacc_id AS item_id,
+                bo.bshop_id AS shop_id,
+                bo.time,
+                bo.quantity,
+                bo.notes,
+                bo.order_status,
+                ba.bacc_name AS item_name,
+                s.shop_name,
+                CAST(bah.bacc_price AS NUMERIC) AS price
+            FROM bookaccessories_orders bo
+            JOIN book_accassaries ba ON bo.bacc_id = ba.baccc_id
+            JOIN bookshop bs ON bo.bshop_id = bs.bshop_id
+            JOIN shop s ON bs.bshop_id = s.shop_id
+            JOIN bookaccessories_has bah ON bo.bacc_id = bah.bacc_id AND bo.bshop_id = bah.shop_id
+            WHERE bo.client_id = %s
+        """, (client_id,))
+        book_orders = cur.fetchall()
+
+        # Combine and convert types
+        all_orders = food_orders + juice_orders + book_orders
+        all_orders = [convert_types(order) for order in all_orders]
+
+        cur.close()
+        conn.close()
+        return jsonify(all_orders), 200
+    except Exception as e:
+        print(f"Error fetching orders: {e}")
+        return jsonify({"error": "Failed to fetch orders"}), 500
+
+@app.route('/api/orders/cancel', methods=['POST'])
+def cancel_order():
+    try:
+        data = request.get_json()
+        client_id = data.get('client_id')
+        item_id = data.get('item_id')
+        shop_id = data.get('shop_id')
+        time = data.get('time')
+        order_type = data.get('order_type')
+
+        if not all([client_id, item_id, shop_id, time, order_type]):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if order_type == 'food':
+            cur.execute("""
+                DELETE FROM food_orders
+                WHERE client_id = %s AND food_id = %s AND fshop_id = %s AND time = %s
+                RETURNING client_id;
+            """, (client_id, item_id, shop_id, time))
+        elif order_type == 'juice':
+            cur.execute("""
+                DELETE FROM juice_orders
+                WHERE client_id = %s AND juice_id = %s AND jshop_id = %s AND time = %s
+                RETURNING client_id;
+            """, (client_id, item_id, shop_id, time))
+        elif order_type == 'bookaccessories':
+            cur.execute("""
+                DELETE FROM bookaccessories_orders
+                WHERE client_id = %s AND bacc_id = %s AND bshop_id = %s AND time = %s
+                RETURNING client_id;
+            """, (client_id, item_id, shop_id, time))
+        else:
+            return jsonify({"error": "Invalid order_type"}), 400
+
+        deleted = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        if deleted:
+            return jsonify({"message": "Order cancelled successfully"}), 200
+        else:
+            return jsonify({"error": "Order not found"}), 404
+    except Exception as e:
+        print(f"Error cancelling order: {e}")
+        return jsonify({"error": "Failed to cancel order"}), 500
+
     
     
 

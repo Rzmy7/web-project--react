@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import OrderCard from '../components/Orders/OrderCard';
+import ItemOrderCard from '../components/Orders/OrderCard';
 import FilterContainer from '../components/Orders/FilterContainer';
 import EmptyState from '../components/Orders/EmptyState';
 
@@ -41,95 +41,73 @@ const OrdersGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 `;
 
-// Sample data - replace with your actual API call
-const sampleOrders = [
-  {
-    id: "ORD001",
-    orderName: "Lunch Combo",
-    shopName: "Central Canteen",
-    items: [
-      { name: "Chicken Rice", quantity: 1, price: 4.50 },
-      { name: "Iced Tea", quantity: 1, price: 1.50 }
-    ],
-    totalPrice: 6.00,
-    time: "12:30 PM",
-    status: "completed"
-  },
-  {
-    id: "ORD002",
-    orderName: "Study Snacks",
-    shopName: "Library Café",
-    items: [
-      { name: "Coffee", quantity: 2, price: 2.50 },
-      { name: "Muffin", quantity: 1, price: 3.00 }
-    ],
-    totalPrice: 8.00,
-    time: "2:15 PM",
-    status: "accepted"
-  },
-  {
-    id: "ORD003",
-    orderName: "Quick Bite",
-    shopName: "Juice Bar",
-    items: [
-      { name: "Fresh Orange Juice", quantity: 1, price: 3.50 },
-      { name: "Sandwich", quantity: 1, price: 4.00 }
-    ],
-    totalPrice: 7.50,
-    time: "4:45 PM",
-    status: "pending"
-  }
-];
+const ErrorMessage = styled.p`
+  color: var(--danger);
+  text-align: center;
+  font-size: 1.1rem;
+`;
 
 const OrderPage = () => {
-  const [orders, setOrders] = useState([]);
-  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [items, setItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simulate API call - replace with your actual API endpoint
-    const fetchOrders = async () => {
+    let isMounted = true;
+    const fetchItems = async () => {
       try {
         setLoading(true);
-        // Replace this with your actual API call
-        // const response = await fetch('/api/orders/today');
-        // const data = await response.json();
-        
-        // Using sample data for demonstration
-        setTimeout(() => {
-          setOrders(sampleOrders);
-          setFilteredOrders(sampleOrders);
+        setError(null);
+        const clientId = 14; // Replace with authenticated user ID
+        const response = await fetch(`http://127.0.0.1:8001/api/orders/${clientId}`);
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        console.log('API response:', data);
+        if (isMounted) {
+          setItems(data);
+          setFilteredItems(data);
+        }
+      } catch (err) {
+        console.error('Error fetching items:', err);
+        if (isMounted) {
+          setError('Failed to load orders. Please try again later.');
+        }
+      } finally {
+        if (isMounted) {
           setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        setLoading(false);
+        }
       }
     };
 
-    fetchOrders();
+    fetchItems();
+    return () => { isMounted = false; };
   }, []);
 
   useEffect(() => {
-    if (filter === 'all') {
-      setFilteredOrders([...orders]);
-    } else {
-      setFilteredOrders(orders.filter(order => order.status === filter));
-    }
-  }, [filter, orders]);
+    setFilteredItems(filter === 'all' ? [...items] : items.filter(item => item.order_status === filter));
+  }, [filter, items]);
 
-  const handleFilterChange = (newFilter) => {
+  const handleFilterChange = useCallback((newFilter) => {
     setFilter(newFilter);
-  };
+  }, []);
 
-  const handleCancelOrder = (orderId) => {
-    setOrders(prevOrders => {
-      const updatedOrders = prevOrders.filter(order => order.id !== orderId);
-      setFilteredOrders(updatedOrders.filter(order => filter === 'all' || order.status === filter));
-      return updatedOrders;
+  const handleCancelItem = useCallback((clientId, itemId, shopId, time) => {
+    console.log('handleCancelItem called with:', { clientId, itemId, shopId, time });
+    setItems(prevItems => {
+      const updatedItems = prevItems.filter(item =>
+        !(item.client_id === clientId &&
+          item.item_id === itemId &&
+          item.shop_id === shopId &&
+          item.time === time)
+      );
+      console.log('Updated items:', updatedItems);
+      return updatedItems;
     });
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -138,6 +116,18 @@ const OrderPage = () => {
           <Title>My Orders</Title>
           <Subtitle>Loading your orders...</Subtitle>
         </Header>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Header>
+          <Title>My Orders</Title>
+          <Subtitle>Today's orders • Auto-deleted at midnight</Subtitle>
+        </Header>
+        <ErrorMessage>{error}</ErrorMessage>
       </Container>
     );
   }
@@ -154,15 +144,29 @@ const OrderPage = () => {
         handleFilterChange={handleFilterChange}
       />
 
-      {filteredOrders.length === 0 ? (
+      {filteredItems.length === 0 ? (
         <EmptyState filter={filter} />
       ) : (
         <OrdersGrid>
-          {filteredOrders.map((order) => (
-            <OrderCard 
-              key={order.id} 
-              order={order} 
-              onCancelOrder={handleCancelOrder} 
+          {filteredItems.map((item) => (
+            <ItemOrderCard 
+              key={`${item.client_id}-${item.item_id}-${item.shop_id}-${item.time}`}
+              item={{
+                orderId: `${item.client_id}-${item.item_id}-${item.shop_id}-${item.time}`,
+                itemId: item.item_id,
+                name: item.item_name,
+                quantity: item.quantity,
+                price: item.price,
+                facilityName: item.shop_name,
+                realTime : item.time,
+                time: new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: item.order_status,
+                clientId: item.client_id,
+                shopId: item.shop_id,
+                orderType: item.item_id < 100 ? 'food' : 
+                          item.item_id >= 100 && item.item_id < 200 ? 'juice' : 'bookaccessories'
+              }} 
+              onCancelItem={handleCancelItem} 
             />
           ))}
         </OrdersGrid>
