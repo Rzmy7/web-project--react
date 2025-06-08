@@ -4,6 +4,7 @@ import "../index.css";
 import Facilities from "../components/Facilities";
 import SearchBar from "../components/Searchbar";
 import MapWithUserLocation from "../utils/MapWithUserLocation";
+import LoadingScreen from "../utils/Loading";
 
 const HeroSection = styled.div`
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)),
@@ -87,7 +88,7 @@ function UOMFacHome() {
       });
   }, []);
 
-  if (loading) return <p>Loading places...</p>;
+  if (loading) return <div style={{width:"100%",justifyContent:"center"}}><LoadingScreen/></div>;
   if (error) return <p>Error: {error}</p>;
 
   // const places = [

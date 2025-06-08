@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import ItemOrderCard from '../components/Orders/OrderCard';
 import FilterContainer from '../components/Orders/FilterContainer';
 import EmptyState from '../components/Orders/EmptyState';
+import LoadingScreen from '../utils/Loading';
+import { useParams } from 'react-router-dom';
 
 // Styled Components
 const Container = styled.div`
@@ -47,20 +49,22 @@ const ErrorMessage = styled.p`
   font-size: 1.1rem;
 `;
 
-const OrderPage = () => {
+function OrderPage() {
+    const {clientId} = useParams();
+    console.log("clientId:", clientId);
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  
   useEffect(() => {
+    if (!clientId) return console.log("no user",clientId);
     let isMounted = true;
     const fetchItems = async () => {
       try {
         setLoading(true);
-        setError(null);
-        const clientId = 14; // Replace with authenticated user ID
+        setError(null); // Replace with authenticated user ID
         const response = await fetch(`http://127.0.0.1:8001/api/orders/${clientId}`);
         if (!response.ok) {
           throw new Error(`API error: ${response.status} ${response.statusText}`);
@@ -85,7 +89,7 @@ const OrderPage = () => {
 
     fetchItems();
     return () => { isMounted = false; };
-  }, []);
+  }, [clientId]);
 
   useEffect(() => {
     setFilteredItems(filter === 'all' ? [...items] : items.filter(item => item.order_status === filter));
@@ -114,7 +118,7 @@ const OrderPage = () => {
       <Container>
         <Header>
           <Title>My Orders</Title>
-          <Subtitle>Loading your orders...</Subtitle>
+          <div style={{width:"100%",justifyContent:"center"}}><LoadingScreen/></div>
         </Header>
       </Container>
     );

@@ -1,11 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import styled from 'styled-components';
 import Navbar from './navbar';
-import Dashboard from './dashboard';
-import Products from './products';
-import Preorder from './preorder';
-import Reviews from './reviews';
-import Settings from './Settings';
+import DataFetcher from './DataFetcher';
 
 // Main Content Styles
 const MainContent = styled.div`
@@ -167,11 +163,7 @@ function App() {
     <>
       <Navbar setActiveSection={setActiveSection} onLogout={handleLogout} shopOwner={shopOwner}/>
       <MainContent>
-        {activeSection === 'dashboard' && <Dashboard shopOwner={shopOwner} onLogout={handleLogout}/>}
-        {activeSection === 'products' && <Products />}
-        {activeSection === 'preorder' && <Preorder />}
-        {activeSection === 'reviews' && <Reviews />}
-        {activeSection === 'settings' && <Settings />}
+        <DataFetcher activeSection={activeSection} shopOwner={shopOwner} onLogout={handleLogout}/>
       </MainContent>
     </>
   );
