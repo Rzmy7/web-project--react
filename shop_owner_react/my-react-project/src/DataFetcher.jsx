@@ -4,11 +4,11 @@ import Preorder from './preorder';
 import Reviews from './reviews';
 import Settings from './Settings';
 
-const DataFetcher = ({ activeSection, shopOwner, handleLogout }) => {
+const DataFetcher = ({ activeSection, shopOwner, onLogout }) => {
   return (
     <div>
       {activeSection === "dashboard" && (
-        <Dashboard shopOwner={shopOwner} onLogout={handleLogout} />
+        <Dashboard shopOwner={shopOwner} onLogout={onLogout} />
       )}
       {activeSection === "products" && <Products />}
       {activeSection === "preorder" && <Preorder />}
