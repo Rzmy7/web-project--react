@@ -1,4 +1,6 @@
-from flask import Flask, jsonify, request, render_template, redirect
+import calendar
+import re
+from flask import Flask, jsonify, make_response, request, render_template, redirect
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import psycopg2
@@ -1227,9 +1229,9 @@ def login_shop_owner():
 
         # JOIN users with shop_owner
         cur.execute("""
-            SELECT u.user_id, u.full_name, u.email, u.user_password
+            SELECT u.user_id, u.full_name, u.email, u.user_password,s.shop_id
             FROM users u
-            JOIN shop_owner so ON so.user_id = u.user_id
+            JOIN shop s ON s.shopowner_id = u.user_id
             WHERE u.email = %s
         """, (email,))
         shop_owner = cur.fetchone()
@@ -1253,17 +1255,74 @@ def login_shop_owner():
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Server error'}), 500
-
-    
     
 
 
 
+def convert_types(data):
+    """Convert datetime.time to JSON-serializable strings."""
+    if not data:
+        return None
+    result = dict(data)
+    for key, value in result.items():
+        if isinstance(value, time):
+            result[key] = str(value)  # Convert time to string (e.g., "07:00:00")
+    return result
     
-    
-    
-    
-    
+
+@app.route('/api/shopOwnerP1/<shop_id>', methods=['GET'])
+def get_shop_details(shop_id):
+    try:
+        # Validate shop_id (e.g., "SH01")
+        if not shop_id or not re.match(r'^SH\d+$', shop_id):
+            return jsonify({"error": "Invalid shop_id, must be a string like 'SH01'"}), 400
+
+        # Connect to database
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        tz = pytz.timezone('Asia/Kolkata')
+        current_date = datetime.now(tz)
+        current_day = calendar.day_name[current_date.weekday()]
+
+        # Execute query
+        cur.execute("""
+            SELECT 
+                u.full_name,
+                s.shop_name,
+                s.shopowner_id,
+				s.shop_image,
+                s.open_status,
+                s."Location",
+                so_open.opening_time,
+                so_open.closing_time
+            FROM 
+                users u
+                INNER JOIN shop_owner so ON u.user_id = so.user_id
+                INNER JOIN shop s ON so.user_id = s.shopowner_id
+                INNER JOIN shop_open so_open ON s.shop_id = so_open.shop_id
+            WHERE 
+                s.shop_id = %s
+                AND so_open.day = %s
+        """, (shop_id, current_day))
+        shop_details = cur.fetchone()
+
+        # Close database connection
+        cur.close()
+        conn.close()
+
+        # Check if data exists
+        if not shop_details:
+            return jsonify({"error": "No data found for the given shop_id"}), 404
+        
+        shop_details = convert_types(shop_details)
+        return jsonify(shop_details), 200
+    except Exception as e:
+        print(f"Error fetching shop details: {e}")
+        if 'conn' in locals():
+            conn.close()
+        return jsonify({"error": "Failed to fetch shop details", "details": str(e)}), 500
+
     
     
     

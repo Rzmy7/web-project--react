@@ -100,7 +100,7 @@ const MobileMenuBtn = styled.button`
   }
 `;
 
-function Navbar({ setActiveSection ,shopOwner}) {
+function Navbar({ setActiveSection ,shopOwner,onLogout}) {
   const [menuOpen, setMenuOpen] = useState(false);
  
 
@@ -151,7 +151,7 @@ function Navbar({ setActiveSection ,shopOwner}) {
         </NavContainer>
 
         <UserInfo>
-          <UserAvatar>{shopOwner.full_name[0]}</UserAvatar>
+          <UserAvatar onClick={onLogout}>{shopOwner.full_name[0]}</UserAvatar>
           <span>{shopOwner.full_name}</span>
         </UserInfo>
 

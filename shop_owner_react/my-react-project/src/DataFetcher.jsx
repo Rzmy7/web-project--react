@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import Dashboard from './dashboard';
 import Products from './products';
 import Preorder from './preorder';
@@ -5,15 +6,79 @@ import Reviews from './reviews';
 import Settings from './Settings';
 
 const DataFetcher = ({ activeSection, shopOwner, onLogout }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [shopData, setShopData] = useState(null);
+  const [localShopOwner, setLocalShopOwner] = useState(null);
+  const shopId = shopOwner.shop_id; // Fallback to 'SH01'
+
+  useEffect(() => {
+    console.log('Shop ID:', shopId);
+    const fetchShopDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://127.0.0.1:8001/api/shopOwnerP1/${shopId}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Shop details fetched:', data);
+
+        if (data.error) {
+          throw new Error(data.details || data.error);
+        }
+
+        setLocalShopOwner({ full_name: data.full_name });
+        setShopData({
+          shopName: data.shop_name,
+          location: data.Location,
+          hours: `${data.opening_time} - ${data.closing_time}`,
+          open_status: data.open_status,
+          shopImage: data.shop_image,
+          imageAlt: data.shop_name,
+          imageUrl: data.shop_image,
+          stats: {
+            availableItems: 0, // Placeholder
+            pendingOrders: 0,
+            completedOrders: 0,
+            totalRevenue: 0
+          },
+          notifications: [] // Placeholder
+        });
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (shopId) {
+      fetchShopDetails();
+    }
+    // console.log('Shop data:', shopData);
+  }, [ shopId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!shopData || !localShopOwner) {
+    return <div>No data available for shop ID: {shopId}</div>;
+  }
+
   return (
     <div>
-      {activeSection === "dashboard" && (
-        <Dashboard shopOwner={shopOwner} onLogout={onLogout} />
+      {activeSection === 'dashboard' && (
+        <Dashboard shopOwner={localShopOwner} shopData={shopData} onLogout={onLogout} />
       )}
-      {activeSection === "products" && <Products />}
-      {activeSection === "preorder" && <Preorder />}
-      {activeSection === "reviews" && <Reviews />}
-      {activeSection === "settings" && <Settings />}
+      {activeSection === 'products' && <Products />}
+      {activeSection === 'preorder' && <Preorder />}
+      {activeSection === 'reviews' && <Reviews />}
+      {activeSection === 'settings' && <Settings />}
     </div>
   );
 };

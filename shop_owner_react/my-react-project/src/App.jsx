@@ -93,6 +93,7 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+
   useEffect(() => {
     const stored = localStorage.getItem("shopOwner");
     if (stored) {
@@ -117,6 +118,8 @@ function App() {
         localStorage.setItem("shopOwner", JSON.stringify(result.shop_owner));
         // Auto-reload page to refresh UI
         window.location.reload();
+        console.log("Login successful:", result);
+        setShopOwner(result.shop_owner);
       } else {
         setError(result.error || "Login failed");
       }
@@ -158,8 +161,10 @@ function App() {
       </LoginContainer>
     );
   }
+  
 
   return (
+    
     <>
       <Navbar setActiveSection={setActiveSection} onLogout={handleLogout} shopOwner={shopOwner}/>
       <MainContent>
