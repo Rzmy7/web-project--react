@@ -1,5 +1,3 @@
-Sure, I can condense the README to make it more concise. Here’s a shorter version:
-
 ---
 
 # UoM Facility App
