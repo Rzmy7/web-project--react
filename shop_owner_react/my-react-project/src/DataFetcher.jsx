@@ -11,6 +11,7 @@ const DataFetcher = ({ activeSection, shopOwner, onLogout }) => {
   const [shopData, setShopData] = useState(null);
   const [localShopOwner, setLocalShopOwner] = useState(null);
   const shopId = shopOwner.shop_id; // Fallback to 'SH01'
+    const [facilityItems, setFacilityItems] = useState([]);
 
   useEffect(() => {
     console.log("Shop ID:", shopId);
@@ -52,6 +53,19 @@ const DataFetcher = ({ activeSection, shopOwner, onLogout }) => {
         if (openStatus.error) {
           throw new Error(openStatus.details || openStatus.error);
         }
+
+        const responseFacilityItems = await fetch(
+          `http://127.0.0.1:8001/api/shop/${shopId}/FacilityItems`
+        );
+        if (!responseFacilityItems.ok) {
+          throw new Error(`HTTP error! Status: ${responseFacilityItems.status}`);
+        }
+        const facilityItems = await responseFacilityItems.json();
+        console.log("Shop facility items fetched:", facilityItems);
+        if (facilityItems.error) {
+          throw new Error(facilityItems.details || facilityItems.error);
+        }
+        setFacilityItems(facilityItems);
 
         setLocalShopOwner({ full_name: data.full_name });
         setShopData({
@@ -105,7 +119,7 @@ const DataFetcher = ({ activeSection, shopOwner, onLogout }) => {
           shopId={shopId}
         />
       )}
-      {activeSection === "products" && <Products />}
+      {activeSection === "products" && <Products shopId={shopId} facilityItems={facilityItems}/>}
       {activeSection === "preorder" && <Preorder />}
       {activeSection === "reviews" && <Reviews />}
       {activeSection === "settings" && <Settings />}

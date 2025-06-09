@@ -1509,9 +1509,207 @@ def get_shop_status(shop_id):
             conn.close()
         return jsonify({"error": "Failed to fetch shop status", "details": str(e)}), 500
 
+def format_price(price):
+    """Convert varchar price to LKR X.00 format."""
+    try:
+        # Remove any non-numeric characters except decimal point
+        cleaned_price = ''.join(c for c in price if c.isdigit() or c == '.')
+        numeric_price = float(cleaned_price)
+        return f"LKR {numeric_price:.2f}"
+    except (ValueError, TypeError):
+        return "LKR 0.00"  # Fallback for invalid prices
+
+@app.route('/api/shop/<shop_id>/FacilityItems', methods=['GET'])
+def get_shop_items(shop_id):
+    try:
+        if not shop_id or not re.match(r'^SH\d+$', shop_id):
+            return jsonify({"error": "Invalid shop_id, must be a string like 'SH06'"}), 400
+
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Fetch food items
+        cur.execute("""
+            SELECT fh.food_id AS id, f.food_name AS name, fh.food_price AS price, fh.food_avalability AS availability
+            FROM food_has fh
+            JOIN food f ON fh.food_id = f.food_id
+            WHERE fh.shop_id = %s AND fh.food_avalability = true
+        """, (shop_id,))
+        food_items = [
+            {
+                "id": item['id'],
+                "name": item['name'],
+                "price": format_price(item['price']),
+                "type": "Main Dishes",
+                "availability": item['availability']
+            }
+            for item in cur.fetchall()
+        ]
+
+        # Fetch juice items
+        cur.execute("""
+            SELECT jh.juice_id AS id, j.juice_name AS name, jh.juice_price AS price, jh.juice_avalability AS availability
+            FROM juice_has jh
+            JOIN juice j ON jh.juice_id = j.juice_id
+            WHERE jh.shop_id = %s AND jh.juice_avalability = true
+        """, (shop_id,))
+        juice_items = [
+            {
+                "id": item['id'],
+                "name": item['name'],
+                "price": format_price(item['price']),
+                "type": "Drinks",
+                "availability": item['availability']
+            }
+            for item in cur.fetchall()
+        ]
+
+        # Fetch book accessories
+        cur.execute("""
+            SELECT bh.bacc_id AS id, b.bacc_name AS name, bh.bacc_price AS price, bh.bacc_avalability AS availability
+            FROM bookaccessories_has bh
+            JOIN book_accassaries b ON bh.bacc_id = b.baccc_id
+            WHERE bh.shop_id = %s AND bh.bacc_avalability = true
+        """, (shop_id,))
+        book_items = [
+            {
+                "id": item['id'],
+                "name": item['name'],
+                "price": format_price(item['price']),
+                "type": "Stationery",
+                "availability": item['availability']
+            }
+            for item in cur.fetchall()
+        ]
+
+        cur.close()
+        conn.close()
+
+        categories = [
+            {"title": "canteen products", "items": food_items},
+            {"title": "juice bar products", "items": juice_items},
+            {"title": "bookshop accessories", "items": book_items}
+        ]
+
+        return jsonify(categories), 200
+    except Exception as e:
+        print(f"Error fetching shop items: {e}")
+        if 'conn' in locals():
+            conn.close()
+        return jsonify({"error": "Failed to fetch shop items", "details": str(e)}), 500
 
 
+def update_item_availability(shop_id, category, item_id):
+    try:
+        # Validate shop_id
+        if not shop_id or not re.match(r'^SH\d+$', shop_id):
+            return jsonify({"error": "Invalid shop_id, must be a string like 'SH06'"}), 400
 
+        # Validate category
+        valid_categories = ['food', 'juice', 'book']
+        if category not in valid_categories:
+            return jsonify({"error": "Invalid category, must be 'food', 'juice', or 'book'"}), 400
+
+        # Validate item_id
+        try:
+            item_id = int(item_id)
+        except ValueError:
+            return jsonify({"error": "Invalid item_id value, must be an integer"}), 400
+
+        # Validate JSON payload
+        data = request.get_json()
+        if not data or 'availability' not in data or not isinstance(data['availability'], bool):
+            return jsonify({"error": "Invalid payload, must include 'availability' as a boolean"}), 400
+
+        availability = data['availability']
+
+        # Connect to database
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Update availability based on category
+        if category == 'food':
+            cur.execute("""
+                UPDATE food_has
+                SET food_availability = %s
+                WHERE shop_id = %s AND food_id = %s
+                RETURNING food_availability AS availability
+            """, (availability, shop_id, item_id))
+        elif category == 'juice':
+            cur.execute("""
+                UPDATE juice_has
+                SET juice_availability = %s
+                WHERE shop_id = %s AND juice_id = %s
+                RETURNING juice_availability AS availability
+            """, (availability, shop_id, item_id))
+        else:  # book
+            cur.execute("""
+                UPDATE bookaccessories_has
+                SET bacc_availability = %s
+                WHERE shop_id = %s% AND bacc_id = %s
+                RETURNING bacc_availability AS availability
+            """, (availability, shop_id, item_id))
+
+        result = cur.fetchone()
+
+        # Commit transaction
+        conn.commit()
+
+        # Close connection
+        cur.close()
+        conn.close()
+
+        if not result:
+            return jsonify({"error": "Item not found for the given shop_id and item_id"}), 404
+
+        return jsonify({"availability": result['availability']}), 200
+    except Exception as e:
+        print(f"Error updating item availability: {e}")
+        if 'conn' in locals():
+            conn.rollback()
+            conn.close()
+        return jsonify({"error": "Failed to update item availability", "details": str(e)}), 500
+
+
+@app.route('/api/shop/<shop_id>/item/<category>/<item_id>', methods=['DELETE'])
+def delete_item(shop_id, category, item_id):
+    try:
+        if not shop_id or not re.match(r'^SH\d+$', shop_id):
+            return jsonify({"error": "Invalid shop_id, must be a string like 'SH06'"}), 400
+
+        valid_categories = ['food', 'juice', 'book']
+        if category not in valid_categories:
+            return jsonify({"error": "Invalid category, must be 'food', 'juice', or 'book'"}), 400
+
+        try:
+            item_id = int(item_id)
+        except ValueError:
+            return jsonify({"error": "Invalid item_id, must be an integer"}), 400
+
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        if category == 'food':
+            cur.execute("DELETE FROM food_has WHERE shop_id = %s AND food_id = %s", (shop_id, item_id))
+            cur.execute("DELETE FROM food WHERE food_id = %s", (item_id,))
+        elif category == 'juice':
+            cur.execute("DELETE FROM juice_has WHERE shop_id = %s AND juice_id = %s", (shop_id, item_id))
+            cur.execute("DELETE FROM juice WHERE juice_id = %s", (item_id,))
+        else:  # book
+            cur.execute("DELETE FROM bookaccessories_has WHERE shop_id = %s AND bacc_id = %s", (shop_id, item_id))
+            cur.execute("DELETE FROM book_accassaries WHERE baccc_id = %s", (item_id,))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({"message": "Item deleted successfully"}), 200
+    except Exception as e:
+        print(f"Error deleting item: {e}")
+        if 'conn' in locals():
+            conn.rollback()
+            conn.close()
+        return jsonify({"error": "Failed to delete item", "details": str(e)}), 500
 
 
 
