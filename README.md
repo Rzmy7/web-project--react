@@ -67,4 +67,3 @@ A React + Flask app for campus facility status and pre-orders.
 
 ---
 
-This version is more concise while still providing essential information.
