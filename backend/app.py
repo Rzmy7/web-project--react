@@ -1430,6 +1430,120 @@ def get_shop_stats(shop_id):
             conn.close()
         return jsonify({"error": "Failed to fetch shop stats", "details": str(e)}), 500
 
+
+
+@app.route('/api/shop/<shop_id>/OpenStatusChanger', methods=['PATCH'])
+def update_shop_status(shop_id):
+    try:
+        # Validate shop_id (e.g., "SH01")
+        if not shop_id or not re.match(r'^SH\d+$', shop_id):
+            return jsonify({"error": "Invalid shop_id, must be a string like 'SH01'"}), 400
+
+        # Validate JSON payload
+        data = request.get_json()
+        if not data or 'is_open' not in data or not isinstance(data['is_open'], bool):
+            return jsonify({"error": "Invalid payload, must include 'is_open' as a boolean"}), 400
+
+        is_open = data['is_open']
+
+        # Connect to database
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Update open_status
+        cur.execute("""
+            UPDATE shop
+            SET open_status = %s
+            WHERE shop_id = %s
+            RETURNING open_status
+        """, (is_open, shop_id))
+        result = cur.fetchone()
+
+        # Commit the transaction
+        conn.commit()
+
+        # Close database connection
+        cur.close()
+        conn.close()
+
+        # Check if shop exists
+        if not result:
+            return jsonify({"error": "No shop found for the given shop_id"}), 404
+
+        return jsonify({"open_status": result['open_status']}), 200
+    except Exception as e:
+        print(f"Error updating shop status: {e}")
+        if 'conn' in locals():
+            conn.rollback()
+            conn.close()
+        return jsonify({"error": "Failed to update shop status", "details": str(e)}), 500
+
+
+@app.route('/api/shop/<shop_id>/OpenStatus', methods=['GET'])
+def get_shop_status(shop_id):
+    try:
+        # Validate shop_id (e.g., "SH01")
+        if not shop_id or not re.match(r'^SH\d+$', shop_id):
+            return jsonify({"error": "Invalid shop_id, must be a string like 'SH01'"}), 400
+
+        # Connect to database
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Execute query
+        cur.execute("SELECT open_status FROM shop WHERE shop_id = %s", (shop_id,))
+        result = cur.fetchone()
+
+        # Close database connection
+        cur.close()
+        conn.close()
+
+        # Check if shop exists
+        if not result:
+            return jsonify({"error": "No shop found for the given shop_id"}), 404
+
+        return jsonify({"open_status": result['open_status']}), 200
+    except Exception as e:
+        print(f"Error fetching shop status: {e}")
+        if 'conn' in locals():
+            conn.close()
+        return jsonify({"error": "Failed to fetch shop status", "details": str(e)}), 500
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     

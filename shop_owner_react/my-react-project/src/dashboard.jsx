@@ -329,12 +329,31 @@ const NotifiBtns = styled.div`
 //   ]
 // };
 
-function Dashboard({ onLogout, shopOwner,shopData }) {
-  const [isOpen, setIsOpen] = useState(false);
+function Dashboard({ onLogout, shopOwner,shopData , shopId }) {
+  const [isOpen, setIsOpen] = useState(shopData.open_status);
   const [imageError, setImageError] = useState(false);
 
-  const handleStatusChange = () => {
-    setIsOpen(!isOpen);
+  const handleStatusChange = async () => {
+    try {
+      setIsOpen(!isOpen); // Optimistically update the state
+      const newStatus = !isOpen;
+      const response = await fetch(`http://127.0.0.1:8001/api/shop/${shopId}/OpenStatusChanger`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_open: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setIsOpen(data.open_status); // Update state only on success
+    } catch (err) {
+      console.error('Error updating shop status:', err.message);
+      // setIsOpen(isOpen); // Revert to previous state on error
+      // Optionally show an error message to the user
+    }
   };
 
   const handleImageError = () => {

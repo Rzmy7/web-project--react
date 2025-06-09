@@ -41,12 +41,24 @@ const DataFetcher = ({ activeSection, shopOwner, onLogout }) => {
           throw new Error(stats.details || stats.error);
         }
 
+        const responseOpenStatus = await fetch(
+          `http://127.0.0.1:8001/api/shop/${shopId}/OpenStatus`
+        );
+        if (!responseOpenStatus.ok) {
+          throw new Error(`HTTP error! Status: ${responseOpenStatus.status}`);
+        }
+        const openStatus = await responseOpenStatus.json();
+        console.log("Shop open status fetched:", openStatus);
+        if (openStatus.error) {
+          throw new Error(openStatus.details || openStatus.error);
+        }
+
         setLocalShopOwner({ full_name: data.full_name });
         setShopData({
           shopName: data.shop_name,
           location: data.Location,
           hours: `${data.opening_time} - ${data.closing_time}`,
-          open_status: data.open_status,
+          open_status: openStatus.open_status,
           shopImage: data.shop_image,
           imageAlt: data.shop_name,
           imageUrl: data.shop_image,
@@ -90,6 +102,7 @@ const DataFetcher = ({ activeSection, shopOwner, onLogout }) => {
           shopOwner={localShopOwner}
           shopData={shopData}
           onLogout={onLogout}
+          shopId={shopId}
         />
       )}
       {activeSection === "products" && <Products />}
