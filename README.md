@@ -26,6 +26,14 @@ A React + Flask app for campus facility status and pre-orders.
 
 2. **Set Up Environment Variables**
 
+   Go to Backend:
+   
+   ```bash
+   cd backend
+   touch .env
+   nano .env
+   ```
+   
    Create a `.env` file in the root directory:
 
    ```plaintext
@@ -43,13 +51,13 @@ A React + Flask app for campus facility status and pre-orders.
    MAIL_DEFAULT_SENDER=example@gmail.com
    ```
 
-3. **Install Dependencies**
+4. **Install Dependencies**
 
    ```bash
    npm install
    ```
 
-4. **Start the Application**
+5. **Start the Application**
 
    ```bash
    npm run install-all
