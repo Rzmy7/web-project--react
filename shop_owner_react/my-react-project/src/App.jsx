@@ -1,11 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import styled from 'styled-components';
 import Navbar from './navbar';
-import Dashboard from './dashboard';
-import Products from './products';
-import Preorder from './preorder';
-import Reviews from './reviews';
-import Settings from './Settings';
+import DataFetcher from './DataFetcher';
 
 // Main Content Styles
 const MainContent = styled.div`
@@ -88,32 +84,54 @@ const ErrorMessage = styled.div`
 `;
 
 // Simple in-memory credentials (replace with backend API in production)
-const ADMIN_CREDENTIALS = {
-  email: 'owner@lcanteen.com',
-  password: 'admin123' // Password set by admin
-};
 
 function App() {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [shopOwner, setShopOwner] = useState(null);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // Simulate backend authentication
-    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+
+  useEffect(() => {
+    const stored = localStorage.getItem("shopOwner");
+    if (stored) {
+      setShopOwner(JSON.parse(stored));
       setIsAuthenticated(true);
-      setError('');
-      setEmail('');
-      setPassword('');
-    } else {
-      setError('Invalid email or password');
+    }
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://127.0.0.1:8001/shop-owner-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("shopOwner", JSON.stringify(result.shop_owner));
+        // Auto-reload page to refresh UI
+        window.location.reload();
+        console.log("Login successful:", result);
+        setShopOwner(result.shop_owner);
+      } else {
+        setError(result.error || "Login failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
     }
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("shopOwner");
+    setShopOwner(null);
     setIsAuthenticated(false);
     setActiveSection('dashboard');
   };
@@ -143,19 +161,18 @@ function App() {
       </LoginContainer>
     );
   }
+  
 
   return (
+    
     <>
-      <Navbar setActiveSection={setActiveSection} onLogout={handleLogout} />
+      <Navbar setActiveSection={setActiveSection} onLogout={handleLogout} shopOwner={shopOwner}/>
       <MainContent>
-        {activeSection === 'dashboard' && <Dashboard onLogout={handleLogout} />}
-        {activeSection === 'products' && <Products />}
-        {activeSection === 'preorder' && <Preorder />}
-        {activeSection === 'reviews' && <Reviews />}
-        {activeSection === 'settings' && <Settings />}
+        <DataFetcher activeSection={activeSection} shopOwner={shopOwner} onLogout={handleLogout}/>
       </MainContent>
     </>
   );
 }
+
 
 export default App;

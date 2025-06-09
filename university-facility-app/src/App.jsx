@@ -11,7 +11,11 @@ import styled from "styled-components";
 import Footer from "./components/Footer";
 import FacilityDetails from "./pages/ViewShop";
 import ScrollToTop from "./utils/ScrolledUp";
+import OrderPage from "./pages/Orders";
 import "./index.css";
+import socket from "./socket";
+import { ToastContainer } from 'react-toastify';
+
 
 import { useRef, useEffect } from "react";
 
@@ -43,6 +47,13 @@ function App() {
       });
     }
   }, [pathname]);
+  useEffect(() => {
+    socket.connect();
+
+    return () => {
+      socket.disconnect(); // Clean up
+    };
+  }, []);
   return (
     <div ref={scrollRef} style={{ overflowY: "scroll", height: "100vh" }}>
       <Navbar />
@@ -52,7 +63,7 @@ function App() {
           <Route path="/" element={<UOMFacHome />} />
           <Route path="/facilities" element={<Facilities />} />
           <Route path="/about" element={<About />} />
-          <Route path="/review" element={<Review />} />
+          <Route path="/Orders/:clientId" element={<OrderPage />} />
           <Route path="/UoMFacilities" element={<UOMFacilities />} />
           <Route path="/facilityItems/:shopId" element={<ShopPage />} />
           <Route path="/UOMFacHome" element={<UOMFacHome />} />
@@ -60,6 +71,17 @@ function App() {
           <Route path="/facility/:facilityId" element={<FacilityDetails />} />
         </Routes>
       </MainContent>
+      <ToastContainer 
+          position="top-right" 
+          autoClose={3000} 
+          hideProgressBar={false} 
+          newestOnTop={false} 
+          closeOnClick 
+          rtl={false} 
+          pauseOnFocusLoss 
+          draggable 
+          pauseOnHover 
+        />
       <Footer />
     </div>
   );

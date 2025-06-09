@@ -39,7 +39,7 @@ const FlyToUser = ({ userLocation }) => {
   const map = useMap();
   useEffect(() => {
     if (userLocation) {
-      map.flyTo(userLocation, 15);
+      map.flyTo(userLocation, 17);
     }
   }, [userLocation, map]);
   return null;
@@ -57,18 +57,18 @@ const MapWithUserLocation = ({ places = [] }) => {
       (err) => {
         console.error("GPS error:", err);
         // fallback location if user blocks permission
-        setUserLocation([6.9271, 79.8612]); // Colombo
+        setUserLocation([6.797549, 79.900334]); // Colombo
       }
     );
   }, []);
 
-  const defaultCenter = [6.9271, 79.8612]; // fallback
+  const defaultCenter = [6.796857, 79.901053]; // fallback
 
   return (
     <MapWrapper>
       <MapContainer
-        center={userLocation || defaultCenter}
-        zoom={13}
+        center={ defaultCenter} //center={userLocation || defaultCenter}
+        zoom={3}
         scrollWheelZoom
         style={{ height: '100%', width: '100%' }}
       >
@@ -83,7 +83,7 @@ const MapWithUserLocation = ({ places = [] }) => {
     <Marker position={userLocation} icon={userIcon}>
       <Popup>You are here</Popup>
     </Marker>
-    <FlyToUser userLocation={userLocation} />
+    <FlyToUser userLocation={defaultCenter} />
   </>
 )}
 

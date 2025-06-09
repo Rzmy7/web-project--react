@@ -84,7 +84,7 @@ const PreOrderBadge = styled.span`
   align-items: center;
 `;
 
-const TabNavigationComponent = ({menuData}) => {
+const TabNavigationComponent = ({menuData,shopId,alerts}) => {
   const [activeTab, setActiveTab] = useState("Menu");
   const [preOrderItemCount, setPreOrderItemCount] = useState(0); // State to track pre-order items
   const tabs = ["Menu", "Alerts", "Pre-Order"];
@@ -163,6 +163,12 @@ const [preOrderedItems, setPreOrderedItems] = useState([]);
 };
 
 useEffect(() => {
+  const total = preOrderedItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  setPreOrderItemCount(total);
+}, [preOrderedItems]);
+
+
+useEffect(() => {
   console.log("Current Pre-Ordered Items:", preOrderedItems);
 }, [preOrderedItems]);
 
@@ -195,9 +201,15 @@ useEffect(() => {
             isSelected={true}
           />
         )}
-        {activeTab === "Alerts" && <AlertTab/>}
+        {activeTab === "Alerts" && <AlertTab shopId={shopId} alerts={alerts}/>}
         {activeTab === "Pre-Order" && (
-          <PreOrderTab PreOrderItems={preOrderedItems} setPreOrderedItems={handlePreOrderChange}/>
+          <PreOrderTab
+  PreOrderItems={preOrderedItems}
+  setPreOrderedItems={handlePreOrderChange}
+  shopId={shopId}
+  noPreOrder={() => setPreOrderedItems([])}  // this will clear all items
+/>
+
         )}
       </TabContent>
     </TabContainer>

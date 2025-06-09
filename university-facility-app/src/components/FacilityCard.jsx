@@ -100,6 +100,12 @@ const FacilityBtn = styled.button`
   }
 `;
 
+// Utility function to format time (HH:mm:ss -> HH:mm)
+const formatTime = (time) => {
+  if (!time) return "";
+  return time.split(":").slice(0, 2).join(":");
+};
+
 function FacilityCard({
   id,
   name,
@@ -132,18 +138,18 @@ function FacilityCard({
         <FacilityName>{name}</FacilityName>
         <FacilityDetails>
           <FacilityDetailsText>
-            Hours: {opentime} - {closetime}
+            Hours: {formatTime(opentime)} - {formatTime(closetime)}
           </FacilityDetailsText>
           <FacilityDetailsText>Location: {location}</FacilityDetailsText>
         </FacilityDetails>
         <FacilityActions>
           <Link to={`/facility/${id}`}>
-            <FacilityBtn color="#1a3064" $hoverColor="#0f1e42" data-id={name}>
+            <FacilityBtn color="#1a3064" hoverColor="#0f1e42" data-id={name}>
               View Details
             </FacilityBtn>
           </Link>
           <Link to={`/facilityItems/${id}`}>
-            <FacilityBtn color="#e67e22" $hoverColor="#d35400">
+            <FacilityBtn color="#e67e22" hoverColor="#d35400">
               Pre-order
             </FacilityBtn>
           </Link>

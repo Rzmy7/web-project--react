@@ -6,3 +6,5 @@ python-dotenv
 flask-mail
 bcrypt
 eventlet
+APScheduler
+pytz

@@ -310,43 +310,81 @@ const NotifiBtns = styled.div`
   }
 `;
 
-function Dashboard({ onLogout }) {
-  const [isOpen, setIsOpen] = useState(false);
+// const shopData={
+//   "shopName": "L Canteen",
+//   "imageUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+//   "imageAlt": "L Canteen",
+//   "location": "Business Building",
+//   "hours": "7.00AM - 6.00PM",
+//   "stats": {
+//     "availableItems": 10,
+//     "pendingOrders": 5,
+//     "completedOrders": 20,
+//     "totalRevenue": 15000
+//   },
+//   "notifications": [
+//     { "message": "New order received!" },
+//     { "message": "Customer feedback submitted." },
+//     { "message": "Low stock alert for rice." }
+//   ]
+// };
+
+function Dashboard({ onLogout, shopOwner,shopData , shopId }) {
+  const [isOpen, setIsOpen] = useState(shopData.open_status);
   const [imageError, setImageError] = useState(false);
 
-  const handleStatusChange = () => {
-    setIsOpen(!isOpen);
+  const handleStatusChange = async () => {
+    try {
+      setIsOpen(!isOpen); // Optimistically update the state
+      const newStatus = !isOpen;
+      const response = await fetch(`http://127.0.0.1:8001/api/shop/${shopId}/OpenStatusChanger`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_open: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setIsOpen(data.open_status); // Update state only on success
+    } catch (err) {
+      console.error('Error updating shop status:', err.message);
+      // setIsOpen(isOpen); // Revert to previous state on error
+      // Optionally show an error message to the user
+    }
   };
 
   const handleImageError = () => {
     setImageError(true);
   };
-
+  console.log("Dashboard rendered with shopOwner:", shopOwner);
   return (
     <Section id="dashboard">
       <DashboardTitle>
-        <h2>Hello! Wasantha</h2>
+        <h2>Hello! {shopOwner.full_name}</h2>
         <LogoutButton onClick={onLogout}>Logout</LogoutButton>
       </DashboardTitle>
 
       <OwnerDetails>
-        <Title>L Canteen</Title>
+        <Title>{shopData.shopName}</Title>
         <ContentRow>
           <ImageWrapper>
             {imageError ? (
               <ImageError>Failed to load canteen image</ImageError>
             ) : (
               <CanteenImage
-                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                alt="L Canteen"
+                src={shopData.imageUrl}
+                alt={shopData.imageAlt}
                 onError={handleImageError}
               />
             )}
           </ImageWrapper>
           <OwnerInfo>
-            <p id="name">Shop owner: Wasantha</p>
-            <p id="location">Location: Business Building</p>
-            <p id="hours">Time: 7.00AM - 6.00PM</p>
+            <p id="name">Shop owner: {shopOwner.full_name}</p>
+            <p id="location">Location: {shopData.location}</p>
+            <p id="hours">Time: {shopData.hours}</p>
           </OwnerInfo>
           <StatusWrapper>
             <ShopStatusStyle>
@@ -376,27 +414,27 @@ function Dashboard({ onLogout }) {
       <DashboardStats>
         <StatCard>
           <h3>Available items</h3>
-          <div className="number">0</div>
+          <div className="number">{shopData.stats.availableItems}</div>
         </StatCard>
         <StatCard>
           <h3>Pending orders</h3>
-          <div className="number">0</div>
+          <div className="number">{shopData.stats.pendingOrders}</div>
         </StatCard>
         <StatCard>
           <h3>Completed orders</h3>
-          <div className="number">0</div>
+          <div className="number">{shopData.stats.completedOrders}</div>
         </StatCard>
         <StatCard>
           <h3>Total revenue</h3>
-          <div className="number">Rs.0</div>
+          <div className="number">Rs.{shopData.stats.totalRevenue}</div>
         </StatCard>
       </DashboardStats>
 
       <Notifications>
         <h2>Notifications</h2>
-        {[1, 2, 3].map((_, index) => (
+        {shopData.notifications.map((notification, index) => (
           <NotifiAlert key={index}>
-            <span>You have alert!</span>
+            <span>{notification.message}</span>
             <NotifiBtns>
               <button id="preview-notifi">Preview</button>
               <button id="delete-notifi">Delete</button>

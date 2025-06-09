@@ -1,6 +1,13 @@
 
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const TabPane = styled.div`
   display: flex;
@@ -133,7 +140,10 @@ const formatCurrency = (value) => {
 };
 
 
-const PreOrderTab = ({ PreOrderItems = [] ,setPreOrderedItems}) => {
+const PreOrderTab = ({ PreOrderItems = [], setPreOrderedItems, shopId, noPreOrder }) => {
+  // rest of your component
+
+
   const initializedItems = PreOrderItems.map(item => ({
     ...item,
     quantity: item.quantity || 1,
@@ -174,12 +184,64 @@ const PreOrderTab = ({ PreOrderItems = [] ,setPreOrderedItems}) => {
     setPreOrderedItems("remove",item);
   };
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    console.log("🛒 Ordered Items:", orderedItems);
-    console.log("📝 Additional Notes:", additionalNotes);
-    alert("Pre-order submitted! Check console for details.");
-  };
+  // const handleSubmit = e => {
+  //   e.preventDefault();
+  //   console.log("🛒 Ordered Items:", orderedItems);
+  //   console.log("📝 Additional Notes:", additionalNotes);
+  //   alert("Pre-order submitted! Check console for details.");
+  // };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const storedClient = localStorage.getItem('user'); // Assuming it's saved on login
+  const client = storedClient ? JSON.parse(storedClient) : null;
+  const clientId = client?.user_id;
+  console.log("client ID",clientId);
+
+  if (!clientId) {
+    alert("Client not logged in.");
+    return;
+  }
+
+  try {
+    const responses = await Promise.all(orderedItems.map(async (item) => {
+      const res = await fetch("http://127.0.0.1:8001/api/place_order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: clientId,
+          item_id: item.id,
+          item_name: item.name,
+          shop_id: shopId,
+          quantity: item.quantity,
+          notes: additionalNotes
+        }),
+      });
+
+      const data = await res.json();
+      console.log("Response for item", item.name, ":", data);
+      return data;
+    }));
+
+    alert("Pre-order submitted!");
+    console.log("All order responses:", responses);
+
+    // Optionally clear state
+    setOrderedItems([]);
+setAdditionalNotes("");
+localStorage.removeItem("orderedItems");
+localStorage.removeItem("additionalNotes");
+noPreOrder(); // clears in parent and resets badge
+
+  } catch (err) {
+    console.error("Failed to submit order:", err);
+    alert("Something went wrong when submitting your order.");
+  }
+};
+
 
   const getTotal = () => {
     return orderedItems.reduce((acc, item) => {

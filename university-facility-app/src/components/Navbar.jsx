@@ -515,6 +515,42 @@ const MobileOnly = styled.div`
   }
 `;
 
+const NavList = styled.ul`
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  width: 30dvw; 
+
+  /* gap: 20px; */
+  padding: 0;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: self-start;
+  }
+`;
+
+const NavItem = styled.li`
+  --index: ${props => props.index};
+  transition: transform 0.3s ease calc(var(--index) * 0.1s);
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+`;
+
+const NavLink = styled(Link)`
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+
+  &:hover {
+    color: var(--primary-color);
+  }
+`;
+
 // ---------------- Header Component ---------------- //
 
 function HeaderComponent() {
@@ -532,6 +568,20 @@ function HeaderComponent() {
     if (stored) {
       setUser(JSON.parse(stored));
       setIsLoggedIn(true);
+      console.log(stored);
+      if (stored) {
+    try {
+      const parsedUser = JSON.parse(stored);
+      console.log('Parsed user:', parsedUser);
+      setUser(parsedUser);
+      setIsLoggedIn(true);
+      console.log("user id:", parsedUser.user_id);
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+    }
+  } else {
+    console.log('No user data in localStorage');
+  }
     }
   }, []);
 
@@ -605,18 +655,41 @@ function HeaderComponent() {
                 </MobileOnly>
               )}
 
-              {[
+              {/* {[
                 "Home",
                 "Facilities",
                 "About",
-                "Review",
+                `Orders/${user.user_id}`,
                 "UoMFacilities",
                 "UoMFacHome",
               ].map((item, index) => (
                 <li key={item} style={{ "--index": index }}>
                   <Link to={`/${item === "Home" ? "" : item}`}>{item}</Link>
                 </li>
-              ))}
+              ))} */}
+              <NavList>
+        <NavItem index={0}>
+          <NavLink to="/">Home</NavLink>
+        </NavItem>
+        {/* <NavItem index={1}>
+          <NavLink to="/Facilities">Facilities</NavLink>
+        </NavItem> */}
+        {user && user.user_id && (
+          <NavItem index={2}>
+            <NavLink to={`/Orders/${user.user_id}`}>Orders</NavLink>
+          </NavItem>
+        )}
+        <NavItem index={3}>
+          <NavLink to="/About">About</NavLink>
+        </NavItem>
+        
+        {/* <NavItem index={4}>
+          <NavLink to="/UoMFacilities">UoMFacilities</NavLink>
+        </NavItem>
+        <NavItem index={5}>
+          <NavLink to="/UoMFacHome">UoMFacHome</NavLink>
+        </NavItem> */}
+      </NavList>
             </ul>
           </Nav>
 

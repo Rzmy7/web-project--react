@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import styled from 'styled-components';
 
 const Section = styled.section`
@@ -249,63 +249,143 @@ const ConfirmDelete = styled.div`
   }
 `;
 
-function Products() {
-  const [categories, setCategories] = useState([
-    {
-      title: 'canteen products',
-      items: [
-        { id: 1, name: 'Egg bun', price: 'LKR 90.000', type: 'Main Dishes' },
-        { id: 2, name: 'Rolls', price: 'LKR 70.00', type: 'Main Dishes' },
-        { id: 3, name: 'Fish bun', price: 'LKR 50.00', type: 'Main Dishes' }
-      ]
-    },
-    {
-      title: 'juice bar products',
-      items: [
-        { id: 1, name: 'Chocolate milk shake', price: 'LKR 340.000', type: 'Drinks' },
-        { id: 2, name: 'Watermellon', price: 'LKR 120.00', type: 'Drinks' },
-        { id: 3, name: 'Banana boat', price: 'LKR 350.00', type: 'Drinks' }
-      ]
-    },
-    {
-      title: 'bookshop accessories',
-      items: [
-        { id: 1, name: 'A4 sheet', price: 'LKR 10.000', type: 'Main Dishes' },
-        { id: 2, name: 'Pen', price: 'LKR 30.00', type: 'Main Dishes' },
-        { id: 3, name: 'Eraser', price: 'LKR 30.00', type: 'Main Dishes' }
-      ]
-    }
-  ]);
+// [
+//     {
+//       title: 'canteen products',
+//       items: [
+//         { id: 1, name: 'Egg bun', price: 'LKR 90.000', type: 'Main Dishes' },
+//         { id: 2, name: 'Rolls', price: 'LKR 70.00', type: 'Main Dishes' },
+//         { id: 3, name: 'Fish bun', price: 'LKR 50.00', type: 'Main Dishes' }
+//       ]
+//     },
+//     {
+//       title: 'juice bar products',
+//       items: [
+//         { id: 1, name: 'Chocolate milk shake', price: 'LKR 340.000', type: 'Drinks' },
+//         { id: 2, name: 'Watermellon', price: 'LKR 120.00', type: 'Drinks' },
+//         { id: 3, name: 'Banana boat', price: 'LKR 350.00', type: '' }
+//       ]
+//     },
+//     {
+//       title: 'bookshop accessories',
+//       items: [
+//         { id: 1, name: 'A4 sheet', price: 'LKR 10.000', type: 'Main Dishes' },
+//         { id: 2, name: 'Pen', price: 'LKR 30.00', type: 'Main Dishes' },
+//         { id: 3, name: 'Eraser', price: 'LKR 30.00', type: 'Main Dishes' }
+//       ]
+//     }
+//   ]
 
+const Products = ({ facilityItems, shopId }) => {
+  const [categories, setCategories] = useState(facilityItems || []);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newItem, setNewItem] = useState({ name: '', price: '', category: '', type: 'Main Dishes' });
   const [editItem, setEditItem] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleAddItem = () => {
-    if (!newItem.name || !newItem.price || !newItem.type) return;
+  useEffect(() => {
+    setCategories(facilityItems || []);
+  }, [facilityItems]);
 
-    setCategories(categories.map(category => {
-      if (category.title === newItem.category) {
-        return {
-          ...category,
-          items: [
-            ...category.items,
-            {
-              id: category.items.length + 1,
-              name: newItem.name,
-              price: `LKR ${parseFloat(newItem.price).toFixed(3)}`,
-              type: newItem.type
-            }
-          ]
-        };
+  const categoryMap = {
+    'canteen products': 'food',
+    'juice bar products': 'juice',
+    'bookshop accessories': 'book'
+  };
+
+  const typeMap = {
+    'canteen products': 'Main Dishes',
+    'juice bar products': 'Drinks',
+    'bookshop accessories': 'Stationery'
+  };
+
+  const handleToggleAvailability = async (item, categoryTitle) => {
+    try {
+      const newAvailability = !item.availability;
+      const category = categoryMap[categoryTitle.toLowerCase()];
+      if (!category) throw new Error('Invalid category');
+
+      // Optimistically update state
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.title === categoryTitle
+            ? {
+                ...cat,
+                items: cat.items.map((i) =>
+                  i.id === item.id ? { ...i, availability: newAvailability } : i
+                )
+              }
+            : cat
+        )
+      );
+
+      const response = await fetch(
+        `http://127.0.0.1:8001/api/shop/${shopId}/item/${category}/${item.id}/availability`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ availability: newAvailability })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      return category;
-    }));
 
-    setNewItem({ name: '', price: '', category: '', type: 'Main Dishes' });
-    setShowModal(false);
+      setError(null);
+    } catch (err) {
+      console.error('Error updating availability:', err.message);
+      setCategories(categories); // Revert
+      setError('Failed to update availability');
+    }
+  };
+
+  const handleAddItem = async () => {
+    if (!newItem.name || !newItem.price || !newItem.category || !newItem.type) {
+      setError('All fields are required');
+      return;
+    }
+
+    try {
+      const category = categoryMap[newItem.category.toLowerCase()];
+      if (!category) throw new Error('Invalid category');
+
+      const response = await fetch(
+        `http://127.0.0.1:8001/api/shop/${shopId}/item/${category}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: newItem.name,
+            price: parseFloat(newItem.price),
+            type: newItem.type,
+            availability: true
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const addedItem = await response.json();
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.title === newItem.category
+            ? { ...cat, items: [...cat.items, addedItem] }
+            : cat
+        )
+      );
+
+      setNewItem({ name: '', price: '', category: '', type: 'Main Dishes' });
+      setShowModal(false);
+      setError(null);
+    } catch (err) {
+      console.error('Error adding item:', err.message);
+      setError('Failed to add item');
+    }
   };
 
   const handleEditItem = (item, categoryTitle) => {
@@ -313,23 +393,54 @@ function Products() {
     setShowModal(true);
   };
 
-  const handleSaveEdit = () => {
-    if (!editItem.name || !editItem.price || !editItem.type) return;
+  const handleSaveEdit = async () => {
+    if (!editItem.name || !editItem.price || !editItem.category || !editItem.type) {
+      setError('All fields are required');
+      return;
+    }
 
-    setCategories(categories.map(category => {
-      if (category.title === editItem.category) {
-        return {
-          ...category,
-          items: category.items.map(item =>
-            item.id === editItem.id ? { ...editItem, price: `LKR ${parseFloat(editItem.price).toFixed(3)}` } : item
-          )
-        };
+    try {
+      const category = categoryMap[editItem.category.toLowerCase()];
+      if (!category) throw new Error('Invalid category');
+
+      const response = await fetch(
+        `http://127.0.0.1:8001/api/shop/${shopId}/item/${category}/${editItem.id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: editItem.name,
+            price: parseFloat(editItem.price.replace('LKR ', '')),
+            type: editItem.type
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      return category;
-    }));
 
-    setEditItem(null);
-    setShowModal(false);
+      const updatedItem = await response.json();
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.title === editItem.category
+            ? {
+                ...cat,
+                items: cat.items.map((i) =>
+                  i.id === editItem.id ? updatedItem : i
+                )
+              }
+            : cat
+        )
+      );
+
+      setEditItem(null);
+      setShowModal(false);
+      setError(null);
+    } catch (err) {
+      console.error('Error editing item:', err.message);
+      setError('Failed to edit item');
+    }
   };
 
   const handleDeleteConfirm = (item, categoryTitle) => {
@@ -337,20 +448,43 @@ function Products() {
     setShowDeleteConfirm(true);
   };
 
-  const handleDelete = () => {
-    if (itemToDelete) {
-      setCategories(categories.map(category => {
-        if (category.title === itemToDelete.category) {
-          return {
-            ...category,
-            items: category.items.filter(item => item.id !== itemToDelete.item.id)
-          };
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      const category = categoryMap[itemToDelete.category.toLowerCase()];
+      if (!category) throw new Error('Invalid category');
+
+      const response = await fetch(
+        `http://127.0.0.1:8001/api/shop/${shopId}/item/${category}/${itemToDelete.item.id}`,
+        {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
         }
-        return category;
-      }));
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.title === itemToDelete.category
+            ? {
+                ...cat,
+                items: cat.items.filter((i) => i.id !== itemToDelete.item.id)
+              }
+            : cat
+        )
+      );
+
+      setShowDeleteConfirm(false);
+      setItemToDelete(null);
+      setError(null);
+    } catch (err) {
+      console.error('Error deleting item:', err.message);
+      setError('Failed to delete item');
     }
-    setShowDeleteConfirm(false);
-    setItemToDelete(null);
   };
 
   return (
@@ -358,15 +492,22 @@ function Products() {
       <SectionHeader>
         <h1>Products</h1>
       </SectionHeader>
-
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       {categories.map((category, index) => (
         <ProductCategory key={index}>
           <h2>{category.title}</h2>
           <AddButton>
-            <button onClick={() => {
-              setNewItem({ name: '', price: '', category: category.title, type: 'Main Dishes' });
-              setShowModal(true);
-            }}>
+            <button
+              onClick={() => {
+                setNewItem({
+                  name: '',
+                  price: '',
+                  category: category.title,
+                  type: typeMap[category.title.toLowerCase()] || 'Main Dishes'
+                });
+                setShowModal(true);
+              }}
+            >
               Add new items
             </button>
           </AddButton>
@@ -377,19 +518,33 @@ function Products() {
                   <h4>{item.name}</h4>
                   <p>{item.price}</p>
                   <div className="item-status">
-                    <span className="status-text-item"></span>
+                    <span className="status-text-item">
+                      {item.availability ? 'Available' : 'Unavailable'}
+                    </span>
                     <CheckboxWrapper>
                       <input
                         id={`switch-${category.title}-${item.id}`}
                         type="checkbox"
+                        checked={item.availability}
+                        onChange={() => handleToggleAvailability(item, category.title)}
                       />
-                      <span className="switch"></span>
+                      <label htmlFor={`switch-${category.title}-${item.id}`} className="switch"></label>
                     </CheckboxWrapper>
                   </div>
                 </ItemInfo>
                 <ItemActions>
-                  <button className="edit-btn" onClick={() => handleEditItem(item, category.title)}>Edit</button>
-                  <button className="delete-btn" onClick={() => handleDeleteConfirm(item, category.title)}>Delete</button>
+                  <button
+                    className="edit-btn"
+                    onClick={() => handleEditItem(item, category.title)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDeleteConfirm(item, category.title)}
+                  >
+                    Delete
+                  </button>
                 </ItemActions>
               </FoodItem>
             ))}
@@ -407,32 +562,67 @@ function Products() {
                   type="text"
                   placeholder="Item Name"
                   value={editItem ? editItem.name : newItem.name}
-                  onChange={(e) => (editItem ? setEditItem({ ...editItem, name: e.target.value }) : setNewItem({ ...newItem, name: e.target.value }))}
+                  onChange={(e) =>
+                    editItem
+                      ? setEditItem({ ...editItem, name: e.target.value })
+                      : setNewItem({ ...newItem, name: e.target.value })
+                  }
                 />
                 <input
                   type="number"
                   placeholder="Price (LKR)"
-                  value={editItem ? editItem.price.replace('LKR ', '') : newItem.price}
-                  onChange={(e) => (editItem ? setEditItem({ ...editItem, price: e.target.value }) : setNewItem({ ...newItem, price: e.target.value }))}
+                  value={
+                    editItem
+                      ? editItem.price.replace('LKR ', '')
+                      : newItem.price
+                  }
+                  onChange={(e) =>
+                    editItem
+                      ? setEditItem({ ...editItem, price: e.target.value })
+                      : setNewItem({ ...newItem, price: e.target.value })
+                  }
                 />
                 <select
                   value={editItem ? editItem.type : newItem.type}
-                  onChange={(e) => (editItem ? setEditItem({ ...editItem, type: e.target.value }) : setNewItem({ ...newItem, type: e.target.value }))}
+                  onChange={(e) =>
+                    editItem
+                      ? setEditItem({ ...editItem, type: e.target.value })
+                      : setNewItem({ ...newItem, type: e.target.value })
+                  }
                 >
                   <option value="Main Dishes">Main Dishes</option>
                   <option value="Drinks">Drinks</option>
+                  <option value="Stationery">Stationery</option>
                 </select>
-                <button className="submit-btn" onClick={editItem ? handleSaveEdit : handleAddItem}>
+                <button
+                  className="submit-btn"
+                  onClick={editItem ? handleSaveEdit : handleAddItem}
+                >
                   {editItem ? 'Save Changes' : 'Add Item'}
                 </button>
-                <button className="cancel-btn" onClick={() => { setShowModal(false); setEditItem(null); }}>Cancel</button>
+                <button
+                  className="cancel-btn"
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditItem(null);
+                  }}
+                >
+                  Cancel
+                </button>
               </ModalForm>
             )}
             {showDeleteConfirm && (
               <ConfirmDelete>
                 <p>Are you sure you want to delete {itemToDelete.item.name}?</p>
-                <button className="confirm-btn" onClick={handleDelete}>Yes</button>
-                <button className="cancel-btn" onClick={() => setShowDeleteConfirm(false)}>No</button>
+                <button className="confirm-btn" onClick={handleDelete}>
+                  Yes
+                </button>
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  No
+                </button>
               </ConfirmDelete>
             )}
           </ModalContent>
@@ -440,6 +630,6 @@ function Products() {
       )}
     </Section>
   );
-}
+};
 
 export default Products;

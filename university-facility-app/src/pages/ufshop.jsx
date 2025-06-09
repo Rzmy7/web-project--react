@@ -76,22 +76,125 @@ const ShopInfoItem = styled.div`
 
 const socket = io("http://127.0.0.1:8001");
 
-function ShopPage() {
-  const { shopId } = useParams(); // Change here
-  const [shopData, setShopData] = useState(null);
+// Utility function to format time (HH:mm:ss -> HH:mm)
+const formatTime = (time) => {
+  if (!time) return "";
+  // Remove seconds (e.g., "12:00:00" -> "12:00")
+  return time.split(":").slice(0, 2).join(":");
+};
 
-  // Fetch shop data on mount or when shopName changes
+// function ShopPage() {
+//   const { shopId } = useParams();
+//   const [shopData, setShopData] = useState(null);
+
+//   // Fetch shop data on mount or when shopId changes
+//   useEffect(() => {
+//     if (!shopId) return;
+//     fetch(`http://127.0.0.1:8001/api/shopItems/${shopId}`)
+//       .then((res) => res.json())
+//       .then((data) => {
+//         if (!data.error) {
+//           console.log("✅ shopData fetched:", data);
+//           setShopData(data);
+//         } else {
+//           console.error("Shop not found");
+//         }
+//       })
+//       .catch((err) => console.error("Fetch error:", err));
+//   }, [shopId]);
+
+//   useEffect(() => {
+//     if (!shopId) return;
+
+//     socket.emit("join_shop", shopId);
+
+//     socket.on("shop_updated", (updatedData) => {
+//       if (updatedData.id === shopId || updatedData.shopId === shopId) {
+//         console.log("Shop data updated via socket:", updatedData);
+//         setShopData(updatedData);
+//       }
+//     });
+
+//     return () => {
+//       socket.emit("leave_shop", shopId);
+//       socket.off("shop_updated");
+//     };
+//   }, [shopId]);
+
+//   if (!shopData)
+//     return (
+//       <div style={{ width: "100%", justifyContent: "center" }}>
+//         <LoadingScreen />
+//       </div>
+//     );
+
+//   const { shopName, status, openingTime, closingTime, location, menuData } =
+//     shopData;
+
+//   return (
+//     <div
+//       style={{
+//         width: "100%",
+//         display: "flex",
+//         flexDirection: "column",
+//         justifyContent: "center",
+//       }}
+//     >
+//       <Shop>
+//         <ShopHeader>
+//           <BackButton />
+//           <ShopTitle>
+//             <ShopNameMain>{shopName}</ShopNameMain>
+//             <ShopStatus $isOpen={status === "Open"}>{status}</ShopStatus>
+//           </ShopTitle>
+//           <ShopInfo>
+//             <ShopInfoItem>
+//               <span>Hours:</span>
+//               <span>
+//                 {formatTime(openingTime)} - {formatTime(closingTime)}
+//               </span>
+//             </ShopInfoItem>
+//             <ShopInfoItem className="location">
+//               <span>Location:</span>
+//               <span>{location}</span>
+//             </ShopInfoItem>
+//           </ShopInfo>
+//         </ShopHeader>
+
+//         <TabNavigationComponent menuData={menuData} shopId={shopId} />
+//       </Shop>
+//     </div>
+//   );
+// }
+
+function ShopPage() {
+  const { shopId } = useParams();
+  const [shopData, setShopData] = useState(null);
+  const [alerts, setAlerts] = useState([]);
+
+  // Fetch shop data on mount or when shopId changes
   useEffect(() => {
     if (!shopId) return;
-    fetch(`http://127.0.0.1:8001/api/shopItems/${shopId}`) // Fetch by ID
+
+    // Fetch shop data
+    fetch(`http://127.0.0.1:8001/api/shopItems/${shopId}`)
       .then((res) => res.json())
       .then((data) => {
         if (!data.error) {
-          console.log("✅ shopData fetched:", data); 
+          console.log("✅ shopData fetched:", data);
           setShopData(data);
         } else {
           console.error("Shop not found");
         }
+      })
+      .catch((err) => console.error("Fetch error:", err));
+
+    // Fetch alerts for the shop
+    fetch(`http://127.0.0.1:8001/api/alerts/${shopId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("✅ Alerts fetched:", data);
+        setAlerts(data);
       })
       .catch((err) => console.error("Fetch error:", err));
   }, [shopId]);
@@ -108,9 +211,17 @@ function ShopPage() {
       }
     });
 
+    socket.on("new_alert", (newAlert) => {
+      if (newAlert.shop_id === shopId) {
+        console.log("New alert received:", newAlert);
+        setAlerts((prevAlerts) => [...prevAlerts, newAlert]);
+      }
+    });
+
     return () => {
       socket.emit("leave_shop", shopId);
       socket.off("shop_updated");
+      socket.off("new_alert");
     };
   }, [shopId]);
 
@@ -144,7 +255,7 @@ function ShopPage() {
             <ShopInfoItem>
               <span>Hours:</span>
               <span>
-                {openingTime} - {closingTime}
+                {formatTime(openingTime)} - {formatTime(closingTime)}
               </span>
             </ShopInfoItem>
             <ShopInfoItem className="location">
@@ -154,11 +265,15 @@ function ShopPage() {
           </ShopInfo>
         </ShopHeader>
 
-        {/* Pass menudata to TabNavigationComponent if needed */}
-        <TabNavigationComponent menuData={menuData} />
+        <TabNavigationComponent 
+          menuData={menuData} 
+          shopId={shopId} 
+          alerts={alerts} 
+        />
       </Shop>
     </div>
   );
 }
+
 
 export default ShopPage;

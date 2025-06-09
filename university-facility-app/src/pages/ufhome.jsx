@@ -1,9 +1,10 @@
 import styled from "styled-components";
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import "../index.css";
 import Facilities from "../components/Facilities";
 import SearchBar from "../components/Searchbar";
 import MapWithUserLocation from "../utils/MapWithUserLocation";
+import LoadingScreen from "../utils/Loading";
 
 const HeroSection = styled.div`
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)),
@@ -49,7 +50,7 @@ const FindFacBtn = styled.a`
   }
 `;
 
-const MapContainer  = styled.div`
+const MapContainer = styled.div`
   padding: 1.2rem;
   padding-bottom: 2rem;
   border: 2px solid var(--light-gray);
@@ -64,20 +65,46 @@ function UOMFacHome() {
   const [status, setStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const places = [
-    {
-      name: "Central Canteen",
-      lat: 6.7973,
-      lng: 79.9018,
-      description: "Main dining area",
-    },
-    {
-      name: "Library Café",
-      lat: 6.7985,
-      lng: 79.9022,
-      description: "Quick snacks",
-    },
-  ];
+  const [places, setPlaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch('http://127.0.0.1:8001/api/places')  // Your Flask endpoint
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setPlaces(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch places:', err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div style={{width:"100%",justifyContent:"center"}}><LoadingScreen/></div>;
+  if (error) return <p>Error: {error}</p>;
+
+  // const places = [
+  //   {
+  //     name: "Central Canteen",
+  //     lat: 6.7973,
+  //     lng: 79.9018,
+  //     description: "Main dining area",
+  //   },
+  //   {
+  //     name: "Library Café",
+  //     lat: 6.7985,
+  //     lng: 79.9022,
+  //     description: "Quick snacks",
+  //   },
+  // ];
 
   return (
     <div
@@ -122,8 +149,9 @@ function UOMFacHome() {
           searchQuery={searchQuery}
         />
       </div>
-<MapContainer ><MapWithUserLocation places={places} /></MapContainer >
-      
+      <MapContainer>
+        <MapWithUserLocation places={places} />
+      </MapContainer>
     </div>
   );
 }

@@ -2,6 +2,13 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Send, Star } from "lucide-react";
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const ReviewContainer = styled.div`
   background-color: var(--light-gray);
@@ -67,26 +74,38 @@ const Lable =  styled.div`
   padding-bottom: 0.4rem;
 `;
 
-const AddReviewForm = ({ onSubmit }) => {
+const AddReviewForm = ({ onSubmit, clientId, shopId }) => {
   const [newReview, setNewReview] = useState("");
   const [newRating, setNewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
 
   const handleSubmit = () => {
-    if (newReview.trim() && newRating > 0) {
-      onSubmit({ rating: newRating, comment: newReview});
+    if (newReview.trim() && newRating > 0 && clientId && shopId) {
+      const now = new Date();
+
+      const formattedDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+      const formattedTime = dayjs().tz('Asia/Colombo').format('YYYY-MM-DD HH:mm:ss')// YYYY-MM-DD HH:MM:SS
+
+      const reviewPayload = {
+        client_id: clientId,
+        shop_id: shopId,
+        review: newReview,
+        star_mark: newRating,
+        date: formattedDate,
+        time: formattedTime,
+      };
+
+      onSubmit(reviewPayload);
+
       setNewReview("");
       setNewRating(0);
     }
   };
 
-
-  
-
   return (
     <ReviewContainer>
       <h4 style={{ color: "var(--primary-color)" }}>Add Your Review</h4>
-      <div  style={{rowGap:"0.8rem" ,  marginTop:"1rem"}} >
+      <div style={{ rowGap: "0.8rem", marginTop: "1rem" }}>
         <div>
           <Lable>Rating:</Lable>
           <StarRating>
@@ -116,12 +135,13 @@ const AddReviewForm = ({ onSubmit }) => {
           />
         </div>
       </div>
-      <SubmitButton onClick={handleSubmit} style={{marginTop:"1.2rem"}}>
+      <SubmitButton onClick={handleSubmit} style={{ marginTop: "1.2rem" }}>
         <Send size={16} />
         Submit Review
       </SubmitButton>
     </ReviewContainer>
   );
 };
+
 
 export default AddReviewForm;
