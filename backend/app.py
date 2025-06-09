@@ -1324,7 +1324,112 @@ def get_shop_details(shop_id):
         return jsonify({"error": "Failed to fetch shop details", "details": str(e)}), 500
 
     
-    
+@app.route('/api/stats/<shop_id>', methods=['GET'])
+def get_shop_stats(shop_id):
+    try:
+        # Validate shop_id (e.g., "SH01")
+        if not shop_id or not re.match(r'^SH\d+$', shop_id):
+            return jsonify({"error": "Invalid shop_id, must be a string like 'SH01'"}), 400
+
+        # Connect to database
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Execute query
+        cur.execute("""
+            SELECT 
+                -- Count all available items (food + juice + book accessories)
+                (
+                    SELECT COUNT(*) 
+                    FROM food_has fh 
+                    JOIN food_canteen fc ON fh.shop_id = fc.fshop_id 
+                    WHERE fc.fshop_id = %s AND fh.food_avalability = true
+                ) + (
+                    SELECT COUNT(*) 
+                    FROM juice_has jh 
+                    JOIN juice_bar jb ON jh.shop_id = jb.jshop_id 
+                    WHERE jb.jshop_id = %s AND jh.juice_avalability = true
+                ) + (
+                    SELECT COUNT(*) 
+                    FROM bookaccessories_has bh 
+                    JOIN bookshop bs ON bh.shop_id = bs.bshop_id 
+                    WHERE bs.bshop_id = %s AND bh.bacc_avalability = true
+                ) AS available_items,
+                
+                -- Count all pending orders (food + juice + book accessories)
+                (
+                    SELECT COUNT(*) 
+                    FROM food_orders 
+                    WHERE fshop_id = %s AND order_status = 'pending'
+                ) + (
+                    SELECT COUNT(*) 
+                    FROM juice_orders 
+                    WHERE jshop_id = %s AND order_status = 'pending'
+                ) + (
+                    SELECT COUNT(*) 
+                    FROM bookaccessories_orders 
+                    WHERE bshop_id = %s AND order_status = 'pending'
+                ) AS pending_orders,
+                
+                -- Sum all completed order quantities (food + juice + book accessories)
+                (
+                    SELECT COALESCE(COUNT(quantity), 0) 
+                    FROM food_orders 
+                    WHERE fshop_id = %s AND order_status = 'completed'
+                ) + (
+                    SELECT COALESCE(COUNT(quantity), 0) 
+                    FROM juice_orders 
+                    WHERE jshop_id = %s AND order_status = 'completed'
+                ) + (
+                    SELECT COALESCE(COUNT(quantity), 0) 
+                    FROM bookaccessories_orders 
+                    WHERE bshop_id = %s AND order_status = 'completed'
+                ) AS completed_quantity,
+                
+                -- Calculate total revenue from completed orders
+                (
+                    SELECT COALESCE(SUM(fo.quantity * CAST(fh.food_price AS numeric)), 0)
+                    FROM food_orders fo
+                    JOIN food_has fh ON fo.food_id = fh.food_id AND fo.fshop_id = fh.shop_id
+                    WHERE fo.fshop_id = %s 
+                    AND fo.order_status = 'completed'
+                    AND fh.food_price ~ '^[0-9]+(\.[0-9]+)?$'
+                ) + (
+                    SELECT COALESCE(SUM(jo.quantity * CAST(jh.juice_price AS numeric)), 0)
+                    FROM juice_orders jo
+                    JOIN juice_has jh ON jo.juice_id = jh.juice_id AND jo.jshop_id = jh.shop_id
+                    WHERE jo.jshop_id = %s
+                    AND jo.order_status = 'completed'
+                    AND jh.juice_price ~ '^[0-9]+(\.[0-9]+)?$'
+                ) + (
+                    SELECT COALESCE(SUM(bo.quantity * CAST(bh.bacc_price AS numeric)), 0)
+                    FROM bookaccessories_orders bo
+                    JOIN bookaccessories_has bh ON bo.bacc_id = bh.bacc_id AND bo.bshop_id = bh.shop_id
+                    WHERE bo.bshop_id = %s
+                    AND bo.order_status = 'completed'
+                    AND bh.bacc_price ~ '^[0-9]+(\.[0-9]+)?$'
+                ) AS total_revenue;
+        """, (shop_id, shop_id, shop_id, shop_id, shop_id, shop_id, shop_id, shop_id, shop_id, shop_id, shop_id, shop_id))
+        stats = cur.fetchone()
+
+        # Close database connection
+        cur.close()
+        conn.close()
+
+        # Check if data exists
+        if not stats:
+            return jsonify({"error": "No stats found for the given shop_id"}), 404
+
+        # Convert types for JSON serialization
+        stats = convert_types(stats)
+
+        return jsonify(stats), 200
+    except Exception as e:
+        print(f"Error fetching shop stats: {e}")
+        if 'conn' in locals():
+            conn.close()
+        return jsonify({"error": "Failed to fetch shop stats", "details": str(e)}), 500
+
     
     
     
