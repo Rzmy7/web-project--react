@@ -294,6 +294,14 @@ function About() {
       bio: "A creative designer with a keen eye for user experience, Sanduni shapes the app’s visual and navigational appeal.",
       github: "https://github.com/sanduni-liyange",
       linkedin: "https://linkedin.com/in/sanduni-liyange",
+    },{
+      name: "Sachin Maleesha",
+      role: "Map API Integrator",
+      contribution:
+        "Integrated Google Maps API for displaying facility locations, implemented interactive maps with markers, and ensured responsive design for mobile and desktop views.",
+      bio: "A skilled developer with a passion for geolocation services, Sachin enhances the app’s functionality with dynamic map features.",
+      github: "https://github.com/sachin-maleesha",
+      linkedin: "https://linkedin.com/in/sachin-maleesha",
     },
   ];
 
