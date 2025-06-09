@@ -5,7 +5,8 @@
     "start:client_frontend": "cd university-facility-app/src && npm run dev",
     "start:shopOwner_frontend": "cd shop_owner_react/my-react-project/src && npm run dev",
     "start:backend": "cd backend && python app.py",
-    "start": "concurrently \"npm run start:client_frontend\" \"npm run start:shopOwner_frontend\" \"npm run start:backend\""
+    "start": "concurrently \"npm run start:client_frontend\" \"npm run start:shopOwner_frontend\" \"npm run start:backend\"",
+    "install-all": "npm install && cd university-facility-app/src && npm install && cd ../../shop_owner_react/my-react-project/src && npm install && cd ../../backend && pip install -r requirements.txt && cd ../"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.8",
